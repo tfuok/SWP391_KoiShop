@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -12,8 +13,10 @@ import java.util.Date;
 
 @Getter
 @Setter
-@NoArgsConstructor
+@Entity
 public class Account {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
     @NotBlank(message = "Code must not be blank")
     @Pattern(regexp = "KH\\d{6}", message = "Invalid code!")
