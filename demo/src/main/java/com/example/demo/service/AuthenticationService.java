@@ -79,7 +79,8 @@ public class AuthenticationService implements UserDetailsService {
             accountResponse.setToken(tokenService.generateToken(account));
             return accountResponse;
         } catch (Exception e) {
-            throw new EntityNotFoundException("Email or password invaild!");
+            e.printStackTrace();
+            throw new EntityNotFoundException("Email or password invalid!");
         }
     }
 

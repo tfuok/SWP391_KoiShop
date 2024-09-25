@@ -1,6 +1,7 @@
 package com.example.demo.config;
 
 import com.example.demo.entity.Account;
+import com.example.demo.exception.NotFoundException;
 import com.example.demo.service.TokenService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -58,7 +59,7 @@ public class Filter extends OncePerRequestFilter {
             String token = getToken(request);
             if (token == null) {
                 //ko dc phep truy cap
-                resolver.resolveException(request, response, null, new AuthException("Empty token"));
+                resolver.resolveException(request, response, null, new NotFoundException("Empty token"));
                 return;
             }
             // => co token => check xem token dung hay ko => lay thong tin tu token
@@ -67,9 +68,11 @@ public class Filter extends OncePerRequestFilter {
                 account = tokenService.getAccountByToken(token);
             } catch (ExpiredJwtException e) {
                 //response token het han
+                resolver.resolveException(request, response, null, new NotFoundException("Expired token"));
                 return;
             } catch (MalformedJwtException malformedJwtException) {
                 //token sai
+                resolver.resolveException(request, response, null, new NotFoundException("Invalid token"));
                 return;
             }
             //=>token chuan => cho phep truy cap

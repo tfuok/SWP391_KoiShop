@@ -24,17 +24,23 @@ public class Account implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
+
     @NotBlank(message = "Code must not be blank")
     @Pattern(regexp = "KH\\d{6}", message = "Invalid code!")
     String code;
+
     @Email(message = "Email not valid")
     String email;
+
     @Pattern(regexp = "(84|0[3|5|7|8|9])+([0-9]{8})\\b", message = "Invalid phone number!")
     String phone;
+
     @NotBlank(message = "Password must not be blank!")
     @Size(min = 6, message = "Password must at least 6 character!")
     String password;
+
     Date signUpDate;
+    @Enumerated(EnumType.STRING)
     Role role;
 
     @Override

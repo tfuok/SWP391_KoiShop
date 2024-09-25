@@ -14,11 +14,12 @@ public class KoiService {
     @Autowired
     KoiRepository koiRepository;
 
-    public Koi createKOi(Koi koi) {
+    public Koi createKoi(Koi koi) {
         try {
             Koi newKoi = koiRepository.save(koi);
             return newKoi;
         } catch (Exception e) {
+            e.printStackTrace();
             if (e.getMessage().contains(koi.getKoiCode())) {
                 throw new DuplicatedEntity("Duplicated code");
             }
