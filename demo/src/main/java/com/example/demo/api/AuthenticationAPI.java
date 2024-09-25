@@ -1,6 +1,9 @@
 package com.example.demo.api;
 
 import com.example.demo.entity.Account;
+import com.example.demo.model.AccountResponse;
+import com.example.demo.model.LoginRequest;
+import com.example.demo.model.RegisterRequest;
 import com.example.demo.service.AuthenticationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,13 +14,20 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin("*")
 public class AuthenticationAPI {
     @Autowired
     AuthenticationService authenticationService;
 
     @PostMapping("register")
-    public ResponseEntity register(@Valid @RequestBody Account account) {
-        Account newAccount = authenticationService.register(account);
+    public ResponseEntity register(@Valid @RequestBody RegisterRequest registerRequest) {
+        AccountResponse newAccount = authenticationService.register(registerRequest);
+        return ResponseEntity.ok(newAccount);
+    }
+
+    @PostMapping("login")
+    public ResponseEntity login(@Valid @RequestBody LoginRequest loginRequest) {
+        AccountResponse newAccount = authenticationService.login(loginRequest);
         return ResponseEntity.ok(newAccount);
     }
 

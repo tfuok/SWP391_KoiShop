@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,13 +12,18 @@ import org.springframework.format.annotation.NumberFormat;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
 public class Koi {
-    @NotBlank (message = "Name cannot be blank!")
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    long id;
+    @NotBlank(message = "Name cannot be blank!")
     String name;
 
     @NotBlank(message = "Code must not be blank!")
-    @Pattern(regexp = "K\\d{3}", message = "ID must be like (Kxxx)")
-    String koiID;
+    @Pattern(regexp = "K\\d{3}", message = "Code must be like (Kxxx)")
+    @Column(unique = true)
+    String koiCode;
 
     @Min(value = 0, message = "Price must be positive")
     float price;
@@ -44,4 +50,5 @@ public class Koi {
      * If false, the koi is still available.
      */
     boolean sold;
+    boolean isDeleted = false;
 }
