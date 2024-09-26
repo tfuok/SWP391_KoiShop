@@ -39,7 +39,8 @@ public class Account implements UserDetails {
     @Size(min = 6, message = "Password must at least 6 character!")
     String password;
 
-    Date signUpDate;
+    Date signUpDate = new Date();
+
     @Enumerated(EnumType.STRING)
     Role role;
 

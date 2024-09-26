@@ -24,8 +24,8 @@ public class KoiAPI {
     //method post koi
     @PostMapping
     public ResponseEntity create(@Valid @RequestBody Koi koi) {
-        kois.add(koi);
-        return ResponseEntity.ok(koi);
+        Koi koiRepsponse =koiService.createKoi(koi);
+        return ResponseEntity.ok(koiRepsponse);
     }
 
     //lay danh sach koi

@@ -24,8 +24,7 @@ public class ValidationHandler {
         return new ResponseEntity(message, HttpStatus.BAD_REQUEST);//input đầu vào sai, FE check lại
     }
 
-    @ExceptionHandler(DuplicatedEntity.class)
-//input đầu vào sai, FE check lại
+    @ExceptionHandler(Exception.class)
     public ResponseEntity handleValidation(Exception exception) {
         return new ResponseEntity(exception.getMessage(), HttpStatus.BAD_REQUEST);//input đầu vào sai, FE check lại
     }
