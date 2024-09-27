@@ -1,9 +1,12 @@
 package com.example.demo.service;
 
+import com.example.demo.entity.Account;
 import com.example.demo.entity.Koi;
 import com.example.demo.exception.DuplicatedEntity;
 import com.example.demo.exception.NotFoundException;
+import com.example.demo.model.KoiRequest;
 import com.example.demo.repository.KoiRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,16 +16,23 @@ import java.util.List;
 public class KoiService {
     @Autowired
     KoiRepository koiRepository;
-
-    public Koi createKoi(Koi koi) {
+    @Autowired
+    ModelMapper modelMapper;
+    @Autowired
+    AuthenticationService authenticationService;
+    public Koi createKoi(KoiRequest koiRequest) {
         try {
+            Koi koi = modelMapper.map(koiRequest, Koi.class);
+            //xac dinh manager nao tao ra ca koi nay
+            Account accountRequest = authenticationService.getCurrentAccount();
+            koi.setAccount(accountRequest);
             Koi newKoi = koiRepository.save(koi);
             return newKoi;
         } catch (Exception e) {
             e.printStackTrace();
-            if (e.getMessage().contains(koi.getKoiCode())) {
-                throw new DuplicatedEntity("Duplicated code");
-            }
+//            if (e.getMessage().contains(koi.getId())) {
+//                throw new DuplicatedEntity("Duplicated code");
+//            }
         }
         return null;
     }
@@ -39,7 +49,7 @@ public class KoiService {
             throw new NotFoundException("Student not found");
         }
         //=> tồn tại
-        foundKoi.setKoiCode(koi.getKoiCode());
+//        foundKoi.setKoiCode(koi.getKoiCode());
         foundKoi.setName(koi.getName());
         foundKoi.setPrice(koi.getPrice());
         foundKoi.setVendor(koi.getVendor());
@@ -49,7 +59,8 @@ public class KoiService {
         foundKoi.setBreed(koi.getBreed());
         foundKoi.setOrigin(koi.getOrigin());
         foundKoi.setDescription(koi.getDescription());
-//        foundKoi.setSold(koi.gets);
+        foundKoi.setSold(koi.isSold());
+        foundKoi.setDeleted(koi.isDeleted());
         return koiRepository.save(foundKoi);
     }
 

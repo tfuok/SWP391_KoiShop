@@ -1,6 +1,7 @@
 package com.example.demo.api;
 
 import com.example.demo.entity.Koi;
+import com.example.demo.model.KoiRequest;
 import com.example.demo.service.KoiService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -23,7 +24,7 @@ public class KoiAPI {
 
     //method post koi
     @PostMapping
-    public ResponseEntity create(@Valid @RequestBody Koi koi) {
+    public ResponseEntity create(@Valid @RequestBody KoiRequest koi) {
         Koi koiRepsponse =koiService.createKoi(koi);
         return ResponseEntity.ok(koiRepsponse);
     }

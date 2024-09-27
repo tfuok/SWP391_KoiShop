@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.entity.Account;
 import com.example.demo.exception.DuplicatedEntity;
 import com.example.demo.model.AccountResponse;
+import com.example.demo.model.EmailDetails;
 import com.example.demo.model.LoginRequest;
 import com.example.demo.model.RegisterRequest;
 import com.example.demo.repository.AccountRepository;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -35,19 +37,26 @@ public class AuthenticationService implements UserDetailsService {
     AuthenticationManager authenticationManager;
     @Autowired
     TokenService tokenService;
-
+    @Autowired
+    EmailService emailService;
     public AccountResponse register(RegisterRequest registerRequest) {
         Account account = modelMapper.map(registerRequest, Account.class);
         try {
             String originPassword = account.getPassword();
             account.setPassword(passwordEncoder.encode(originPassword));
             Account newAccount = accountRepository.save(account);
+            //sau khi dang ki thanh cong thi se gui mail ve cho nguoi dung
+            EmailDetails emailDetails = new EmailDetails();
+            emailDetails.setReceiver(newAccount);
+            emailDetails.setSubject("Welcome to KoiShop");
+            emailDetails.setLink("github.com");
+            emailService.sendEmail(emailDetails);
             return modelMapper.map(newAccount, AccountResponse.class);
         } catch (Exception e) {
             e.printStackTrace();
-            if (e.getMessage().contains(account.getCode())) {
-                throw new DuplicatedEntity("Duplicate code!");
-            } else if (e.getMessage().contains(account.getEmail())) {
+//            if (e.getMessage().contains(account.getCode())) {
+//                throw new DuplicatedEntity("Duplicate code!");
+             if (e.getMessage().contains(account.getEmail())) {
                 throw new DuplicatedEntity("Duplicate email!");
             } else {
                 throw new DuplicatedEntity("Duplicate phone");
@@ -87,5 +96,10 @@ public class AuthenticationService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return (UserDetails) accountRepository.findAccountByEmail(email);
+    }
+
+    public Account getCurrentAccount(){
+        Account account = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return accountRepository.findAccountById(account.getId());
     }
 }

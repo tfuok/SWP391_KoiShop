@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -25,9 +26,11 @@ public class Account implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
 
-    @NotBlank(message = "Code must not be blank")
-    @Pattern(regexp = "KH\\d{6}", message = "Invalid code!")
-    String code;
+    String username;
+
+//    @NotBlank(message = "Code must not be blank")
+//    @Pattern(regexp = "KH\\d{6}", message = "Invalid code!")
+//    String code;
 
     @Email(message = "Email not valid")
     String email;
@@ -75,4 +78,8 @@ public class Account implements UserDetails {
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
     }
+
+    @OneToMany(mappedBy = "account") // 1 account tao dc 1 koi
+    @JsonIgnore
+    List<Koi> kois;
 }

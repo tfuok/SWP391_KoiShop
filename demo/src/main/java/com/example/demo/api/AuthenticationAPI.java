@@ -33,7 +33,7 @@ public class AuthenticationAPI {
         return ResponseEntity.ok(newAccount);
     }
 
-    @GetMapping("account")
+    @GetMapping
     public ResponseEntity getAllAccount(){
         List<Account> accounts = authenticationService.getAllAccount();
         return ResponseEntity.ok(accounts);
