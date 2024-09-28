@@ -39,8 +39,15 @@ public class AuthenticationService implements UserDetailsService {
     TokenService tokenService;
     @Autowired
     EmailService emailService;
+
     public AccountResponse register(RegisterRequest registerRequest) {
         Account account = modelMapper.map(registerRequest, Account.class);
+        if (accountRepository.existsByEmail(account.getEmail())) {
+            throw new DuplicatedEntity("Email existed!");
+        }
+        if (accountRepository.existsByPhone(account.getPhone())) {
+            throw new DuplicatedEntity("Phone existed!");
+        }
         try {
             String originPassword = account.getPassword();
             account.setPassword(passwordEncoder.encode(originPassword));
@@ -54,13 +61,7 @@ public class AuthenticationService implements UserDetailsService {
             return modelMapper.map(newAccount, AccountResponse.class);
         } catch (Exception e) {
             e.printStackTrace();
-//            if (e.getMessage().contains(account.getCode())) {
-//                throw new DuplicatedEntity("Duplicate code!");
-             if (e.getMessage().contains(account.getEmail())) {
-                throw new DuplicatedEntity("Duplicate email!");
-            } else {
-                throw new DuplicatedEntity("Duplicate phone");
-            }
+            throw new RuntimeException("Error while register!");
         }
     }
 
@@ -70,7 +71,7 @@ public class AuthenticationService implements UserDetailsService {
         return accounts;
     }
 
-    public AccountResponse login(LoginRequest loginRequest){
+    public AccountResponse login(LoginRequest loginRequest) {
         //        //xử lý logic liên quan đến login
 //        //2 trường hợp xảy ra
 //        /*
@@ -98,7 +99,7 @@ public class AuthenticationService implements UserDetailsService {
         return (UserDetails) accountRepository.findAccountByEmail(email);
     }
 
-    public Account getCurrentAccount(){
+    public Account getCurrentAccount() {
         Account account = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return accountRepository.findAccountById(account.getId());
     }
