@@ -30,9 +30,6 @@ public class KoiService {
             return newKoi;
         } catch (Exception e) {
             e.printStackTrace();
-//            if (e.getMessage().contains(koi.getId())) {
-//                throw new DuplicatedEntity("Duplicated code");
-//            }
         }
         return null;
     }
@@ -42,29 +39,26 @@ public class KoiService {
         return kois;
     }
 
-    public Koi updateKoi(Koi koi, long id) {
+    public Koi updateKoi(KoiRequest koiRequest, long id) {
         //b1: tìm tới student có id như FE cung cấp
         Koi foundKoi = koiRepository.findKoiById(id);
         if (foundKoi == null) {
-            throw new NotFoundException("Student not found");
+            throw new NotFoundException("Koi not found");
         }
         //=> tồn tại
-//        foundKoi.setKoiCode(koi.getKoiCode());
-        foundKoi.setName(koi.getName());
-        foundKoi.setPrice(koi.getPrice());
-        foundKoi.setVendor(koi.getVendor());
-        foundKoi.setGender(koi.getGender());
-        foundKoi.setBornYear(koi.getBornYear());
-        foundKoi.setSize(koi.getSize());
-        foundKoi.setBreed(koi.getBreed());
-        foundKoi.setOrigin(koi.getOrigin());
-        foundKoi.setDescription(koi.getDescription());
-        foundKoi.setSold(koi.isSold());
-        foundKoi.setDeleted(koi.isDeleted());
+        foundKoi.setName(koiRequest.getName());
+        foundKoi.setPrice(koiRequest.getPrice());
+        foundKoi.setVendor(koiRequest.getVendor());
+        foundKoi.setGender(koiRequest.getGender());
+        foundKoi.setBornYear(koiRequest.getBornYear());
+        foundKoi.setSize(koiRequest.getSize());
+        foundKoi.setBreed(koiRequest.getBreed());
+        foundKoi.setOrigin(koiRequest.getOrigin());
+        foundKoi.setDescription(koiRequest.getDescription());
         return koiRepository.save(foundKoi);
     }
 
-    public Koi deleteKoi(Koi koi, long id) {
+    public Koi deleteKoi(long id) {
         Koi koi1 = koiRepository.findKoiById(id);
         if (koi1 == null) {
             throw new NotFoundException("Koi not found!");

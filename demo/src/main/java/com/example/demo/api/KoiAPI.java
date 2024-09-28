@@ -37,13 +37,13 @@ public class KoiAPI {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity deleteKoi(@Valid @RequestBody Koi koi, @PathVariable long id) {
-        Koi newKoi = koiService.deleteKoi(koi, id);
+    public ResponseEntity deleteKoi(@Valid @PathVariable long id) {
+        Koi newKoi = koiService.deleteKoi(id);
         return ResponseEntity.ok(newKoi);
     }
 
     @PutMapping("{id}")
-    public ResponseEntity updateKoi(@Valid @RequestBody Koi koi, @PathVariable long id) {
+    public ResponseEntity updateKoi(@Valid @RequestBody KoiRequest koi, @PathVariable long id) {
         Koi newKoi = koiService.updateKoi(koi, id);
         return ResponseEntity.ok(newKoi);
     }

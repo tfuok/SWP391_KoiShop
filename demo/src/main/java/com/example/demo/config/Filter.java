@@ -59,7 +59,7 @@ public class Filter extends OncePerRequestFilter {
             String token = getToken(request);
             if (token == null) {
                 //ko dc phep truy cap
-                resolver.resolveException(request, response, null, new NotFoundException("Empty token"));
+                resolver.resolveException(request, response, null, new NotFoundException("You do not have sufficient access rights! (Empty token)"));
                 return;
             }
             // => co token => check xem token dung hay ko => lay thong tin tu token
