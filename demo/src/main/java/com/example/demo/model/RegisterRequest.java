@@ -11,10 +11,6 @@ import lombok.Data;
 
 @Data
 public class RegisterRequest {
-//    @NotBlank(message = "Code must not be blank")
-//    @Pattern(regexp = "KH\\d{6}", message = "Invalid code!")
-//    @Column(unique = true)
-//    String code;
 
     @Email(message = "Email not valid")
     String email;

@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.entity.Account;
 import com.example.demo.exception.DuplicatedEntity;
+import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.AccountResponse;
 import com.example.demo.model.EmailDetails;
 import com.example.demo.model.LoginRequest;
@@ -20,9 +21,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.security.auth.login.AccountNotFoundException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -67,7 +65,7 @@ public class AuthenticationService implements UserDetailsService {
 
 
     public List<Account> getAllAccount() {
-        List<Account> accounts = accountRepository.findAll();
+        List<Account> accounts = accountRepository.findAccountByIsDeletedFalse();
         return accounts;
     }
 
@@ -103,4 +101,33 @@ public class AuthenticationService implements UserDetailsService {
         Account account = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return accountRepository.findAccountById(account.getId());
     }
+
+    public Account deleteAccount(long id) {
+        Account account = accountRepository.findAccountById(id);
+        if (account == null) {
+            throw new NotFoundException("Account not found!");
+        }
+        account.setDeleted(true);
+        return accountRepository.save(account);
+    }
+
+    public Account updateAccount(RegisterRequest registerRequest, long id) {
+        Account account = accountRepository.findAccountById(id);
+        if (account == null) {
+            throw new NotFoundException("Account not exist!");
+        }
+        // Kiểm tra email,số điện thoại đã tồn tại chưa (ngoại trừ tài khoản hiện tại)
+        if (!account.getEmail().equals(registerRequest.getEmail()) && accountRepository.existsByEmail(registerRequest.getEmail())) {
+            throw new DuplicatedEntity("Email already exists!");
+        }
+        if (!account.getPhone().equals(registerRequest.getPhone()) && accountRepository.existsByPhone(registerRequest.getPhone())) {
+            throw new DuplicatedEntity("Phone number already exists!");
+        }
+        account.setEmail(registerRequest.getEmail());
+        account.setUsername(registerRequest.getUsername());
+        account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        account.setPhone(registerRequest.getPhone());
+        return accountRepository.save(account);
+    }
+
 }

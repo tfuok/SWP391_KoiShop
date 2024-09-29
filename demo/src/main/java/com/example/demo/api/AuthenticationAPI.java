@@ -1,7 +1,9 @@
 package com.example.demo.api;
 
 import com.example.demo.entity.Account;
+import com.example.demo.entity.Koi;
 import com.example.demo.model.AccountResponse;
+import com.example.demo.model.KoiRequest;
 import com.example.demo.model.LoginRequest;
 import com.example.demo.model.RegisterRequest;
 import com.example.demo.service.AuthenticationService;
@@ -34,8 +36,20 @@ public class AuthenticationAPI {
     }
 
     @GetMapping
-    public ResponseEntity getAllAccount(){
+    public ResponseEntity getAllAccount() {
         List<Account> accounts = authenticationService.getAllAccount();
         return ResponseEntity.ok(accounts);
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity deleteAccount(@Valid @PathVariable long id) {
+        Account account = authenticationService.deleteAccount(id);
+        return ResponseEntity.ok(account);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity updateAccount(@Valid @RequestBody RegisterRequest request, @PathVariable long id) {
+        Account newKoi = authenticationService.updateAccount(request, id);
+        return ResponseEntity.ok(newKoi);
     }
 }

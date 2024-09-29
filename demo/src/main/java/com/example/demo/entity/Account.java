@@ -28,10 +28,6 @@ public class Account implements UserDetails {
 
     String username;
 
-//    @NotBlank(message = "Code must not be blank")
-//    @Pattern(regexp = "KH\\d{6}", message = "Invalid code!")
-//    String code;
-
     @Email(message = "Email not valid")
     String email;
 
@@ -43,6 +39,8 @@ public class Account implements UserDetails {
     String password;
 
     Date signUpDate = new Date();
+
+    boolean isDeleted = false;
 
     @Enumerated(EnumType.STRING)
     Role role;
