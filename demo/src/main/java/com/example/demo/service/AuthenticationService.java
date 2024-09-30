@@ -130,4 +130,11 @@ public class AuthenticationService implements UserDetailsService {
         return accountRepository.save(account);
     }
 
+    public Account searchByID(long id) {
+        Account account = accountRepository.findAccountById(id);
+        if (account == null) {
+            throw new NotFoundException("Account not exist!");
+        }
+        return account;
+    }
 }

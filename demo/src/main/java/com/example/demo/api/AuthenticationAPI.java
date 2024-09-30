@@ -52,4 +52,10 @@ public class AuthenticationAPI {
         Account newKoi = authenticationService.updateAccount(request, id);
         return ResponseEntity.ok(newKoi);
     }
+
+    @GetMapping("{id}")
+    public ResponseEntity getAccountByID(long id) {
+        Account account = authenticationService.searchByID(id);
+        return ResponseEntity.ok(account);
+    }
 }

@@ -8,6 +8,7 @@ public class AccountResponse {
     long id;
     String email;
     String phone;
+    String username;
     Role role;
     String token;
 }
