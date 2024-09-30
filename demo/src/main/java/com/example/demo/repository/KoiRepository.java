@@ -10,4 +10,6 @@ public interface KoiRepository extends JpaRepository<Koi, Long> {
     Koi findKoiById(long id);
 
     List<Koi> findKoiByIsDeletedFalse();
+
+    Koi findKoiByName(String name);
 }

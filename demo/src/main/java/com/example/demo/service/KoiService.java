@@ -10,7 +10,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class KoiService {
@@ -20,6 +22,7 @@ public class KoiService {
     ModelMapper modelMapper;
     @Autowired
     AuthenticationService authenticationService;
+
     public Koi createKoi(KoiRequest koiRequest) {
         try {
             Koi koi = modelMapper.map(koiRequest, Koi.class);
@@ -65,5 +68,32 @@ public class KoiService {
         }
         koi1.setDeleted(true);
         return koiRepository.save(koi1);
+    }
+
+    public Koi searchByName(String name) {
+        Koi koi = koiRepository.findKoiByName(name);
+        if (koi == null) throw new NotFoundException("Koi not existed");
+        return koi;
+    }
+
+    public Map<String, Object> compareKoi(long id1, long id2) {
+        Koi koi1 = koiRepository.findKoiById(id1);
+        Koi koi2 = koiRepository.findKoiById(id2);
+
+        if (koi1 == null || koi2 == null) {
+            throw new NotFoundException("One or both Koi not found");
+        }
+
+        // So sánh các thuộc tính của 2 cá thể Koi
+        Map<String, Object> comparisonResult = new HashMap<>();
+        comparisonResult.put("nameMatch", koi1.getName().equals(koi2.getName()));
+        comparisonResult.put("priceDifference", Math.abs(koi1.getPrice() - koi2.getPrice()));
+        comparisonResult.put("genderMatch", koi1.getGender().equals(koi2.getGender()));
+        comparisonResult.put("bornYearDifference", Math.abs(koi1.getBornYear() - koi2.getBornYear()));
+        comparisonResult.put("sizeDifference", Math.abs(koi1.getSize() - koi2.getSize()));
+        comparisonResult.put("breedMatch", koi1.getBreed().equals(koi2.getBreed()));
+        comparisonResult.put("originMatch", koi1.getOrigin().equals(koi2.getOrigin()));
+
+        return comparisonResult;
     }
 }

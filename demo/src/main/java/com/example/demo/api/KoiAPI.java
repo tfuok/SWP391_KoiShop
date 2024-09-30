@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/koi")
@@ -19,8 +20,6 @@ import java.util.List;
 public class KoiAPI {
     @Autowired
     KoiService koiService;
-
-    List<Koi> kois = new ArrayList<>();
 
     //method post koi
     @PostMapping
@@ -46,5 +45,17 @@ public class KoiAPI {
     public ResponseEntity updateKoi(@Valid @RequestBody KoiRequest koi, @PathVariable long id) {
         Koi newKoi = koiService.updateKoi(koi, id);
         return ResponseEntity.ok(newKoi);
+    }
+
+    @GetMapping("{name}")
+    public ResponseEntity searchKoiById(String name) {
+        Koi kois = koiService.searchByName(name);
+        return ResponseEntity.ok(kois);
+    }
+
+    @GetMapping("/compare")
+    public ResponseEntity compareKoi(@RequestParam long id1, @RequestParam long id2) {
+        Map<String, Object> comparisonResult = koiService.compareKoi(id1, id2);
+        return ResponseEntity.ok(comparisonResult);
     }
 }
