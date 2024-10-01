@@ -3,10 +3,7 @@ package com.example.demo.service;
 import com.example.demo.entity.Account;
 import com.example.demo.exception.DuplicatedEntity;
 import com.example.demo.exception.NotFoundException;
-import com.example.demo.model.AccountResponse;
-import com.example.demo.model.EmailDetails;
-import com.example.demo.model.LoginRequest;
-import com.example.demo.model.RegisterRequest;
+import com.example.demo.model.*;
 import com.example.demo.repository.AccountRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
@@ -54,7 +51,7 @@ public class AuthenticationService implements UserDetailsService {
             EmailDetails emailDetails = new EmailDetails();
             emailDetails.setReceiver(newAccount);
             emailDetails.setSubject("Welcome to KoiShop");
-            emailDetails.setLink("github.com");
+            emailDetails.setLink("http://koishop.site/");
             emailService.sendEmail(emailDetails);
             return modelMapper.map(newAccount, AccountResponse.class);
         } catch (Exception e) {
@@ -136,5 +133,21 @@ public class AuthenticationService implements UserDetailsService {
             throw new NotFoundException("Account not exist!");
         }
         return account;
+    }
+
+    public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest){
+        Account account = accountRepository.findAccountByEmail(forgotPasswordRequest.getEmail());
+        if (account == null) throw new NotFoundException("Account not exist");
+        EmailDetails emailDetails = new EmailDetails();
+        emailDetails.setReceiver(account);
+        emailDetails.setSubject("Reset Password");
+        emailDetails.setLink("http://koishop.site/?token=" + tokenService.generateToken(account)); //sửa lại thành link trang thay dfoi pass
+        emailService.sendEmail(emailDetails);
+    }
+
+    public void resetPassword(ResetPasswordRequest resetPasswordRequest){
+        Account account = getCurrentAccount();
+        account.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
+        accountRepository.save(account);
     }
 }

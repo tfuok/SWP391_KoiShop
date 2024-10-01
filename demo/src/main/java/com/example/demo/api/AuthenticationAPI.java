@@ -2,10 +2,7 @@ package com.example.demo.api;
 
 import com.example.demo.entity.Account;
 import com.example.demo.entity.Koi;
-import com.example.demo.model.AccountResponse;
-import com.example.demo.model.KoiRequest;
-import com.example.demo.model.LoginRequest;
-import com.example.demo.model.RegisterRequest;
+import com.example.demo.model.*;
 import com.example.demo.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -57,5 +54,17 @@ public class AuthenticationAPI {
     public ResponseEntity getAccountByID(long id) {
         Account account = authenticationService.searchByID(id);
         return ResponseEntity.ok(account);
+    }
+
+    @PostMapping("forgot-password")
+    public ResponseEntity forgotPassword(@Valid @RequestBody ForgotPasswordRequest forgotPasswordRequest){
+        authenticationService.forgotPassword(forgotPasswordRequest);
+        return ResponseEntity.ok("Email sent!");
+    }
+
+    @PostMapping("reset-password")
+    public ResponseEntity resetPassword(@Valid @RequestBody ResetPasswordRequest resetPasswordRequest){
+        authenticationService.resetPassword(resetPasswordRequest);
+        return ResponseEntity.ok("Reset successfully");
     }
 }
