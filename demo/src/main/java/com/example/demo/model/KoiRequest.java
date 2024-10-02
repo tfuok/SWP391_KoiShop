@@ -30,4 +30,6 @@ public class KoiRequest {
 
     @Size(max = 500, message = "Description cannot be longer than 500 characters")
     String description;
+
+    String path;
 }
