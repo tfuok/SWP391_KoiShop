@@ -2,10 +2,10 @@ package com.example.demo.api;
 
 import com.example.demo.entity.Consignment;
 import com.example.demo.model.ConsignmentRequest;
-import com.example.demo.model.ConsignmentRespone;
+
 import com.example.demo.service.ConsignmentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.persistence.Entity;
+
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

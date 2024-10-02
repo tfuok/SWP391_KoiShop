@@ -9,6 +9,4 @@ public class ConsignmentRequest {
     String type;
     @NotBlank(message = "Description cannot be blank!")
     String description;
-    String createDate;
-
 }
