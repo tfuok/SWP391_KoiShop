@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface ConsignmentRespority extends JpaRepository<Consignment, Long> {
     List<Consignment> findConsignmentByIsDeletedFalse();
-    Consignment findConsignmentById(long id);
+    Consignment findConsignmentByconsignmentID(long id);
 }

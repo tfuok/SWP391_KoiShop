@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -22,14 +23,13 @@ public class ConsignmentService {
     @Autowired
     AuthenticationService authenticationService;
 
-    public ConsignmentService createConsignment(ConsignmentRequest consignmentRequest, long Id) {
+    public Consignment createConsignment(ConsignmentRequest consignmentRequest) {
         try {
             Consignment consignment = modelMapper.map(consignmentRequest, Consignment.class);
             Account accountRequest = authenticationService.getCurrentAccount();
             consignment.setAccount(accountRequest);
-            consignment.setKoiID(Id);
             Consignment newConsignment = consignmentRespority.save(consignment);
-
+            return newConsignment;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -40,7 +40,7 @@ public class ConsignmentService {
         return consignments;
     }
     public Consignment deleteConsignment(long id) {
-        Consignment consignment = consignmentRespority.findConsignmentById(id);
+        Consignment consignment = consignmentRespority.findConsignmentByconsignmentID(id);
         if (consignment == null) {
             throw new NotFoundException("Consignment not found!");
         }
@@ -48,21 +48,14 @@ public class ConsignmentService {
         return consignmentRespority.save(consignment);
     }
     public Consignment updateConsignment(ConsignmentRequest consignmentRequest, long id) {
-        //b1: tìm tới student có id như FE cung cấp
-        Koi foundKoi = consignmentRespority.findConsignmentById(id);
-        if (foundKoi == null) {
+
+        Consignment foundConsignment = consignmentRespority.findConsignmentByconsignmentID(id);
+        if (foundConsignment == null) {
             throw new NotFoundException("Koi not found");
         }
-        //=> tồn tại
-        foundKoi.setName(koiRequest.getName());
-        foundKoi.setPrice(koiRequest.getPrice());
-        foundKoi.setVendor(koiRequest.getVendor());
-        foundKoi.setGender(koiRequest.getGender());
-        foundKoi.setBornYear(koiRequest.getBornYear());
-        foundKoi.setSize(koiRequest.getSize());
-        foundKoi.setBreed(koiRequest.getBreed());
-        foundKoi.setOrigin(koiRequest.getOrigin());
-        foundKoi.setDescription(koiRequest.getDescription());
-        return koiRepository.save(foundKoi);
+
+        foundConsignment.setType(consignmentRequest.getType());
+        foundConsignment.setDescription(consignmentRequest.getDescription());
+        return consignmentRespority.save(foundConsignment);
     }
 }
