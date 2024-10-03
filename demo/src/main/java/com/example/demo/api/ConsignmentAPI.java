@@ -1,7 +1,8 @@
 package com.example.demo.api;
 
 import com.example.demo.entity.Consignment;
-import com.example.demo.model.ConsignmentRequest;
+import com.example.demo.model.Request.ConsignmentCustomerRequest;
+import com.example.demo.model.Request.ConsignmentRequest;
 
 import com.example.demo.service.ConsignmentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -22,7 +23,7 @@ public class ConsignmentAPI {
     ConsignmentService consignmentService;
 
     @PostMapping("create")
-    public ResponseEntity createConsignment(@Valid @RequestBody ConsignmentRequest consignment) {
+    public ResponseEntity createConsignment(@Valid @RequestBody ConsignmentCustomerRequest consignment) {
         Consignment consignmentRespone1 = consignmentService.createConsignment(consignment);
         return ResponseEntity.ok(consignmentRespone1);
     }

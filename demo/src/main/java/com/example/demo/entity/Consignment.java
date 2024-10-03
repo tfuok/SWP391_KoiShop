@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -25,13 +26,21 @@ public class Consignment implements UserDetails {
 
     String type;
 
+    String address;
+
     String description;
+
+    String cost;
+
+    Date StartDate;
+
+    Date EndDate;
+
+    Date createDate;
 
     String status = "pending";
 
     Boolean isDeleted = false;
-
-    Date createDate = new Date();
 
     @OneToMany(mappedBy = "consignment")
     @JsonIgnore
@@ -41,6 +50,9 @@ public class Consignment implements UserDetails {
     @JoinColumn(name = "account_id")
     Account account;
 
+    @ManyToOne
+    @JoinColumn(name = "care_type_id")
+    CareType careType;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -57,4 +69,3 @@ public class Consignment implements UserDetails {
         return "";
     }
 }
-
