@@ -1,7 +1,8 @@
 package com.example.demo.api;
 
 import com.example.demo.entity.Koi;
-import com.example.demo.model.KoiRequest;
+import com.example.demo.model.Request.KoiRequest;
+import com.example.demo.model.Response.KoiResponse;
 import com.example.demo.service.KoiService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +49,7 @@ public class KoiAPI {
 
     @GetMapping("{name}")
     public ResponseEntity searchKoiById(String name) {
-        Koi kois = koiService.searchByName(name);
+        KoiResponse kois = koiService.searchByName(name);
         return ResponseEntity.ok(kois);
     }
 
@@ -57,5 +57,10 @@ public class KoiAPI {
     public ResponseEntity compareKoi(@RequestParam long id1, @RequestParam long id2) {
         Map<String, Object> comparisonResult = koiService.compareKoi(id1, id2);
         return ResponseEntity.ok(comparisonResult);
+    }
+
+    @GetMapping("/by-breed/{breedId}")
+    public List<Koi> getKoiByBreed(@PathVariable Long breedId) {
+        return koiService.getKoiByBreed(breedId);
     }
 }

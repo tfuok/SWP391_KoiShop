@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.format.annotation.NumberFormat;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,7 +20,9 @@ public class Koi {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
+
     String name;
+
     float price;
 
     String vendor;
@@ -27,8 +32,6 @@ public class Koi {
     int bornYear;
 
     int size;
-
-    String breed;
 
     String origin;
 
@@ -43,6 +46,15 @@ public class Koi {
     boolean isDeleted = false;
 
     @ManyToOne
+    @JoinColumn(name = "breed_id")
+    @JsonBackReference  // Ngăn vòng lặp tuần hoàn khi chuyển sang JSON
+    Breed breed;
+
+    @ManyToOne
     @JoinColumn(name = "account_id")
     Account account;
+
+    @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
+    private List<Image> images;
 }
