@@ -1,4 +1,4 @@
-package com.example.demo.model;
+package com.example.demo.model.Request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -23,13 +23,12 @@ public class KoiRequest {
     @Min(value = 0, message = "Size must be positive ")
     int size;
 
-    @NotBlank(message = "Breed must not be blank!")
-    String breed;
+    Long breedId;
 
     String origin;
 
     @Size(max = 500, message = "Description cannot be longer than 500 characters")
     String description;
 
-    String path;
+
 }

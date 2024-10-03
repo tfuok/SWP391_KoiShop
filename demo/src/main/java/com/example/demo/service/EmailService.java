@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.model.EmailDetails;
+import com.example.demo.model.Request.EmailDetails;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;

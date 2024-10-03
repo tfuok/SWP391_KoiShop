@@ -1,10 +1,12 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.Account;
+import com.example.demo.entity.Breed;
 import com.example.demo.entity.Koi;
-import com.example.demo.exception.DuplicatedEntity;
 import com.example.demo.exception.NotFoundException;
-import com.example.demo.model.KoiRequest;
+import com.example.demo.model.Request.KoiRequest;
+import com.example.demo.model.Response.KoiResponse;
+import com.example.demo.repository.BreedRepository;
 import com.example.demo.repository.KoiRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +24,15 @@ public class KoiService {
     ModelMapper modelMapper;
     @Autowired
     AuthenticationService authenticationService;
-
+    @Autowired
+    BreedRepository breedRepository;
     public Koi createKoi(KoiRequest koiRequest) {
         try {
             Koi koi = modelMapper.map(koiRequest, Koi.class);
+            // Xác định giống cá (breed) từ breedId được cung cấp trong request
+            Breed breed = breedRepository.findBreedById(koiRequest.getBreedId());
+            if (breed == null) throw new NotFoundException("Breed not found");
+            koi.setBreed(breed);
             //xac dinh manager nao tao ra ca koi nay
             Account accountRequest = authenticationService.getCurrentAccount();
             koi.setAccount(accountRequest);
@@ -55,9 +62,12 @@ public class KoiService {
         foundKoi.setGender(koiRequest.getGender());
         foundKoi.setBornYear(koiRequest.getBornYear());
         foundKoi.setSize(koiRequest.getSize());
-        foundKoi.setBreed(koiRequest.getBreed());
         foundKoi.setOrigin(koiRequest.getOrigin());
         foundKoi.setDescription(koiRequest.getDescription());
+
+        Breed breed = breedRepository.findBreedById(koiRequest.getBreedId());
+        if (breed == null) throw new NotFoundException("Breed not found");
+        foundKoi.setBreed(breed);
         return koiRepository.save(foundKoi);
     }
 
@@ -70,10 +80,11 @@ public class KoiService {
         return koiRepository.save(koi1);
     }
 
-    public Koi searchByName(String name) {
+    public KoiResponse searchByName(String name) {
         Koi koi = koiRepository.findKoiByName(name);
         if (koi == null) throw new NotFoundException("Koi not existed");
-        return koi;
+        KoiResponse response = modelMapper.map(koi, KoiResponse.class);
+        return response;
     }
 
     public Map<String, Object> compareKoi(long id1, long id2) {
@@ -95,5 +106,13 @@ public class KoiService {
         comparisonResult.put("originMatch", koi1.getOrigin().equals(koi2.getOrigin()));
 
         return comparisonResult;
+    }
+
+    public List<Koi> getKoiByBreed(Long breedId) {
+        // Tìm giống cá (Breed) dựa trên breedId
+        Breed breed = breedRepository.findBreedById(breedId);
+        if (breed == null) throw new NotFoundException("Breed not found");
+        // Tìm tất cả các Koi thuộc giống cá đó
+        return koiRepository.findByBreed(breed);
     }
 }

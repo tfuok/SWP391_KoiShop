@@ -3,7 +3,7 @@ package com.example.demo.service;
 import com.example.demo.entity.Account;
 import com.example.demo.entity.Voucher;
 import com.example.demo.exception.NotFoundException;
-import com.example.demo.model.VoucherRequest;
+import com.example.demo.model.Request.VoucherRequest;
 import com.example.demo.repository.VoucherRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;

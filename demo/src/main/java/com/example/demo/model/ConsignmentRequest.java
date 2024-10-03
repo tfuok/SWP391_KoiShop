@@ -9,4 +9,6 @@ public class ConsignmentRequest {
     String type;
     @NotBlank(message = "Description cannot be blank!")
     String description;
+    @NotBlank(message = "Status cannot be blank!")
+    String status;
 }

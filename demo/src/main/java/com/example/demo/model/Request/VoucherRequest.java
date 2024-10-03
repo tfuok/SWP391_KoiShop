@@ -1,14 +1,10 @@
-package com.example.demo.model;
+package com.example.demo.model.Request;
 
-import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import org.springframework.data.jpa.repository.Temporal;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 

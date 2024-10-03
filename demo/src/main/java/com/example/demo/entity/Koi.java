@@ -58,7 +58,7 @@ public class Koi {
     @ManyToOne
     @JoinColumn(name = "consignment_id")
     Consignment consignment;
-    @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonBackReference
-    private List<Image> images;
+    //@OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
+    //@JsonBackReference
+    //private List<Image> images;
 }

@@ -27,12 +27,15 @@ public class Consignment implements UserDetails {
 
     String description;
 
-    Date createDate = new Date();
-
-    Long koiID;
+    String status = "pending";
 
     Boolean isDeleted = false;
 
+    Date createDate = new Date();
+
+    @OneToMany(mappedBy = "consignment")
+    @JsonIgnore
+    List<Koi> kois;
 
     @ManyToOne
     @JoinColumn(name = "account_id")

@@ -21,7 +21,7 @@ public class ConsignmentAPI {
     @Autowired
     ConsignmentService consignmentService;
 
-    @PostMapping("create/{id}")
+    @PostMapping("create")
     public ResponseEntity createConsignment(@Valid @RequestBody ConsignmentRequest consignment) {
         Consignment consignmentRespone1 = consignmentService.createConsignment(consignment);
         return ResponseEntity.ok(consignmentRespone1);

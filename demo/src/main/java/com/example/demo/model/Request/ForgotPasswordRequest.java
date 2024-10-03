@@ -1,4 +1,4 @@
-package com.example.demo.model;
+package com.example.demo.model.Request;
 
 import jakarta.validation.constraints.Email;
 import lombok.Data;
