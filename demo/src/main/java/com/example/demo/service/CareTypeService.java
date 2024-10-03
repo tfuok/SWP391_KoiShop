@@ -1,8 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.entity.Breed;
 import com.example.demo.entity.CareType;
-import com.example.demo.entity.Koi;
 import com.example.demo.exception.DuplicatedEntity;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.CareTypeRequest;

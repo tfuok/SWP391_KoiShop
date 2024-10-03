@@ -82,7 +82,7 @@ public class ConsignmentService {
 
         Consignment foundConsignment = consignmentRespority.findConsignmentByconsignmentID(id);
         if (foundConsignment == null) {
-            throw new NotFoundException("Koi not found");
+            throw new NotFoundException("Consignment not found!");
         }
 
         foundConsignment.setType(consignmentRequest.getType());

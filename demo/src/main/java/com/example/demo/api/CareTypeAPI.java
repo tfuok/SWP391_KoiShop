@@ -5,6 +5,7 @@ import com.example.demo.exception.DuplicatedEntity;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.CareTypeRequest;
 import com.example.demo.service.CareTypeService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/caretypes")
+@CrossOrigin("*")
+@SecurityRequirement(name = "api")
 public class CareTypeAPI {
 
     @Autowired

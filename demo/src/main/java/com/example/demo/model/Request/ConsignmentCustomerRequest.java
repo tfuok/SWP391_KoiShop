@@ -1,6 +1,7 @@
 package com.example.demo.model.Request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
@@ -13,6 +14,6 @@ public class ConsignmentCustomerRequest {
     String cost;
     @NotBlank(message = "Description cannot be blank!")
     String description;
-    @NotBlank(message = "Care Type cannot be blank!")
-    Long careTypeId;
+    @NotNull(message = "CareTypeId cannot be null")
+    long careTypeId;
 }

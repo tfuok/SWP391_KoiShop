@@ -1,6 +1,7 @@
 package com.example.demo.model.Request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.Date;
@@ -14,14 +15,14 @@ public class ConsignmentRequest {
     @NotBlank(message = "Cost cannot be blank!")
     String cost;
     @NotBlank(message = "Start Date cannot be blank!")
-    String startDate;
+    Date startDate;
     @NotBlank(message = "End Date cannot be blank!")
-    String endDate;
+    Date endDate;
     @NotBlank(message = "Description cannot be blank!")
     String description;
     @NotBlank
     String status;
-    @NotBlank(message = "Care Type cannot be blank!")
-    Long careTypeId;
+    @NotNull(message = "CareTypeId cannot be null")
+    long careTypeId;
 
 }
