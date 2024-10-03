@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -20,6 +21,8 @@ import java.util.List;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 public class Account implements UserDetails {
     @Id
@@ -80,4 +83,14 @@ public class Account implements UserDetails {
     @OneToMany(mappedBy = "account") // 1 account tao dc 1 koi
     @JsonIgnore
     List<Koi> kois;
+
+    @OneToMany(mappedBy = "account")
+    @JsonIgnore
+    List<Voucher> vouchers;
+
+    @OneToOne(mappedBy = "account")
+    Cart cart;
+
+    @OneToOne(mappedBy = "account")
+    Address address;
 }

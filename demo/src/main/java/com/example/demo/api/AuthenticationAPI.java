@@ -1,8 +1,11 @@
 package com.example.demo.api;
 
 import com.example.demo.entity.Account;
-import com.example.demo.entity.Koi;
-import com.example.demo.model.*;
+import com.example.demo.model.Request.ForgotPasswordRequest;
+import com.example.demo.model.Request.LoginRequest;
+import com.example.demo.model.Request.RegisterRequest;
+import com.example.demo.model.Request.ResetPasswordRequest;
+import com.example.demo.model.Response.AccountResponse;
 import com.example.demo.service.AuthenticationService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -38,19 +41,19 @@ public class AuthenticationAPI {
         return ResponseEntity.ok(accounts);
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/account/{id}")
     public ResponseEntity deleteAccount(@Valid @PathVariable long id) {
         Account account = authenticationService.deleteAccount(id);
         return ResponseEntity.ok(account);
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/account/{id}")
     public ResponseEntity updateAccount(@Valid @RequestBody RegisterRequest request, @PathVariable long id) {
         Account newKoi = authenticationService.updateAccount(request, id);
         return ResponseEntity.ok(newKoi);
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/account/{id}")
     public ResponseEntity getAccountByID(long id) {
         Account account = authenticationService.searchByID(id);
         return ResponseEntity.ok(account);
