@@ -1,8 +1,7 @@
 package com.example.demo.api;
 
 import com.example.demo.entity.Voucher;
-import com.example.demo.model.KoiRequest;
-import com.example.demo.model.VoucherRequest;
+import com.example.demo.model.Request.VoucherRequest;
 import com.example.demo.service.VoucherService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
