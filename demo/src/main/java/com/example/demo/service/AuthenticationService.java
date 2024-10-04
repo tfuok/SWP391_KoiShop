@@ -53,11 +53,16 @@ public class AuthenticationService implements UserDetailsService {
             emailDetails.setReceiver(newAccount);
             emailDetails.setSubject("Welcome to KoiShop");
             emailDetails.setLink("http://koishop.site/");
-            emailService.sendEmail(emailDetails);
+            emailService.sendWelcomeEmail(emailDetails);
             return modelMapper.map(newAccount, AccountResponse.class);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error while register!");
+            if (e.getMessage().contains(account.getEmail())) {
+                throw new DuplicatedEntity("Duplicate email!");
+            } else {
+                e.printStackTrace();
+                throw new RuntimeException("Error while register!");
+            }
+
         }
     }
 
@@ -75,10 +80,7 @@ public class AuthenticationService implements UserDetailsService {
 //         *   2.ko tồn tại
 //         */
         try {
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    loginRequest.getEmail(),
-                    loginRequest.getPassword()
-            ));
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
             //=> tài khoản có tồn tại
             Account account = (Account) authentication.getPrincipal();
             AccountResponse accountResponse = modelMapper.map(account, AccountResponse.class);
@@ -128,7 +130,7 @@ public class AuthenticationService implements UserDetailsService {
         return accountRepository.save(account);
     }
 
-    public Account searchByID(long id) {
+    public Account searchByID(Long id) {
         Account account = accountRepository.findAccountById(id);
         if (account == null) {
             throw new NotFoundException("Account not exist!");
@@ -136,17 +138,30 @@ public class AuthenticationService implements UserDetailsService {
         return account;
     }
 
-    public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest){
+//    public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest){
+//        Account account = accountRepository.findAccountByEmail(forgotPasswordRequest.getEmail());
+//        if (account == null) throw new NotFoundException("Account not exist");
+//        EmailDetails emailDetails = new EmailDetails();
+//        emailDetails.setReceiver(account);
+//        emailDetails.setSubject("Reset Password");
+//        emailDetails.setLink("http://koishop.site/?token=" + tokenService.generateToken(account)); //sửa lại thành link trang thay dfoi pass
+//        emailService.sendEmail(emailDetails);
+//    }
+
+    public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
         Account account = accountRepository.findAccountByEmail(forgotPasswordRequest.getEmail());
         if (account == null) throw new NotFoundException("Account not exist");
+
         EmailDetails emailDetails = new EmailDetails();
         emailDetails.setReceiver(account);
         emailDetails.setSubject("Reset Password");
-        emailDetails.setLink("http://koishop.site/?token=" + tokenService.generateToken(account)); //sửa lại thành link trang thay dfoi pass
-        emailService.sendEmail(emailDetails);
+        emailDetails.setLink("http://koishop.site/reset-password?token=" + tokenService.generateToken(account)); // Use the reset password link
+
+        // Send the email
+        emailService.sendForgotEmail(emailDetails);
     }
 
-    public void resetPassword(ResetPasswordRequest resetPasswordRequest){
+    public void resetPassword(ResetPasswordRequest resetPasswordRequest) {
         Account account = getCurrentAccount();
         account.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
         accountRepository.save(account);
