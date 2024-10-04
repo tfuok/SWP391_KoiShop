@@ -10,6 +10,8 @@ import com.example.demo.repository.BreedRepository;
 import com.example.demo.repository.KoiRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -44,9 +46,14 @@ public class KoiService {
         return null;
     }
 
-    public List<Koi> getAllKoi() {
-        List<Koi> kois = koiRepository.findKoiByIsDeletedFalse();
-        return kois;
+    public KoiResponse getAllKoi(int page, int size) {
+        Page kois = koiRepository.findAllByIsDeletedFalse(PageRequest.of(page,size));
+        KoiResponse koiResponse = new KoiResponse();
+        koiResponse.setTotalPages(kois.getTotalPages());
+        koiResponse.setContent(kois.getContent());
+        koiResponse.setPageNumber(kois.getNumber());
+        koiResponse.setTotalElements(kois.getTotalElements());
+        return koiResponse;
     }
 
     public Koi updateKoi(KoiRequest koiRequest, long id) {
