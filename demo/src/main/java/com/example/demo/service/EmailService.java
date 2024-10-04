@@ -18,26 +18,49 @@ public class EmailService {
     @Autowired
     JavaMailSender mailSender;
 
-    public void sendEmail(EmailDetails emailDetails) {
+    public void sendWelcomeEmail(EmailDetails emailDetails) {
         try {
             Context context = new Context();
-            context.setVariable("name", emailDetails.getReceiver());
+            context.setVariable("name", emailDetails.getReceiver().getUsername());
             context.setVariable("button", "Go to home page");
-            context.setVariable("name", emailDetails.getLink());
+            context.setVariable("link", emailDetails.getLink());
+
             String template = templateEngine.process("welcome-template", context);
 
-            //Creating a simple mail message
             MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage);
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 
-            //setting up necessary details
             mimeMessageHelper.setFrom("phuocnntse182664@fpt.edu.vn");
             mimeMessageHelper.setTo(emailDetails.getReceiver().getEmail());
-            mimeMessageHelper.setText(template, true);
             mimeMessageHelper.setSubject(emailDetails.getSubject());
+            mimeMessageHelper.setText(template, true);
+
             mailSender.send(mimeMessage);
-        }catch (MessagingException e){
-            System.out.println("Error sent mail");
+        } catch (MessagingException e) {
+            System.out.println("Error sending email: " + e.getMessage());
+        }
+    }
+
+    public void sendForgotEmail(EmailDetails emailDetails) {
+        try {
+            Context context = new Context();
+            context.setVariable("name", emailDetails.getReceiver().getUsername());
+            context.setVariable("button", "Go to home page");
+            context.setVariable("link", emailDetails.getLink());
+
+            String template = templateEngine.process("forgot-password", context);
+
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+
+            mimeMessageHelper.setFrom("phuocnntse182664@fpt.edu.vn");
+            mimeMessageHelper.setTo(emailDetails.getReceiver().getEmail());
+            mimeMessageHelper.setSubject(emailDetails.getSubject());
+            mimeMessageHelper.setText(template, true);
+
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            System.out.println("Error sending email: " + e.getMessage());
         }
     }
 }
