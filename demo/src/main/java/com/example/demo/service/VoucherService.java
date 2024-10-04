@@ -33,7 +33,7 @@ public class VoucherService {
         return null;
     }
 
-    public Voucher deleteVoucher(long id) {
+    public Voucher deleteVoucher(Long id) {
         Voucher voucher = voucherRepository.findVoucherById(id);
         if (voucher == null) throw new NotFoundException("Voucher not found!");
         voucher.setDeleted(true);

@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,21 +16,27 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 public class Breed {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
+    private long id;
 
-    String name;
+    private String name;
 
-    boolean isDeleted = false;
+    private boolean isDeleted = false;
 
-    // Một giống cá có thể chứa nhiều cá koi
+    // A breed can have many koi
     @OneToMany(mappedBy = "breed", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference  // Quản lý tham chiếu và ngăn vòng lặp tuần hoàn
+    @JsonManagedReference  // Manages references and prevents infinite loops in serialization
     private List<Koi> kois;
 
-    // Nhiều giống cá thuộc về một lô cá
-    @ManyToOne
-    @JoinColumn(name = "koi_lot_id")  // Khóa ngoại liên kết đến bảng KoiLot
-    private KoiLot koiLot;  // Tham chiếu ngược về lô cá
+    // Correct ManyToMany mapping with KoiLot
+    @ManyToMany
+    @JoinTable(
+            name = "koi_lot_breed",  // Should match the JoinTable in KoiLot
+            joinColumns = @JoinColumn(name = "breed_id"),
+            inverseJoinColumns = @JoinColumn(name = "koi_lot_id")
+    )
+    @JsonIgnore
+    private List<KoiLot> koiLots;
 }

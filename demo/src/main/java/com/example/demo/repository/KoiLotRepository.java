@@ -2,21 +2,19 @@ package com.example.demo.repository;
 
 import com.example.demo.entity.Breed;
 import com.example.demo.entity.Koi;
+import com.example.demo.entity.KoiLot;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface KoiRepository extends JpaRepository<Koi, Long> {
+public interface KoiLotRepository extends JpaRepository<KoiLot, Long> {
+    Page<KoiLot> findAllByIsDeletedFalse(Pageable pageable);
 
-    Koi findKoiById(long id);
+    KoiLot findKoiLotById(Long id);
 
-    List<Koi> findKoiByIsDeletedFalse();
+    KoiLot findKoiLotByName(String name);
 
-    Koi findKoiByName(String name);
-
-    List<Koi> findByBreed(Breed breed);
-
-    Page<Koi> findAllByIsDeletedFalse(Pageable pageable);
+    List<KoiLot> findByBreeds(Breed breed);
 }

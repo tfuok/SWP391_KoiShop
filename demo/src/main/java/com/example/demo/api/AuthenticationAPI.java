@@ -54,7 +54,7 @@ public class AuthenticationAPI {
     }
 
     @GetMapping("/account/{id}")
-    public ResponseEntity getAccountByID(long id) {
+    public ResponseEntity getAccountByID(Long id) {
         Account account = authenticationService.searchByID(id);
         return ResponseEntity.ok(account);
     }

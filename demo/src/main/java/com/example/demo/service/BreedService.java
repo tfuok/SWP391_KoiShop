@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.entity.Breed;
 import com.example.demo.exception.DuplicatedEntity;
 import com.example.demo.exception.NotFoundException;
+import com.example.demo.model.Request.BreedRequest;
 import com.example.demo.repository.BreedRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +18,12 @@ public class BreedService {
     @Autowired
     ModelMapper modelMapper;
 
-    public Breed addNewBreed(String name) {
+    public Breed addNewBreed(BreedRequest breedRequest) {
         try {
-            Breed breed = new Breed();
-            Breed newBreed = breedRepository.findBreedByName(name);
+            Breed breed = modelMapper.map(breedRequest, Breed.class);
+            Breed newBreed = breedRepository.findBreedByName(breedRequest.getName());
             if (newBreed != null) throw new DuplicatedEntity("Breed existed!");
-            breed.setName(name);
+            breed.setName(breedRequest.getName());
             return breedRepository.save(breed);
         } catch (Exception e) {
             e.printStackTrace();

@@ -24,14 +24,14 @@ public class KoiAPI {
     //method post koi
     @PostMapping
     public ResponseEntity create(@Valid @RequestBody KoiRequest koi) {
-        Koi koiRepsponse =koiService.createKoi(koi);
+        Koi koiRepsponse = koiService.createKoi(koi);
         return ResponseEntity.ok(koiRepsponse);
     }
 
     //lay danh sach koi
     @GetMapping
-    public ResponseEntity getAllKoi() {
-        List<Koi> kois = koiService.getAllKoi();
+    public ResponseEntity getAllKoi(@RequestParam int page, @RequestParam(defaultValue = "5") int size) {
+        KoiResponse kois = koiService.getAllKoi(page, size);
         return ResponseEntity.ok(kois);
     }
 
@@ -48,7 +48,7 @@ public class KoiAPI {
     }
 
     @GetMapping("{name}")
-    public ResponseEntity searchKoiById(String name) {
+    public ResponseEntity searchKoiByName(String name) {
         KoiResponse kois = koiService.searchByName(name);
         return ResponseEntity.ok(kois);
     }
