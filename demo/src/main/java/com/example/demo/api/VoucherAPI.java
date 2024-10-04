@@ -26,7 +26,7 @@ public class VoucherAPI {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity delete(long id) {
+    public ResponseEntity delete(Long id) {
         Voucher voucher = voucherService.deleteVoucher(id);
         return ResponseEntity.ok(voucher);
     }
