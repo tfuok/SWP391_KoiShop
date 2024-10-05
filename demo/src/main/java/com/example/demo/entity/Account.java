@@ -45,6 +45,8 @@ public class Account implements UserDetails {
 
     boolean isDeleted = false;
 
+    String address;
+
     @Enumerated(EnumType.STRING)
     Role role;
 
@@ -91,6 +93,4 @@ public class Account implements UserDetails {
     @OneToOne(mappedBy = "account")
     Cart cart;
 
-    @OneToOne(mappedBy = "account")
-    Address address;
 }

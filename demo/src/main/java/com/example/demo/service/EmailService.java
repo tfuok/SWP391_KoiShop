@@ -18,14 +18,17 @@ public class EmailService {
     @Autowired
     JavaMailSender mailSender;
 
-    public void sendWelcomeEmail(EmailDetails emailDetails) {
+    public void sendEmail(EmailDetails emailDetails, String templateName) {
         try {
             Context context = new Context();
             context.setVariable("name", emailDetails.getReceiver().getUsername());
+            context.setVariable("email", emailDetails.getReceiver().getEmail());
+            context.setVariable("password", emailDetails.getPassword()); // Add password to the context
             context.setVariable("button", "Go to home page");
             context.setVariable("link", emailDetails.getLink());
 
-            String template = templateEngine.process("welcome-template", context);
+            // Process the template with the updated context
+            String template = templateEngine.process(templateName, context);
 
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
@@ -41,26 +44,4 @@ public class EmailService {
         }
     }
 
-    public void sendForgotEmail(EmailDetails emailDetails) {
-        try {
-            Context context = new Context();
-            context.setVariable("name", emailDetails.getReceiver().getUsername());
-            context.setVariable("button", "Go to home page");
-            context.setVariable("link", emailDetails.getLink());
-
-            String template = templateEngine.process("forgot-password", context);
-
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
-
-            mimeMessageHelper.setFrom("phuocnntse182664@fpt.edu.vn");
-            mimeMessageHelper.setTo(emailDetails.getReceiver().getEmail());
-            mimeMessageHelper.setSubject(emailDetails.getSubject());
-            mimeMessageHelper.setText(template, true);
-
-            mailSender.send(mimeMessage);
-        } catch (MessagingException e) {
-            System.out.println("Error sending email: " + e.getMessage());
-        }
-    }
 }

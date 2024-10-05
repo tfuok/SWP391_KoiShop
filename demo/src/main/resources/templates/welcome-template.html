@@ -96,7 +96,9 @@
 
                 <!-- Body -->
                 <p>We’re excited to have you onboard. You have been invited to our system. You can log in and start exploring the world of Koi with us.</p>
-
+                <p><strong>Email:</strong> <span th:text="${email}"></span></p>
+                <p><strong>Password:</strong> <span th:text="${password}"></span></p>
+                <p>Please make sure to change your password after logging in.</p>
                 <!-- Button -->
                 <p style="text-align: center;">
                     <a th:href="${link}" class="btn-primary">[[${button}]]</a>

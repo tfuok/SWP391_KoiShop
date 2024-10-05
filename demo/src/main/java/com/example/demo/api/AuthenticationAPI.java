@@ -1,6 +1,7 @@
 package com.example.demo.api;
 
 import com.example.demo.entity.Account;
+import com.example.demo.entity.Role;
 import com.example.demo.model.Request.ForgotPasswordRequest;
 import com.example.demo.model.Request.LoginRequest;
 import com.example.demo.model.Request.RegisterRequest;
@@ -36,7 +37,7 @@ public class AuthenticationAPI {
     }
 
     @GetMapping
-    public ResponseEntity getAllAccount() {
+    public ResponseEntity<List<Account>> getAllAccount() {
         List<Account> accounts = authenticationService.getAllAccount();
         return ResponseEntity.ok(accounts);
     }
@@ -54,7 +55,7 @@ public class AuthenticationAPI {
     }
 
     @GetMapping("/account/{id}")
-    public ResponseEntity getAccountByID(Long id) {
+    public ResponseEntity getAccountByID(@PathVariable long id) {
         Account account = authenticationService.searchByID(id);
         return ResponseEntity.ok(account);
     }
@@ -70,4 +71,19 @@ public class AuthenticationAPI {
         authenticationService.resetPassword(resetPasswordRequest);
         return ResponseEntity.ok("Reset successfully");
     }
+
+    // Endpoint to get accounts by role
+    @GetMapping("/account/role/{role}")
+    public ResponseEntity<List<Account>> getAccountByRole(@PathVariable("role") Role role) {
+        List<Account> accounts = authenticationService.getAccountByRole(role);
+        return ResponseEntity.ok(accounts);
+    }
+
+    // Endpoint to get accounts by name where role is STAFF
+    @GetMapping("/account/name/{name}")
+    public ResponseEntity<List<Account>> getAccountsByNameAndRoleStaff(@PathVariable("name") String name) {
+        List<Account> accounts = authenticationService.getAccountsByNameAndRoleStaff(name);
+        return ResponseEntity.ok(accounts);
+    }
+
 }
