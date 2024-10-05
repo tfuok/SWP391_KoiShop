@@ -48,7 +48,7 @@ public class KoiAPI {
     }
 
     @GetMapping("{name}")
-    public ResponseEntity searchKoiByName(String name) {
+    public ResponseEntity searchKoiByName(@PathVariable String name) {
         KoiResponse kois = koiService.searchByName(name);
         return ResponseEntity.ok(kois);
     }

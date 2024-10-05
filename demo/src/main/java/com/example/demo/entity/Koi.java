@@ -37,10 +37,6 @@ public class Koi {
 
     String description;
 
-    /**
-     * If true, the koi has been sold.
-     * If false, the koi is still available.
-     */
     boolean sold = false;
 
     boolean isDeleted = false;
