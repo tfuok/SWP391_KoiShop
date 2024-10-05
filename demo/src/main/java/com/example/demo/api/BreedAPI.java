@@ -19,14 +19,14 @@ public class BreedAPI {
     BreedService breedService;
 
     @PostMapping
-    public ResponseEntity create(BreedRequest breedRequest){
+    public ResponseEntity create(@RequestBody BreedRequest breedRequest){
         Breed breed = breedService.addNewBreed(breedRequest);
         return ResponseEntity.ok(breed);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity update(@PathVariable long id, String name){
-        Breed breed = breedService.changeBreedName(id, name);
+    public ResponseEntity update(@PathVariable long id, @RequestBody BreedRequest breedRequest){
+        Breed breed = breedService.changeBreedName(id, breedRequest);
         return ResponseEntity.ok(breed);
     }
 
