@@ -88,9 +88,9 @@ public class Account implements UserDetails {
     @JsonIgnore
     List<Voucher> vouchers;
 
-    @OneToOne(mappedBy = "account")
-    Cart cart;
-
-    @OneToOne(mappedBy = "account")
-    Address address;
+//    @OneToOne(mappedBy = "account")
+//    Cart cart;
+//
+//    @OneToOne(mappedBy = "account")
+//    Address address;
 }

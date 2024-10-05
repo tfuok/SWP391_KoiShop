@@ -19,4 +19,6 @@ public interface KoiRepository extends JpaRepository<Koi, Long> {
     List<Koi> findByBreed(Breed breed);
 
     Page<Koi> findAllByIsDeletedFalse(Pageable pageable);
+
+    List<Koi> findByAccountId(long accountId);
 }

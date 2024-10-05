@@ -55,6 +55,10 @@ public class ConsignmentService {
             consignment.setStatus("Pending");
             //DAT CARE TYPE
             CareType careType = careTypeRespority.findCareTypeByCareTypeId(consignmentCustomerRequest.getCareTypeId());
+            //
+            long estimateCost = CalculateCost(consignmentCustomerRequest.getKois().size(),careType.getCostPerDay());
+            String estimatedCostS = String.valueOf(estimateCost);
+            consignment.setCost(estimatedCostS);
             if(careType == null) throw new NotFoundException("CareType not found");
             consignment.setCareType(careType);
             //LUU
@@ -96,5 +100,9 @@ public class ConsignmentService {
         Account currentAccount = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return koiRepository.findByAccountId(currentAccount.getId());
     }
+    public long CalculateCost(int cost,long carecost) {
+         long CostEstimate = cost*carecost;
+         return CostEstimate;
 
+    }
 }
