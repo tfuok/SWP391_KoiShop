@@ -21,7 +21,7 @@ public class CareType {
 
     String careTypeName;
 
-    long costPerDay;
+    double costPerDay;
 
     boolean isDeleted;
 }

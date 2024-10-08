@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,6 +33,8 @@ public class Consignment implements UserDetails {
 
     String cost;
 
+    int quantity;
+
     Date StartDate;
 
     Date EndDate;
@@ -44,6 +47,7 @@ public class Consignment implements UserDetails {
 
     @OneToMany(mappedBy = "consignment")
     @JsonIgnore
+    @JsonManagedReference
     List<Koi> kois;
 
     @ManyToOne

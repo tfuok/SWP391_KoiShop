@@ -19,9 +19,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class ConsignmentService {
@@ -42,10 +44,10 @@ public class ConsignmentService {
     @Autowired
     private CareTypeRespority careTypeRespority;
 
-    public Consignment createConsignment(ConsignmentCustomerRequest consignmentCustomerRequest) {
+    public Consignment createConsignment(ConsignmentRequest consignmentRequest) {
         try {
             //MAP TU CUSTOMER CONSIGNMENT THANH CONSIGNMENT
-            Consignment consignment = modelMapper.map(consignmentCustomerRequest, Consignment.class);
+            Consignment consignment = modelMapper.map(consignmentRequest, Consignment.class);
             //DAT ACCOUNT CHO CONSIGNMENT = ACCOUNT CUA NGUOI DANG NHAP
             Account accountRequest = authenticationService.getCurrentAccount();
             consignment.setAccount(accountRequest);
@@ -54,11 +56,13 @@ public class ConsignmentService {
             //DAT TRANG THAI CHO STATUS CONSIGNMENT MOI TAO = "Pending"
             consignment.setStatus("Pending");
             //DAT CARE TYPE
-            CareType careType = careTypeRespority.findCareTypeByCareTypeId(consignmentCustomerRequest.getCareTypeId());
+            CareType careType = careTypeRespority.findCareTypeByCareTypeId(consignmentRequest.getCareTypeId());
             //
-            long estimateCost = CalculateCost(consignmentCustomerRequest.getKois().size(),careType.getCostPerDay());
-            String estimatedCostS = String.valueOf(estimateCost);
-            consignment.setCost(estimatedCostS);
+            if(consignmentRequest.getType()=="Offline"){
+                double estimateCost = calculateTotalCost(careType.getCostPerDay(), consignmentRequest.getQuantity(), consignmentRequest.getStartDate(),consignmentRequest.getEndDate());
+                String estimatedCostS = String.valueOf(estimateCost);
+                consignment.setCost(estimatedCostS);
+            }
             if(careType == null) throw new NotFoundException("CareType not found");
             consignment.setCareType(careType);
             //LUU
@@ -100,9 +104,15 @@ public class ConsignmentService {
         Account currentAccount = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return koiRepository.findByAccountId(currentAccount.getId());
     }
-    public long CalculateCost(int cost,long carecost) {
-         long CostEstimate = cost*carecost;
-         return CostEstimate;
 
+    public static double calculateTotalCost(double costPerDay,int quantity, Date startDate, Date endDate) {
+        // Tính số milliseconds giữa startDate và endDate
+        long diffInMillies = endDate.getTime() - startDate.getTime();
+
+        // Tính số ngày
+        long daysBetween = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+
+        // Trả về tổng chi phí
+        return daysBetween * costPerDay * quantity;
     }
 }
