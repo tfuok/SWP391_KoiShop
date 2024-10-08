@@ -36,6 +36,7 @@ public class KoiLot {
 
     private String description;
 
+    private String imgUrl;
     /**
      * If true, the koi has been sold.
      * If false, the koi is still available.
@@ -53,7 +54,6 @@ public class KoiLot {
             joinColumns = @JoinColumn(name = "koi_lot_id"),
             inverseJoinColumns = @JoinColumn(name = "breed_id")
     )
-    @JsonIgnore
     private List<Breed> breeds;
 
     // Correct ManyToOne mapping with Account

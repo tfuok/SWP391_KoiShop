@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.Account;
+import com.example.demo.entity.Role;
 import com.example.demo.exception.DuplicatedEntity;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.*;
@@ -19,6 +20,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
 import java.util.List;
 
 @Service
@@ -38,38 +40,53 @@ public class AuthenticationService implements UserDetailsService {
 
     public AccountResponse register(RegisterRequest registerRequest) {
         Account account = modelMapper.map(registerRequest, Account.class);
+
+        // Check if email or phone already exists
         if (accountRepository.existsByEmail(account.getEmail())) {
-            throw new DuplicatedEntity("Email existed!");
+            throw new DuplicatedEntity("Email already exists!");
         }
         if (accountRepository.existsByPhone(account.getPhone())) {
-            throw new DuplicatedEntity("Phone existed!");
+            throw new DuplicatedEntity("Phone number already exists!");
         }
+
         try {
-            String originPassword = account.getPassword();
+            String originPassword;
+
+            // Generate a random password for STAFF role
+            if (registerRequest.getRole() == Role.STAFF) {
+                originPassword = generateRandomPassword(6);  // Generate a 6-character password for STAFF
+            } else {
+                originPassword = registerRequest.getPassword();  // Use the provided password for other roles
+            }
+
+            // Encode the password and set it in the account
             account.setPassword(passwordEncoder.encode(originPassword));
+
+            // Save the new account to the database
             Account newAccount = accountRepository.save(account);
-            //sau khi dang ki thanh cong thi se gui mail ve cho nguoi dung
+
+            // Prepare email details with the generated password
             EmailDetails emailDetails = new EmailDetails();
             emailDetails.setReceiver(newAccount);
             emailDetails.setSubject("Welcome to KoiShop");
             emailDetails.setLink("http://koishop.site/");
-            emailService.sendWelcomeEmail(emailDetails);
+            emailDetails.setPassword(originPassword);  // Include the original (non-encoded) password in the email
+
+            // Send the email to the user with login details
+            emailService.sendEmail(emailDetails, "welcome-template");
+
+            // Return the registered account details as a response
             return modelMapper.map(newAccount, AccountResponse.class);
         } catch (Exception e) {
-            if (e.getMessage().contains(account.getEmail())) {
-                throw new DuplicatedEntity("Duplicate email!");
-            } else {
-                e.printStackTrace();
-                throw new RuntimeException("Error while register!");
-            }
-
+            e.printStackTrace();
+            throw new RuntimeException("Error while registering the account!");
         }
     }
 
 
+
     public List<Account> getAllAccount() {
-        List<Account> accounts = accountRepository.findAccountByIsDeletedFalse();
-        return accounts;
+        return accountRepository.findAccountByIsDeletedFalseOrderedByRole();
     }
 
     public AccountResponse login(LoginRequest loginRequest) {
@@ -99,11 +116,11 @@ public class AuthenticationService implements UserDetailsService {
 
     public Account getCurrentAccount() {
         Account account = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return accountRepository.findAccountById(account.getId());
+        return accountRepository.findAccountByIdAndIsDeletedFalse(account.getId());
     }
 
     public Account deleteAccount(long id) {
-        Account account = accountRepository.findAccountById(id);
+        Account account = accountRepository.findAccountByIdAndIsDeletedFalse(id);
         if (account == null) {
             throw new NotFoundException("Account not found!");
         }
@@ -112,7 +129,7 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public Account updateAccount(RegisterRequest registerRequest, long id) {
-        Account account = accountRepository.findAccountById(id);
+        Account account = accountRepository.findAccountByIdAndIsDeletedFalse(id);
         if (account == null) {
             throw new NotFoundException("Account not exist!");
         }
@@ -131,22 +148,13 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public Account searchByID(Long id) {
-        Account account = accountRepository.findAccountById(id);
+        Account account = accountRepository.findAccountByIdAndIsDeletedFalse(id);
         if (account == null) {
             throw new NotFoundException("Account not exist!");
         }
         return account;
     }
 
-//    public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest){
-//        Account account = accountRepository.findAccountByEmail(forgotPasswordRequest.getEmail());
-//        if (account == null) throw new NotFoundException("Account not exist");
-//        EmailDetails emailDetails = new EmailDetails();
-//        emailDetails.setReceiver(account);
-//        emailDetails.setSubject("Reset Password");
-//        emailDetails.setLink("http://koishop.site/?token=" + tokenService.generateToken(account)); //sửa lại thành link trang thay dfoi pass
-//        emailService.sendEmail(emailDetails);
-//    }
 
     public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
         Account account = accountRepository.findAccountByEmail(forgotPasswordRequest.getEmail());
@@ -155,15 +163,63 @@ public class AuthenticationService implements UserDetailsService {
         EmailDetails emailDetails = new EmailDetails();
         emailDetails.setReceiver(account);
         emailDetails.setSubject("Reset Password");
-        emailDetails.setLink("http://koishop.site/reset-password?token=" + tokenService.generateToken(account)); // Use the reset password link
+        emailDetails.setLink("http://koishop.site/reset_password?token=" + tokenService.generateToken(account)); // Use the reset password link
 
         // Send the email
-        emailService.sendForgotEmail(emailDetails);
+        emailService.sendEmail(emailDetails, "forgot-password");
     }
 
     public void resetPassword(ResetPasswordRequest resetPasswordRequest) {
         Account account = getCurrentAccount();
         account.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
         accountRepository.save(account);
+    }
+
+    public List<Account> getAccountByRole(Role role) {
+        return accountRepository.findByRole(role);
+    }
+
+    private static final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String LOWER = "abcdefghijklmnopqrstuvwxyz";
+    private static final String DIGITS = "0123456789";
+    private static final String SPECIAL = "!@#$%^&*()-_=+[]{}|;:,.<>?";
+
+    private static final String ALL_CHARACTERS = UPPER + LOWER + DIGITS + SPECIAL;
+    private static final SecureRandom random = new SecureRandom();
+
+    // Method to generate random password of specified length
+    public static String generateRandomPassword(int length) {
+        StringBuilder password = new StringBuilder(length);
+
+        // Ensure that password contains at least one character from each set
+        password.append(UPPER.charAt(random.nextInt(UPPER.length())));
+        password.append(LOWER.charAt(random.nextInt(LOWER.length())));
+        password.append(DIGITS.charAt(random.nextInt(DIGITS.length())));
+        password.append(SPECIAL.charAt(random.nextInt(SPECIAL.length())));
+
+        // Fill the remaining characters randomly from all available characters
+        for (int i = 4; i < length; i++) {
+            password.append(ALL_CHARACTERS.charAt(random.nextInt(ALL_CHARACTERS.length())));
+        }
+
+        // Shuffle to make sure the password is unpredictable
+        return shuffleString(password.toString());
+    }
+
+    // Helper method to shuffle characters in a string
+    private static String shuffleString(String input) {
+        char[] characters = input.toCharArray();
+        for (int i = 0; i < characters.length; i++) {
+            int randomIndex = random.nextInt(characters.length);
+            char temp = characters[i];
+            characters[i] = characters[randomIndex];
+            characters[randomIndex] = temp;
+        }
+        return new String(characters);
+    }
+
+    // Method to get accounts by name where role is STAFF
+    public List<Account> getAccountsByNameAndRoleStaff(String name) {
+        return accountRepository.findByUsernameContainingAndRole(name, Role.STAFF);
     }
 }

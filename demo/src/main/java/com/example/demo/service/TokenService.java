@@ -45,6 +45,6 @@ public class TokenService {
         String idString = claims.getSubject();
         long id = Long.parseLong(idString);
 
-        return accountRepository.findAccountById(id);
+        return accountRepository.findAccountByIdAndIsDeletedFalse(id);
     }
 }

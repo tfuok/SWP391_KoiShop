@@ -48,13 +48,13 @@ public class KoiLotAPI {
     }
 
     @GetMapping("{name}")
-    public ResponseEntity searchKoiByName(String name) {
+    public ResponseEntity searchKoiByName(@PathVariable String name) {
         KoiLot kois = koiLotService.searchByName(name);
         return ResponseEntity.ok(kois);
     }
 
     @GetMapping("/by-breed/{breedId}")
-    public List<KoiLot> getKoiByBreed(@PathVariable Long breedId) {
+    public List<KoiLot> getKoiByBreed(@PathVariable long breedId) {
         return koiLotService.getKoiLotByBreed(breedId);
     }
 }

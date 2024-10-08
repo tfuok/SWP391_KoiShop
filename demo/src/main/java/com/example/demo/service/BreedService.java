@@ -31,11 +31,18 @@ public class BreedService {
         }
     }
 
-    public Breed changeBreedName(long id, String name){
-        Breed breed = breedRepository.findBreedById(id);
-        if (breed == null) throw new NotFoundException("Breed not found");
-        breed.setName(name);
-        return breedRepository.save(breed);
+    public Breed changeBreedName(long id, BreedRequest breedRequest){
+        // Find the breed by its ID
+        Breed existingBreed = breedRepository.findBreedById(id);
+
+        // If the breed is not found, throw an exception
+        if (existingBreed == null) throw new NotFoundException("Breed not found");
+
+        // Update the existing breed's name with the new name from the request
+        existingBreed.setName(breedRequest.getName());
+
+        // Save the updated breed back into the repository
+        return breedRepository.save(existingBreed);
     }
 
     public Breed deleteBreed(long id){
