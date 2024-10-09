@@ -10,13 +10,13 @@ import java.util.List;
 
 public interface KoiRepository extends JpaRepository<Koi, Long> {
 
-    Koi findKoiById(long id);
+    Koi findKoiByIdAndIsDeletedFalse(long id);
 
     List<Koi> findKoiByIsDeletedFalse();
 
-    Koi findKoiByName(String name);
+    List<Koi> findByNameContainingAndIsDeletedFalse(String name);
 
-    List<Koi> findByBreed(Breed breed);
+    List<Koi> findByBreedAndIsDeletedFalse(Breed breed);
 
     Page<Koi> findAllByIsDeletedFalse(Pageable pageable);
 }
