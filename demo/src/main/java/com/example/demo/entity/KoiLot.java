@@ -36,7 +36,7 @@ public class KoiLot {
 
     private String description;
 
-    private String imgUrl;
+    private String images;
     /**
      * If true, the koi has been sold.
      * If false, the koi is still available.

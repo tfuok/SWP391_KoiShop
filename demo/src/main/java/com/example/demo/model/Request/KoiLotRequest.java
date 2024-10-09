@@ -34,4 +34,6 @@ public class KoiLotRequest {
 
     @Min(value = 2, message = "Koi lot must be >2 koi. ")
     int quantity;
+
+    String imageUrl;
 }

@@ -2,13 +2,11 @@ package com.example.demo.service;
 
 import com.example.demo.entity.Account;
 import com.example.demo.entity.Breed;
-import com.example.demo.entity.Koi;
 import com.example.demo.entity.KoiLot;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.KoiLotRequest;
-import com.example.demo.model.Request.KoiRequest;
+import com.example.demo.model.Response.KoiLotPageResponse;
 import com.example.demo.model.Response.KoiLotResponse;
-import com.example.demo.model.Response.KoiResponse;
 import com.example.demo.repository.BreedRepository;
 import com.example.demo.repository.KoiLotRepository;
 import org.modelmapper.ModelMapper;
@@ -18,9 +16,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class KoiLotService {
@@ -32,6 +29,7 @@ public class KoiLotService {
     AuthenticationService authenticationService;
     @Autowired
     BreedRepository breedRepository;
+
     public KoiLot createKoi(KoiLotRequest koiLotRequest) {
         try {
             // Create a new KoiLot manually without using ModelMapper for the List<Breed>
@@ -45,11 +43,12 @@ public class KoiLotService {
             koiLot.setOrigin(koiLotRequest.getOrigin());
             koiLot.setDescription(koiLotRequest.getDescription());
             koiLot.setQuantity(koiLotRequest.getQuantity());
+            koiLot.setImages(koiLot.getImages());
 
             // Map breed IDs to Breed entities
             List<Breed> breeds = new ArrayList<>();
             for (Long breedId : koiLotRequest.getBreedId()) {
-                Breed breed = breedRepository.findBreedById(breedId);
+                Breed breed = breedRepository.findBreedByIdAndIsDeletedFalse(breedId);
                 if (breed == null) throw new NotFoundException("Breed not exist");
                 breeds.add(breed);
             }
@@ -69,13 +68,27 @@ public class KoiLotService {
     }
 
 
-    public KoiLotResponse getAllKoi(int page, int size) {
-        Page kois = koiLotRepository.findAllByIsDeletedFalse(PageRequest.of(page,size));
-        KoiLotResponse koiResponse = new KoiLotResponse();
+    public KoiLotPageResponse getAllKoi(int page, int size) {
+        Page<KoiLot> kois = koiLotRepository.findAllByIsDeletedFalse(PageRequest.of(page, size));
+        // Convert List<KoiLot> to List<KoiLotResponse>
+        List<KoiLotResponse> koiLotResponses = new ArrayList<>();
+        for (KoiLot koi : kois.getContent()) {
+            KoiLotResponse koiLotResponse = modelMapper.map(koi, KoiLotResponse.class);
+
+            List<String> breedNames = koi.getBreeds().stream()
+                    .map(Breed::getName) // Map each Breed entity to its name
+                    .collect(Collectors.toList());
+            koiLotResponse.setBreeds(breedNames);
+            koiLotResponses.add(koiLotResponse);
+        }
+
+        // Set content and other details in KoiLotPageResponse
+        KoiLotPageResponse koiResponse = new KoiLotPageResponse();
         koiResponse.setTotalPages(kois.getTotalPages());
-        koiResponse.setContent(kois.getContent());
+        koiResponse.setContent(koiLotResponses); // Set List<KoiLotResponse>
         koiResponse.setPageNumber(kois.getNumber());
         koiResponse.setTotalElements(kois.getTotalElements());
+
         return koiResponse;
     }
 
@@ -95,11 +108,11 @@ public class KoiLotService {
         foundKoi.setOrigin(koiRequest.getOrigin());
         foundKoi.setDescription(koiRequest.getDescription());
         foundKoi.setQuantity(koiRequest.getQuantity());
-
+        foundKoi.setImages(koiRequest.getImageUrl());
         // Map breed IDs to Breed entities and set the breeds
         List<Breed> breeds = new ArrayList<>();
         for (Long breedId : koiRequest.getBreedId()) {
-            Breed breed = breedRepository.findBreedById(breedId);
+            Breed breed = breedRepository.findBreedByIdAndIsDeletedFalse(breedId);
             if (breed == null) throw new NotFoundException("Breed not exist");
             breeds.add(breed);
         }
@@ -119,15 +132,15 @@ public class KoiLotService {
     }
 
     public KoiLot searchByName(String name) {
-        KoiLot koi = koiLotRepository.findKoiLotByName(name);
+        KoiLot koi = koiLotRepository.findByNameContainingAndIsDeletedFalse(name);
         if (koi == null) throw new NotFoundException("Koi not existed");
 //        KoiLotResponse koiLot = modelMapper.map(koi, KoiLotResponse.class);
         return koi;
     }
 
 //    public Map<String, Object> compareKoi(long id1, long id2) {
-//        Koi koi1 = koiLotRepository.findKoiById(id1);
-//        Koi koi2 = koiLotRepository.findKoiById(id2);
+//        Koi koi1 = koiLotRepository.findKoiByIdAndIsDeletedFalse(id1);
+//        Koi koi2 = koiLotRepository.findKoiByIdAndIsDeletedFalse(id2);
 //
 //        if (koi1 == null || koi2 == null) {
 //            throw new NotFoundException("One or both Koi not found");
@@ -148,7 +161,7 @@ public class KoiLotService {
 
     public List<KoiLot> getKoiLotByBreed(Long breedId) {
         // Tìm giống cá (Breed) dựa trên breedId
-        Breed breed = breedRepository.findBreedById(breedId);
+        Breed breed = breedRepository.findBreedByIdAndIsDeletedFalse(breedId);
         if (breed == null) throw new NotFoundException("Breed not found");
         // Tìm tất cả các Koi thuộc giống cá đó
         return koiLotRepository.findByBreeds(breed);
