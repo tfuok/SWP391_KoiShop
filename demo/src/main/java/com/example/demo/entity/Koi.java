@@ -2,14 +2,10 @@ package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.format.annotation.NumberFormat;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -37,6 +33,8 @@ public class Koi {
 
     String description;
 
+    String imageUrl;
+
     boolean sold = false;
 
     boolean isDeleted = false;
@@ -50,7 +48,7 @@ public class Koi {
     @JoinColumn(name = "account_id")
     Account account;
 
-    @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonBackReference
-    private List<Image> images;
+//    @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @JsonBackReference
+//    private List<Image> imageUrl;
 }

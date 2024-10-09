@@ -2,6 +2,7 @@ package com.example.demo.api;
 
 import com.example.demo.entity.Koi;
 import com.example.demo.model.Request.KoiRequest;
+import com.example.demo.model.Response.KoiPageResponse;
 import com.example.demo.model.Response.KoiResponse;
 import com.example.demo.service.KoiService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -28,12 +29,12 @@ public class KoiAPI {
         return ResponseEntity.ok(koiRepsponse);
     }
 
-    //lay danh sach koi
-    @GetMapping
-    public ResponseEntity getAllKoi(@RequestParam int page, @RequestParam(defaultValue = "5") int size) {
-        KoiResponse kois = koiService.getAllKoi(page, size);
-        return ResponseEntity.ok(kois);
-    }
+//    //lay danh sach koi
+//    @GetMapping
+//    public ResponseEntity getAllKoi() {
+//        List<Koi> kois = koiService.getKoi();
+//        return ResponseEntity.ok(kois);
+//    }
 
     @DeleteMapping("{id}")
     public ResponseEntity deleteKoi(@Valid @PathVariable long id) {
@@ -47,11 +48,11 @@ public class KoiAPI {
         return ResponseEntity.ok(newKoi);
     }
 
-    @GetMapping("{name}")
-    public ResponseEntity searchKoiByName(@PathVariable String name) {
-        KoiResponse kois = koiService.searchByName(name);
-        return ResponseEntity.ok(kois);
-    }
+//    @GetMapping("{name}")
+//    public ResponseEntity searchKoiByName(@PathVariable String name) {
+//        KoiResponse kois = koiService.searchByName(name);
+//        return ResponseEntity.ok(kois);
+//    }
 
     @GetMapping("/compare")
     public ResponseEntity compareKoi(@RequestParam long id1, @RequestParam long id2) {
@@ -59,8 +60,32 @@ public class KoiAPI {
         return ResponseEntity.ok(comparisonResult);
     }
 
-    @GetMapping("/by-breed/{breedId}")
-    public List<Koi> getKoiByBreed(@PathVariable Long breedId) {
-        return koiService.getKoiByBreed(breedId);
+//    @GetMapping("/by-breed/{breedId}")
+//    public List<Koi> getKoiByBreed(@PathVariable Long breedId) {
+//        return koiService.getKoiByBreed(breedId);
+//    }
+
+    @GetMapping
+    public ResponseEntity<?> getKois(
+            @RequestParam(required = false) Long breedId,
+            @RequestParam(required = false) String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        if (breedId != null) {
+            // If breedId is provided, return Kois filtered by breed
+            List<KoiResponse> koisByBreed = koiService.getKoiByBreed(breedId);
+            return ResponseEntity.ok(koisByBreed);
+        } else if (name != null) {
+            // If name is provided, return Kois filtered by name
+            List<KoiResponse> koisByName = koiService.searchByName(name);
+            return ResponseEntity.ok(koisByName);
+        } else {
+            // If no filters are provided, return all Kois with pagination
+            KoiPageResponse allKois = koiService.getAllKoi(page, size);  // Correctly return KoiPageResponse
+            return ResponseEntity.ok(allKois);
+        }
     }
+
+
 }
