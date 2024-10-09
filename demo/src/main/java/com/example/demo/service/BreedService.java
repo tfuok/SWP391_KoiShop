@@ -33,7 +33,7 @@ public class BreedService {
 
     public Breed changeBreedName(long id, BreedRequest breedRequest){
         // Find the breed by its ID
-        Breed existingBreed = breedRepository.findBreedById(id);
+        Breed existingBreed = breedRepository.findBreedByIdAndIsDeletedFalse(id);
 
         // If the breed is not found, throw an exception
         if (existingBreed == null) throw new NotFoundException("Breed not found");
@@ -46,7 +46,7 @@ public class BreedService {
     }
 
     public Breed deleteBreed(long id){
-        Breed breed = breedRepository.findBreedById(id);
+        Breed breed = breedRepository.findBreedByIdAndIsDeletedFalse(id);
         if (breed == null) throw new NotFoundException("Breed not found");
         breed.setDeleted(true);
         return breedRepository.save(breed);
