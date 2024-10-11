@@ -25,6 +25,8 @@ public class Breed {
 
     private boolean isDeleted = false;
 
+    private String imageUrl;
+
     // A breed can have many koi
     @OneToMany(mappedBy = "breed", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference  // Manages references and prevents infinite loops in serialization

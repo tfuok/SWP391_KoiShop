@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 public class KoiRequest {
     @NotBlank(message = "Name cannot be blank!")
@@ -32,6 +30,6 @@ public class KoiRequest {
     @Size(max = 500, message = "Description cannot be longer than 500 characters")
     String description;
 
-    List<String> images;
+    String imageUrl;
 
 }
