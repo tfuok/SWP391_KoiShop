@@ -1,11 +1,14 @@
 package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -48,6 +51,12 @@ public class Koi {
     @JoinColumn(name = "account_id")
     Account account;
 
+    @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Certificate> certificates;
+
+    @OneToOne(mappedBy = "koi")
+    ConsignmentDetails consignmentDetails;
 //    @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
 //    @JsonBackReference
 //    private List<Image> imageUrl;

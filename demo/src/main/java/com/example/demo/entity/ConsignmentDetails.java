@@ -11,18 +11,15 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class CareType {
+public class ConsignmentDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long careTypeId;
+    long id;
 
-    String careTypeName;
+    @ManyToOne
+    @JoinColumn(name = "consignment_id")
+    Consignment consignment;
 
-    double costPerDay;
-
-    boolean isDeleted;
-
-
-
-
+    @OneToOne(mappedBy = "koi")
+    Koi koi;
 }

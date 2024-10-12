@@ -1,34 +1,29 @@
 package com.example.demo.service;
 
-import com.example.demo.entity.Account;
-import com.example.demo.entity.CareType;
-import com.example.demo.entity.Consignment;
+import com.example.demo.entity.*;
 
-import com.example.demo.entity.Koi;
 import com.example.demo.exception.NotFoundException;
-import com.example.demo.model.Request.ConsignmentCustomerRequest;
+import com.example.demo.model.Request.ConsignmentDetailRequest;
 import com.example.demo.model.Request.ConsignmentRequest;
 
 import com.example.demo.repository.CareTypeRespority;
-import com.example.demo.repository.ConsignmentRespority;
+import com.example.demo.repository.ConsignmentRepository;
 import com.example.demo.repository.KoiRepository;
-import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class ConsignmentService {
     @Autowired
-    ConsignmentRespority consignmentRespority;
+    ConsignmentRepository consignmentRepository;
     @Autowired
     ModelMapper modelMapper;
     @Autowired
@@ -65,8 +60,15 @@ public class ConsignmentService {
             }
             if(careType == null) throw new NotFoundException("CareType not found");
             consignment.setCareType(careType);
+
+            List<ConsignmentDetails> consignmentDetails = new ArrayList<>();
+            for(ConsignmentDetailRequest consignmentDetailRequest : consignmentRequest.getConsignmentDetailRequests()){
+                koiRepository.findKoiByIdAndIsDeletedFalse(consignmentDetailRequest.getId());
+            ConsignmentDetails consignmentDetail = new ConsignmentDetails();
+
+            }
             //LUU
-            Consignment newConsignment = consignmentRespority.save(consignment);
+            Consignment newConsignment = consignmentRepository.save(consignment);
             return newConsignment;
         } catch (Exception e) {
             e.printStackTrace();
@@ -74,21 +76,21 @@ public class ConsignmentService {
         return null;
     }
     public List<Consignment> getAllConsignment() {
-        List<Consignment> consignments = consignmentRespority.findConsignmentByIsDeletedFalse();
+        List<Consignment> consignments = consignmentRepository.findConsignmentByIsDeletedFalse();
         return consignments;
     }
     public Consignment deleteConsignment(long id) {
-        Consignment consignment = consignmentRespority.findConsignmentByconsignmentID(id);
+        Consignment consignment = consignmentRepository.findConsignmentByconsignmentID(id);
         if (consignment == null) {
             throw new NotFoundException("Consignment not found!");
         }
 
         consignment.setIsDeleted(true);
-        return consignmentRespority.save(consignment);
+        return consignmentRepository.save(consignment);
     }
     public Consignment updateConsignment(ConsignmentRequest consignmentRequest, long id) {
 
-        Consignment foundConsignment = consignmentRespority.findConsignmentByconsignmentID(id);
+        Consignment foundConsignment = consignmentRepository.findConsignmentByconsignmentID(id);
         if (foundConsignment == null) {
             throw new NotFoundException("Consignment not found!");
         }
@@ -98,7 +100,7 @@ public class ConsignmentService {
         CareType careType = careTypeRespority.findCareTypeByCareTypeId(consignmentRequest.getCareTypeId());
         if(careType == null) throw new NotFoundException("CareType not found");
         foundConsignment.setCareType(careType);
-        return consignmentRespority.save(foundConsignment);
+        return consignmentRepository.save(foundConsignment);
     }
     public List<Koi> getKoibyAccountId(long id) {
         Account currentAccount = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

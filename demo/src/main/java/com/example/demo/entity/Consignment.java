@@ -23,7 +23,7 @@ public class Consignment implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long consignmentID;
+    long id;
 
     String type;
 
@@ -44,11 +44,8 @@ public class Consignment implements UserDetails {
     String status = "pending";
 
     Boolean isDeleted = false;
-
-    @OneToMany(mappedBy = "consignment")
-    @JsonIgnore
-    @JsonManagedReference
-    List<Koi> kois;
+    @OneToMany(mappedBy = "consignment",cascade = CascadeType.ALL)
+    List<ConsignmentDetails> consignmentDetails;
 
     @ManyToOne
     @JoinColumn(name = "account_id")
@@ -57,6 +54,7 @@ public class Consignment implements UserDetails {
     @ManyToOne
     @JoinColumn(name = "care_type_id")
     CareType careType;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

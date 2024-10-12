@@ -14,12 +14,13 @@ import java.util.List;
 public class ConsignmentRequest {
     @NotBlank(message = "Type cannot be blank!")
     String type;
+
     @NotBlank(message = "Address cannot be blank!")
     String address;
-    @NotBlank(message = "Cost cannot be blank!")
-    String cost;
+
     @NotBlank(message = "Quantity cannot be blank!")
     int quantity;
+
     @NotNull(message = "Start Date cannot be null!")
     @Future(message = "Start Date must be in the future!")
     private Date startDate;
@@ -46,6 +47,6 @@ public class ConsignmentRequest {
     String status;
     @NotNull(message = "CareTypeId cannot be null")
     long careTypeId;
-    @NotNull(message = "Koi IDs cannot be null!")
-    List<Long> koiIds; // Change to List of Koi IDs
+    List<ConsignmentDetailRequest> consignmentDetailRequests;
+
 }

@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface ConsignmentRespority extends JpaRepository<Consignment, Long> {
+public interface ConsignmentRepository extends JpaRepository<Consignment, Long> {
     List<Consignment> findConsignmentByIsDeletedFalse();
     Consignment findConsignmentByconsignmentID(long id);
 }
