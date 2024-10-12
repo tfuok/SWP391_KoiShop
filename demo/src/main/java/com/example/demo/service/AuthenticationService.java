@@ -86,7 +86,7 @@ public class AuthenticationService implements UserDetailsService {
 
 
     public List<Account> getAllAccount() {
-        return accountRepository.findAccountByIsDeletedFalseOrderedByRole();
+        return accountRepository.findAccountByIsDeletedFalseOrderByRole();
     }
 
     public AccountResponse login(LoginRequest loginRequest) {
@@ -128,7 +128,7 @@ public class AuthenticationService implements UserDetailsService {
         return accountRepository.save(account);
     }
 
-    public Account updateAccount(RegisterRequest registerRequest, long id) {
+    public Account updateAccount(UpdateRequest registerRequest, long id) {
         Account account = accountRepository.findAccountByIdAndIsDeletedFalse(id);
         if (account == null) {
             throw new NotFoundException("Account not exist!");
@@ -142,8 +142,8 @@ public class AuthenticationService implements UserDetailsService {
         }
         account.setEmail(registerRequest.getEmail());
         account.setUsername(registerRequest.getUsername());
-        account.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         account.setPhone(registerRequest.getPhone());
+        account.setAddress(registerRequest.getAddress());
         return accountRepository.save(account);
     }
 

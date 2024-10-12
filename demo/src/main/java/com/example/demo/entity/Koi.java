@@ -1,11 +1,15 @@
 package com.example.demo.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -13,42 +17,57 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 public class Koi {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
+    private long id;
 
-    String name;
+    private String name;
 
-    float price;
+    private float price;
 
-    String vendor;
+    private String vendor;
 
-    String gender;
+    private String gender;
 
-    int bornYear;
+    private int bornYear;
 
-    int size;
+    private int size;
 
-    String origin;
+    private String origin;
 
-    String description;
+    private String description;
 
-    String imageUrl;
+    private String images;
 
-    boolean sold = false;
+    private boolean sold = false;
 
-    boolean isDeleted = false;
+    private boolean isDeleted = false;
 
+    private int quantity;
+
+    // Correct ManyToMany mapping with Breed
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "koi_breed",  // This is the join table name
+            joinColumns = @JoinColumn(name = "koi_id"),
+            inverseJoinColumns = @JoinColumn(name = "breed_id")
+    )
+    private Set<Breed> breeds;
+
+    // Correct ManyToOne mapping with Account
     @ManyToOne
-    @JoinColumn(name = "breed_id")
-    @JsonBackReference  // Ngăn vòng lặp tuần hoàn khi chuyển sang JSON
-    Breed breed;
+    @JoinColumn(name = "account_id")  // No need for JoinTable here
+    private Account account;
 
-    @ManyToOne
-    @JoinColumn(name = "account_id")
-    Account account;
+    @OneToMany(mappedBy = "koi")
+    @JsonIgnore
+    Set<OrderDetails> orderDetails;
 
-//    @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JsonBackReference
-//    private List<Image> imageUrl;
+    @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Images> imagesList ; // Initialize the list to avoid null references
+
+
+//    boolean isLot;
 }

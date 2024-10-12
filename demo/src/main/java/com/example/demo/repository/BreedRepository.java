@@ -8,7 +8,7 @@ import java.util.List;
 public interface BreedRepository extends JpaRepository<Breed, Long> {
     Breed findBreedByIdAndIsDeletedFalse(Long id);
 
-    Breed findBreedByName(String name);
+    Breed findBreedByNameAndIsDeletedFalse(String name);
 
     List<Breed> findBreedByIsDeletedFalse();
 }

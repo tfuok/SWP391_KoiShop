@@ -5,4 +5,5 @@ import lombok.Data;
 @Data
 public class BreedRequest {
     String name;
+    String imageUrl;
 }

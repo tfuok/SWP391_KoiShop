@@ -14,10 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Getter
 @Setter
@@ -81,16 +78,25 @@ public class Account implements UserDetails {
     public boolean isEnabled() {
         return UserDetails.super.isEnabled();
     }
+//
+//    @OneToMany(mappedBy = "account")
+//    @JsonIgnore
+//    Set<Voucher> vouchers = new HashSet<>();
 
-    @OneToMany(mappedBy = "account") // 1 account tao dc 1 koi
+
+    @OneToMany(mappedBy = "customer")
     @JsonIgnore
-    List<Koi> kois;
+    Set<Orders> orders;
 
     @OneToMany(mappedBy = "account")
-    @JsonIgnore
-    List<Voucher> vouchers;
+            @JsonIgnore
+    Set<Koi> koiLots;
 
-    @OneToOne(mappedBy = "account")
-    Cart cart;
+    @OneToMany(mappedBy = "from")
+    List<Transactions> transactionsFrom;
 
+    @OneToMany(mappedBy = "to")
+    List<Transactions> transactionsTo;
+
+    double balance = 0;
 }

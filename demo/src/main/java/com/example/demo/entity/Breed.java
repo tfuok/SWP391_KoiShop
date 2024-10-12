@@ -1,14 +1,13 @@
 package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -27,18 +26,9 @@ public class Breed {
 
     private String imageUrl;
 
-    // A breed can have many koi
-    @OneToMany(mappedBy = "breed", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference  // Manages references and prevents infinite loops in serialization
-    private List<Koi> kois;
-
     // Correct ManyToMany mapping with KoiLot
-    @ManyToMany
-    @JoinTable(
-            name = "koi_lot_breed",  // Should match the JoinTable in KoiLot
-            joinColumns = @JoinColumn(name = "breed_id"),
-            inverseJoinColumns = @JoinColumn(name = "koi_lot_id")
-    )
+
+    @ManyToMany(mappedBy = "breeds")
     @JsonIgnore
-    private List<KoiLot> koiLots;
+    private Set<Koi> kois;
 }
