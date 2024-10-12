@@ -7,28 +7,26 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Set;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Breed {
+public class OrderDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    long id;
 
-    private String name;
+    double price;
 
-    private boolean isDeleted = false;
-
-    private String imageUrl;
-
-    // Correct ManyToMany mapping with KoiLot
-
-    @ManyToMany(mappedBy = "breeds")
+    @ManyToOne
+    @JoinColumn(name = "order_id")
     @JsonIgnore
-    private Set<Koi> kois;
+    Orders order;
+
+    @ManyToOne
+    @JoinColumn(name = "koi_id")
+    @JsonIgnore
+    Koi koi;
 }

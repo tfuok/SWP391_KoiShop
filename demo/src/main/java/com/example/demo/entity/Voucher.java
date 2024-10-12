@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -19,16 +21,26 @@ public class Voucher {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
 
-    float discountValue;
-    Date createDate = new Date();
-    Date expiredDate;
-    int quantity;
-    int usedCount;
-    String description;
-    int minimumPoints; // diem tich luy toi thieu de co the su dung dc voucher
-    float minimumPrice; //giá đơn hàng tối thieu de co the su dung dc voucher
+    private double discountValue;
+
+    @Temporal(TemporalType.DATE)
+    private Date createDate;
+
+    @Temporal(TemporalType.DATE)
+    private Date expiredDate;
+
+    private int quantity;
+    private int usedCount;
+
+    private String description;
+
+    private int minimumPoints; // Minimum points required to use the voucher
+
+    private double minimumPrice; // Minimum order price required to use the voucher
+
     @ManyToOne
     @JoinColumn(name = "account_id")
-    Account account;
-    boolean isDeleted = false;
+    private Account account;
+
+    private boolean isDeleted;
 }

@@ -6,8 +6,8 @@ import java.util.List;
 
 @Data
 public class KoiPageResponse {
-    private List<KoiResponse> content;  // List of KoiResponse objects
-    private int pageNumber;
-    private long totalElements;
-    private int totalPages;
+    List<KoiResponse> content;
+    int pageNumber;
+    long totalElements;
+    int totalPages;
 }

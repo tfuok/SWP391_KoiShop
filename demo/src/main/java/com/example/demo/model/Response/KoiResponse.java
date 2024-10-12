@@ -1,6 +1,10 @@
 package com.example.demo.model.Response;
 
+import com.example.demo.entity.Images;
+import com.example.demo.model.Request.ImageListRequest;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class KoiResponse {
@@ -16,6 +20,8 @@ public class KoiResponse {
     private boolean sold;
     private boolean deleted;
     private Long accountId;
-    private String breedName;
-    private String imageUrl;
+    private List<String> breeds;
+    private String images;
+    private int quantity;
+//    List<String> imagesList;
 }

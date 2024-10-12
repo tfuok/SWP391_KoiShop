@@ -7,28 +7,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Set;
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class Breed {
-
+public class Images {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    long id;
 
-    private String name;
+    String images;
 
-    private boolean isDeleted = false;
-
-    private String imageUrl;
-
-    // Correct ManyToMany mapping with KoiLot
-
-    @ManyToMany(mappedBy = "breeds")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "koi_id")
     @JsonIgnore
-    private Set<Koi> kois;
+    private Koi koi;
+
 }
