@@ -1,19 +1,15 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.*;
-
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.ConsignmentDetailRequest;
 import com.example.demo.model.Request.ConsignmentRequest;
-
-import com.example.demo.repository.CareTypeRespority;
+import com.example.demo.repository.CareTypeRepository; // Corrected spelling
 import com.example.demo.repository.ConsignmentRepository;
 import com.example.demo.repository.KoiRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,65 +18,96 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class ConsignmentService {
+
     @Autowired
-    ConsignmentRepository consignmentRepository;
+    private ConsignmentRepository consignmentRepository;
+
     @Autowired
-    ModelMapper modelMapper;
+    private ModelMapper modelMapper;
+
     @Autowired
-    AuthenticationService authenticationService;
+    private AuthenticationService authenticationService;
+
     @Autowired
-    KoiService koiService;
+    private KoiService koiService;
+
     @Autowired
-    TokenService tokenService;
+    private TokenService tokenService;
+
     @Autowired
-    KoiRepository koiRepository;
+    private KoiRepository koiRepository;
+
     @Autowired
-    CareTypeService careTypeService;
+    private CareTypeService careTypeService;
+
     @Autowired
-    private CareTypeRespority careTypeRespority;
+    private CareTypeRepository careTypeRepository; // Corrected spelling
 
     public Consignment createConsignment(ConsignmentRequest consignmentRequest) {
         try {
-            //MAP TU CUSTOMER CONSIGNMENT THANH CONSIGNMENT
+            // Map from ConsignmentRequest to Consignment entity
             Consignment consignment = modelMapper.map(consignmentRequest, Consignment.class);
-            //DAT ACCOUNT CHO CONSIGNMENT = ACCOUNT CUA NGUOI DANG NHAP
+
+            // Set the account to the currently authenticated user
             Account accountRequest = authenticationService.getCurrentAccount();
             consignment.setAccount(accountRequest);
-            //DAT NGAY TAO CHO CONSIGNMENT
+
+            // Set creation date
             consignment.setCreateDate(new Date());
-            //DAT TRANG THAI CHO STATUS CONSIGNMENT MOI TAO = "Pending"
+
+            // Set status to "Pending"
             consignment.setStatus("Pending");
-            //DAT CARE TYPE
-            CareType careType = careTypeRespority.findCareTypeByCareTypeId(consignmentRequest.getCareTypeId());
-            //
-            if(consignmentRequest.getType()=="Offline"){
-                double estimateCost = calculateTotalCost(careType.getCostPerDay(), consignmentRequest.getQuantity(), consignmentRequest.getStartDate(),consignmentRequest.getEndDate());
-                String estimatedCostS = String.valueOf(estimateCost);
-                consignment.setCost(estimatedCostS);
+
+            // Set CareType
+            CareType careType = careTypeRepository.findCareTypeByCareTypeId(consignmentRequest.getCareTypeId());
+            if (careType == null) {
+                throw new NotFoundException("CareType not found");
             }
-            if(careType == null) throw new NotFoundException("CareType not found");
             consignment.setCareType(careType);
 
-            List<ConsignmentDetails> consignmentDetails = new ArrayList<>();
-            for(ConsignmentDetailRequest consignmentDetailRequest : consignmentRequest.getConsignmentDetailRequests()){
-                koiRepository.findKoiByIdAndIsDeletedFalse(consignmentDetailRequest.getId());
-            ConsignmentDetails consignmentDetail = new ConsignmentDetails();
-
+            // Calculate and set cost if type is "Offline"
+            if ("Offline".equalsIgnoreCase(consignmentRequest.getType())) {
+                double estimateCost = calculateTotalCost(
+                        careType.getCostPerDay(),
+                        consignmentRequest.getQuantity(),
+                        consignmentRequest.getStartDate(),
+                        consignmentRequest.getEndDate()
+                );
+                consignment.setCost(String.valueOf(estimateCost));
             }
-            //LUU
+
+            // Initialize ConsignmentDetails list
+            List<ConsignmentDetails> consignmentDetailsList = new ArrayList<>();
+            for (ConsignmentDetailRequest consignmentDetailRequest : consignmentRequest.getConsignmentDetailRequests()) {
+                Koi koi = koiRepository.findKoiByIdAndIsDeletedFalse(consignmentDetailRequest.getId());
+                if (koi == null) {
+                    throw new NotFoundException("Koi not found with ID: " + consignmentDetailRequest.getId());
+                }
+
+                ConsignmentDetails consignmentDetail = new ConsignmentDetails();
+                consignmentDetail.setConsignment(consignment);
+                consignmentDetail.setKoi(koi);
+
+                consignmentDetailsList.add(consignmentDetail);
+            }
+
+            consignment.setConsignmentDetails(consignmentDetailsList);
+
+            // Save consignment (cascade will save consignmentDetails)
             Consignment newConsignment = consignmentRepository.save(consignment);
             return newConsignment;
         } catch (Exception e) {
             e.printStackTrace();
+            throw e; // It's better to rethrow or handle appropriately
         }
-        return null;
     }
+
     public List<Consignment> getAllConsignment() {
-        List<Consignment> consignments = consignmentRepository.findConsignmentByIsDeletedFalse();
-        return consignments;
+        return consignmentRepository.findByIsDeletedFalse();
     }
+
     public Consignment deleteConsignment(long id) {
-        Consignment consignment = consignmentRepository.findConsignmentByconsignmentID(id);
+        Consignment consignment = consignmentRepository.findConsignmentById(id);
         if (consignment == null) {
             throw new NotFoundException("Consignment not found!");
         }
@@ -88,33 +115,44 @@ public class ConsignmentService {
         consignment.setIsDeleted(true);
         return consignmentRepository.save(consignment);
     }
-    public Consignment updateConsignment(ConsignmentRequest consignmentRequest, long id) {
 
-        Consignment foundConsignment = consignmentRepository.findConsignmentByconsignmentID(id);
+    public Consignment updateConsignment(ConsignmentRequest consignmentRequest, long id) {
+        Consignment foundConsignment = consignmentRepository.findConsignmentById(id);
         if (foundConsignment == null) {
             throw new NotFoundException("Consignment not found!");
         }
 
         foundConsignment.setType(consignmentRequest.getType());
         foundConsignment.setDescription(consignmentRequest.getDescription());
-        CareType careType = careTypeRespority.findCareTypeByCareTypeId(consignmentRequest.getCareTypeId());
-        if(careType == null) throw new NotFoundException("CareType not found");
+
+        CareType careType = careTypeRepository.findCareTypeByCareTypeId(consignmentRequest.getCareTypeId());
+        if (careType == null) {
+            throw new NotFoundException("CareType not found");
+        }
         foundConsignment.setCareType(careType);
+
+        // Optionally update cost if type is "Offline"
+        if ("Offline".equalsIgnoreCase(consignmentRequest.getType())) {
+            double estimateCost = calculateTotalCost(
+                    careType.getCostPerDay(),
+                    consignmentRequest.getQuantity(),
+                    consignmentRequest.getStartDate(),
+                    consignmentRequest.getEndDate()
+            );
+            foundConsignment.setCost(String.valueOf(estimateCost));
+        }
+
         return consignmentRepository.save(foundConsignment);
     }
-    public List<Koi> getKoibyAccountId(long id) {
-        Account currentAccount = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return koiRepository.findByAccountId(currentAccount.getId());
-    }
 
-    public static double calculateTotalCost(double costPerDay,int quantity, Date startDate, Date endDate) {
-        // Tính số milliseconds giữa startDate và endDate
+    public static double calculateTotalCost(double costPerDay, int quantity, Date startDate, Date endDate) {
+        // Calculate the difference in milliseconds
         long diffInMillies = endDate.getTime() - startDate.getTime();
 
-        // Tính số ngày
+        // Calculate the number of days
         long daysBetween = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
 
-        // Trả về tổng chi phí
+        // Return total cost
         return daysBetween * costPerDay * quantity;
     }
 }

@@ -1,19 +1,16 @@
 package com.example.demo.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -26,60 +23,49 @@ public class Koi {
     private long id;
 
     private String name;
-
     private float price;
-
     private String vendor;
-
     private String gender;
-
     private int bornYear;
-
     private int size;
-
     private String origin;
-
     private String description;
-
     private String images;
-
     private boolean sold = false;
-
     private boolean isDeleted = false;
-
     private int quantity;
 
-    // Correct ManyToMany mapping with Breed
+    // Many-to-Many with Breed
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "koi_breed",  // This is the join table name
+            name = "koi_breed",
             joinColumns = @JoinColumn(name = "koi_id"),
             inverseJoinColumns = @JoinColumn(name = "breed_id")
     )
     private Set<Breed> breeds;
 
-    // Correct ManyToOne mapping with Account
+    // Many-to-One with Account
     @ManyToOne
-    @JoinColumn(name = "account_id")  // No need for JoinTable here
+    @JoinColumn(name = "account_id")
     private Account account;
 
+    // One-to-Many with OrderDetails
     @OneToMany(mappedBy = "koi")
     @JsonIgnore
-    Set<OrderDetails> orderDetails;
+    private Set<OrderDetails> orderDetails;
 
+    // One-to-Many with Images
     @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<Images> imagesList ; // Initialize the list to avoid null references
+    private List<Images> imagesList = new ArrayList<>(); // Initialized to avoid null references
 
-    @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private List<Certificate> certificates;
+    // One-to-One with Certificate
+    @OneToOne(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("certificate")
+    private Certificate certificate;
 
-    @OneToOne(mappedBy = "koi")
-    ConsignmentDetails consignmentDetails;
-//    @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JsonBackReference
-//    private List<Image> imageUrl;
-
-//    boolean isLot;
+    // One-to-One with ConsignmentDetails
+    @OneToOne(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("consignmentDetails")
+    private ConsignmentDetails consignmentDetails;
 }

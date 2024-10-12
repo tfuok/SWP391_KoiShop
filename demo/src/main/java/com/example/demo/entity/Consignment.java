@@ -10,6 +10,7 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -45,15 +46,15 @@ public class Consignment implements UserDetails {
 
     Boolean isDeleted = false;
     @OneToMany(mappedBy = "consignment",cascade = CascadeType.ALL)
-    List<ConsignmentDetails> consignmentDetails;
+    private List<ConsignmentDetails> consignmentDetails = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "account_id")
-    Account account;
+    private Account account;
 
     @ManyToOne
     @JoinColumn(name = "care_type_id")
-    CareType careType;
+    private CareType careType;
 
 
     @Override

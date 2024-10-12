@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Koi Certificate</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+            text-align: center;
+            padding: 20px;
+        }
+        .certificate {
+            border: 5px solid #4CAF50;
+            padding: 30px;
+            background-color: #fff;
+            margin: 0 auto;
+            width: 60%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4CAF50;
+        }
+        .details {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .details p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="certificate">
+    <h1>Certificate of Breeding</h1>
+    <img src="${certificate.imageUrl}" alt="Koi Image" width="300" />
+    <div class="details">
+        <p><strong>Variety:</strong> ${certificate.variety}</p>
+        <p><strong>Breeder:</strong> ${certificate.breeder}</p>
+        <p><strong>Born In:</strong> ${certificate.bornIn}</p>
+        <p><strong>Size:</strong> ${certificate.size} cm</p>
+        <p><strong>Date of Issue:</strong> ${certificate.issueDate}</p>
+    </div>
+</div>
+
+</body>
+</html>

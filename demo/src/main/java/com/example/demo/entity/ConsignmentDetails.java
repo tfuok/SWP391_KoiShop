@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,14 +13,18 @@ import lombok.Setter;
 @NoArgsConstructor
 @Entity
 public class ConsignmentDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
+    private long id;
 
     @ManyToOne
     @JoinColumn(name = "consignment_id")
-    Consignment consignment;
+    private Consignment consignment;
 
-    @OneToOne(mappedBy = "koi")
-    Koi koi;
+    // Owning side of the relationship
+    @OneToOne
+    @JoinColumn(name = "koi_id", unique = true)
+    @JsonBackReference("consignmentDetails")
+    private Koi koi;
 }
