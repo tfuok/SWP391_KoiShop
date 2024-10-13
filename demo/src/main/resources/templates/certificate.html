@@ -3,47 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Koi Certificate</title>
+    <title>Certificate of Breeding</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f3f3f3;
+            margin: 0;
+            padding: 0;
+            background: url('image/background.png') no-repeat center center;
+            background-size: cover;
             text-align: center;
-            padding: 20px;
         }
-        .certificate {
-            border: 5px solid #4CAF50;
-            padding: 30px;
-            background-color: #fff;
+        .container {
+            width: 100%;
+            max-width: 800px;
             margin: 0 auto;
-            width: 60%;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
         }
         h1 {
-            color: #4CAF50;
+            font-size: 24px;
+            margin-bottom: 20px;
         }
-        .details {
-            margin-top: 20px;
+        .koi-image {
+            width: 300px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        .details-table {
+            margin: 0 auto;
             text-align: left;
         }
-        .details p {
-            margin: 5px 0;
+        .details-table td {
+            padding: 5px 10px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
+<div class="container">
+    <h1>Certification of Breeding</h1>
+    <p>We hereby certify that the Koi shown in the photo was bred by the following breeder and sold by Kodama Koi Farm</p>
+    <img class="koi-image" src="koi-image-url" alt="Koi Fish Image">
 
-<div class="certificate">
-    <h1>Certificate of Breeding</h1>
-    <img src="${certificate.imageUrl}" alt="Koi Image" width="300" />
-    <div class="details">
-        <p><strong>Variety:</strong> ${certificate.variety}</p>
-        <p><strong>Breeder:</strong> ${certificate.breeder}</p>
-        <p><strong>Born In:</strong> ${certificate.bornIn}</p>
-        <p><strong>Size:</strong> ${certificate.size} cm</p>
-        <p><strong>Date of Issue:</strong> ${certificate.issueDate}</p>
-    </div>
+    <table class="details-table">
+        <tr>
+            <td><strong>Variety:</strong></td>
+            <td>Goshiki</td>
+        </tr>
+        <tr>
+            <td><strong>Breeder:</strong></td>
+            <td>Kawakami Koi Farm</td>
+        </tr>
+        <tr>
+            <td><strong>Born In:</strong></td>
+            <td>2016</td>
+        </tr>
+        <tr>
+            <td><strong>Size:</strong></td>
+            <td>41 cm approx.</td>
+        </tr>
+        <tr>
+            <td><strong>ID:</strong></td>
+            <td>q0605t027</td>
+        </tr>
+        <tr>
+            <td><strong>Date of Issue:</strong></td>
+            <td>June 5, 2018</td>
+        </tr>
+        <tr>
+            <td><strong>Signature:</strong></td>
+            <td>樹神太郎</td>
+        </tr>
+    </table>
 </div>
-
 </body>
 </html>

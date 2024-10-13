@@ -57,6 +57,7 @@ public class OrderService {
         orders.setCustomer(customer);
         orders.setStatus(Status.PENDING);
         orders.setDescription(orderRequest.getDescription());
+
         for (OrderDetailRequest orderDetailRequest : orderRequest.getDetail()) {
             OrderDetails details = new OrderDetails();
             Koi koi = koiRepository.findKoiByIdAndIsDeletedFalse(orderDetailRequest.getKoiId());
@@ -64,22 +65,26 @@ public class OrderService {
             details.setOrder(orders);
             details.setPrice(koi.getPrice());
             orderDetails.add(details);
-            total = koi.getPrice();
-            //Tao Certificate khi thanh toan tung con ca
-            Certificate certificate = new Certificate();
-            certificate.setKoi(koi);
-            certificate.setVariety(koi.getName());
-            certificate.setBreeder(koi.getVendor());
-            certificate.setBornIn(koi.getBornYear());
-            certificate.setSize(koi.getSize());
-            certificate.setImageUrl(koi.getImages());
-            certificate.setIssueDate(new Date());
+            total += koi.getPrice();
 
-            certificateRepository.save(certificate);
-            koi.setCertificate(certificate);
-            koiRepository.save(koi);
-            // Generate PDF and send email
-            sendCertificateEmail(customer, certificate);
+            // Create and save certificate for each Koi
+            if(koi.getQuantity()==1) {
+                Certificate certificate = new Certificate();
+                certificate.setKoi(koi);
+                certificate.setVariety(koi.getName());
+                certificate.setBreeder(koi.getVendor());
+                certificate.setBornIn(koi.getBornYear());
+                certificate.setSize(koi.getSize());
+                certificate.setImageUrl(koi.getImages());
+                certificate.setIssueDate(new Date());
+
+                certificateRepository.save(certificate);
+                koi.setCertificate(certificate);
+                koiRepository.save(koi);
+
+                // Generate PDF and send email
+                sendCertificateEmail(customer, certificate);
+            }
         }
 
         orders.setOrderDetails(orderDetails);
@@ -220,8 +225,10 @@ public class OrderService {
 
     private void sendCertificateEmail(Account customer, Certificate certificate) {
         try {
+            // Generate PDF from HTML
             File pdfFile = certificatePdfGenerator.createCertificatePdf(certificate);
 
+            // Prepare email details
             EmailDetails emailDetails = new EmailDetails();
             emailDetails.setReceiver(customer);
             emailDetails.setSubject("Your Koi Certificate");
@@ -229,9 +236,11 @@ public class OrderService {
 
             // Send the email with the PDF attachment
             emailService.sendEmailWithAttachment(emailDetails, pdfFile);
+
         } catch (Exception e) {
             e.printStackTrace();
-            // Handle exception
+            // Handle exception (log or retry)
         }
     }
+
 }

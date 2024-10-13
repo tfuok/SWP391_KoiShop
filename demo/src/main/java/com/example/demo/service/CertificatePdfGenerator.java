@@ -1,56 +1,140 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.Certificate;
-import com.itextpdf.io.image.ImageDataFactory;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.element.Image;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.element.Table;
+import com.itextpdf.html2pdf.HtmlConverter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
 
 @Service
 public class CertificatePdfGenerator {
 
-    public File createCertificatePdf(Certificate certificate) throws Exception {
-        String fileName = "certificate_" + certificate.getKoi().getId() + ".pdf";
-        File pdfFile = new File(System.getProperty("java.io.tmpdir") + "/" + fileName);
+    private final ResourceLoader resourceLoader;
 
-        // Initialize PdfWriter and PdfDocument
-        PdfWriter pdfWriter = new PdfWriter(new FileOutputStream(pdfFile));
-        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-        Document document = new Document(pdfDocument);
+    @Autowired
+    public CertificatePdfGenerator(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
 
-        // Add certificate details
-        document.add(new Paragraph("Certification of Breeding").setFontSize(24).setBold());
-        document.add(new Paragraph("We hereby certify that the Koi shown in the photo was bred by the following breeder and sold by Kodama Koi Farm"));
+    public String generateHtml(Certificate certificate) {
+        int bornInDate = certificate.getBornIn(); // Assuming this is an integer year
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedIssueDate = dateFormatter.format(certificate.getIssueDate()); // Format the issue date
 
-        Table table = new Table(2);
-        table.addCell("Variety:");
-        table.addCell(certificate.getVariety());
-        table.addCell("Breeder:");
-        table.addCell(certificate.getBreeder());
-        table.addCell("Born In:");
-        table.addCell(String.valueOf(certificate.getBornIn()));
-        table.addCell("Size:");
-        table.addCell(String.valueOf(certificate.getSize()) + " cm");
-        table.addCell("Issue Date:");
-        table.addCell(certificate.getIssueDate().toString());
+        // Load image as a resource
+        Resource resource = resourceLoader.getResource("classpath:image/background.png");
+        String backgroundImagePath;
 
-        document.add(table);
-
-        // Add Koi image
-        if (certificate.getImageUrl() != null) {
-            Image koiImage = new Image(ImageDataFactory.create(certificate.getImageUrl()));
-            koiImage.setAutoScale(true);
-            document.add(koiImage);
+        try {
+            backgroundImagePath = resource.getFile().getPath(); // Convert resource to path
+        } catch (Exception e) {
+            e.printStackTrace();
+            backgroundImagePath = ""; // Fallback if the image is not found
         }
 
-        document.close();
+        return "<!DOCTYPE html>" +
+                "<html lang=\"en\">" +
+                "<head>" +
+                "    <meta charset=\"UTF-8\">" +
+                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
+                "    <title>Certificate of Breeding</title>" +
+                "    <style>" +
+                "        @font-face {" +
+                "            font-family: 'Noto Sans JP';" +
+                "            src: url('fonts/NotoSansJP-Regular.ttf');" + // Ensure the path is correct
+                "        }" +
+                "        body {" +
+                "            font-family: 'Noto Sans JP', Arial, sans-serif;" + // Use the custom font
+                "            margin: 0;" +
+                "            padding: 0;" +
+                "            background: url('" + backgroundImagePath + "') no-repeat center center;" +
+                "            background-size: cover;" +
+                "            text-align: center;" +
+                "        }" +
+                "        .container {" +
+                "            width: 100%;" +
+                "            max-width: 800px;" +
+                "            margin: 0 auto;" +
+                "            padding: 20px;" +
+                "            background: rgba(255, 255, 255, 0.9);" +
+                "        }" +
+                "        h1 {" +
+                "            font-size: 24px;" +
+                "            margin-bottom: 20px;" +
+                "        }" +
+                "        .koi-image {" +
+                "            width: 150px;" +
+                "            height: auto;" +
+                "            margin-right: 20px;" +
+                "            float: left;" +
+                "        }" +
+                "        .details-table {" +
+                "            margin: 0 auto;" +
+                "            text-align: left;" +
+                "            clear: both;" +
+                "        }" +
+                "        .details-table td {" +
+                "            padding: 5px 10px;" +
+                "            font-size: 14px;" +
+                "        }" +
+                "    </style>" +
+                "</head>" +
+                "<body>" +
+                "    <div class=\"container\">" +
+                "        <h1>Certification of Breeding</h1>" +
+                "        <p>We hereby certify that the Koi shown in the photo was bred by the following breeder and sold by Kodama Koi Farm</p>" +
+                "        <div style=\"display: flex; align-items: center;\">" +
+                "            <img class=\"koi-image\" src='" + certificate.getImageUrl() + "' alt=\"Koi Fish Image\">" +
+                "            <div>" +
+                "                <table class=\"details-table\">" +
+                "                    <tr>" +
+                "                        <td><strong>Variety:</strong></td>" +
+                "                        <td>" + certificate.getVariety() + "</td>" +
+                "                    </tr>" +
+                "                    <tr>" +
+                "                        <td><strong>Breeder:</strong></td>" +
+                "                        <td>" + certificate.getBreeder() + "</td>" +
+                "                    </tr>" +
+                "                    <tr>" +
+                "                        <td><strong>Born In:</strong></td>" +
+                "                        <td>" + bornInDate + "</td>" +
+                "                    </tr>" +
+                "                    <tr>" +
+                "                        <td><strong>Size:</strong></td>" +
+                "                        <td>" + certificate.getSize() + " cm</td>" +
+                "                    </tr>" +
+                "                    <tr>" +
+                "                        <td><strong>Date of Issue:</strong></td>" +
+                "                        <td>" + formattedIssueDate + "</td>" +
+                "                    </tr>" +
+                "                    <tr>" +
+                "                        <td><strong>Signature:</strong></td>" +
+                "                        <td style=\"font-family: 'Noto Sans JP';\">樹神太郎</td>" + // Use custom font for signature
+                "                    </tr>" +
+                "                </table>" +
+                "            </div>" +
+                "        </div>" +
+                "    </div>" +
+                "</body>" +
+                "</html>";
+
+    }
+
+    public File createCertificatePdf(Certificate certificate) throws Exception {
+        // Generate HTML content
+        String htmlContent = generateHtml(certificate);
+
+        // Define the file path for the PDF
+        String outputPath = "D:/Download/Hoc/TestPDF/" + certificate.getKoi().getId() + ".pdf";
+        File pdfFile = new File(outputPath);
+
+        // Convert HTML to PDF and save it
+        HtmlConverter.convertToPdf(htmlContent, new FileOutputStream(pdfFile));
 
         return pdfFile;
     }
