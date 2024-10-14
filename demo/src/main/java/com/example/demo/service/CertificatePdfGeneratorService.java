@@ -11,13 +11,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 
+import static java.lang.Long.parseLong;
+
 @Service
-public class CertificatePdfGenerator {
+public class CertificatePdfGeneratorService {
 
     private final ResourceLoader resourceLoader;
 
     @Autowired
-    public CertificatePdfGenerator(ResourceLoader resourceLoader) {
+    public CertificatePdfGeneratorService(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }
 
@@ -25,6 +27,7 @@ public class CertificatePdfGenerator {
         int bornInDate = certificate.getBornIn(); // Assuming this is an integer year
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         String formattedIssueDate = dateFormatter.format(certificate.getIssueDate()); // Format the issue date
+        String Koiid = Long.toString(certificate.getKoi().getId());
 
         // Load image as a resource
         Resource resource = resourceLoader.getResource("classpath:image/background.png");
@@ -36,7 +39,16 @@ public class CertificatePdfGenerator {
             e.printStackTrace();
             backgroundImagePath = ""; // Fallback if the image is not found
         }
+        //
+        Resource fontResource = resourceLoader.getResource("classpath:static/NotoSansJP-Regular.ttf");
+        String fontFilePath;
 
+        try {
+            fontFilePath = fontResource.getFile().getPath(); // Convert resource to path
+        } catch (Exception e) {
+            e.printStackTrace();
+            fontFilePath = ""; // Fallback if the font is not found
+        }
         return "<!DOCTYPE html>" +
                 "<html lang=\"en\">" +
                 "<head>" +
@@ -107,6 +119,10 @@ public class CertificatePdfGenerator {
                 "                    <tr>" +
                 "                        <td><strong>Size:</strong></td>" +
                 "                        <td>" + certificate.getSize() + " cm</td>" +
+                "                    </tr>" +
+                "                    <tr>" +
+                "                        <td><strong>Id:</strong></td>" +
+                "                        <td>" + Koiid + "</td>" +
                 "                    </tr>" +
                 "                    <tr>" +
                 "                        <td><strong>Date of Issue:</strong></td>" +

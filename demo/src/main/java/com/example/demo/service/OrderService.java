@@ -37,16 +37,6 @@ public class OrderService {
     @Autowired
     PaymentRepository paymentRepository;
 
-    @Autowired
-    CertificateRepository certificateRepository;
-
-    @Autowired
-    EmailService emailService;
-
-    @Autowired
-    CertificatePdfGenerator certificatePdfGenerator;
-
-
     public Orders create(OrderRequest orderRequest) {
         Orders orders = new Orders();
         Account customer = authenticationService.getCurrentAccount();
@@ -66,25 +56,6 @@ public class OrderService {
             details.setPrice(koi.getPrice());
             orderDetails.add(details);
             total += koi.getPrice();
-
-            // Create and save certificate for each Koi
-            if(koi.getQuantity()==1) {
-                Certificate certificate = new Certificate();
-                certificate.setKoi(koi);
-                certificate.setVariety(koi.getName());
-                certificate.setBreeder(koi.getVendor());
-                certificate.setBornIn(koi.getBornYear());
-                certificate.setSize(koi.getSize());
-                certificate.setImageUrl(koi.getImages());
-                certificate.setIssueDate(new Date());
-
-                certificateRepository.save(certificate);
-                koi.setCertificate(certificate);
-                koiRepository.save(koi);
-
-                // Generate PDF and send email
-                sendCertificateEmail(customer, certificate);
-            }
         }
 
         orders.setOrderDetails(orderDetails);
@@ -223,24 +194,6 @@ public class OrderService {
         paymentRepository.save(payment);
     }
 
-    private void sendCertificateEmail(Account customer, Certificate certificate) {
-        try {
-            // Generate PDF from HTML
-            File pdfFile = certificatePdfGenerator.createCertificatePdf(certificate);
-
-            // Prepare email details
-            EmailDetails emailDetails = new EmailDetails();
-            emailDetails.setReceiver(customer);
-            emailDetails.setSubject("Your Koi Certificate");
-            emailDetails.setLink("http://koishop.site/");
-
-            // Send the email with the PDF attachment
-            emailService.sendEmailWithAttachment(emailDetails, pdfFile);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Handle exception (log or retry)
-        }
     }
 
-}
+

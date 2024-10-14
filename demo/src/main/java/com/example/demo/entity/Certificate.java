@@ -28,8 +28,6 @@ public class Certificate  {
     @JsonBackReference("certificate")
     private Koi koi;
 
-    private String certificateCode;
-    private String storeName;
     private String variety;
     private String breeder;
     private int bornIn;
