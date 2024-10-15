@@ -26,7 +26,7 @@ public class Consignment implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
 
-    String type;
+    Type type;
 
     String address;
 
@@ -34,18 +34,17 @@ public class Consignment implements UserDetails {
 
     String cost;
 
-    int quantity;
-
     Date StartDate;
 
     Date EndDate;
 
     Date createDate;
 
-    String status = "pending";
+    Status status;
 
     Boolean isDeleted = false;
     @OneToMany(mappedBy = "consignment",cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<ConsignmentDetails> consignmentDetails = new ArrayList<>();
 
     @ManyToOne

@@ -8,4 +8,5 @@ import java.util.List;
 public interface ConsignmentRepository extends JpaRepository<Consignment, Long> {
     Consignment findConsignmentById(long id);
     List<Consignment> findByIsDeletedFalse();
+    List<Consignment> findByAccount_IdAndIsDeletedFalse(Long accountId);
 }

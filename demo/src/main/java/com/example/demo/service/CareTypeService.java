@@ -20,7 +20,7 @@ public class CareTypeService {
 
     public CareType addNewCareType(CareTypeRequest careTypeRequest) {
         try {
-            CareType newCareType = careTypeRepository.findCareTypeByCareTypeName(careTypeRequest.getCareTypeName());
+            CareType newCareType = careTypeRepository.findByCareTypeName(careTypeRequest.getCareTypeName());
             if (newCareType != null) throw new DuplicatedEntity("CareType existed!");
             CareType careType = modelMapper.map(careTypeRequest, CareType.class);
             return careTypeRepository.save(careType);
@@ -31,7 +31,7 @@ public class CareTypeService {
     }
     public CareType updateCareType(CareTypeRequest careTypeRequest, long id){
 
-        CareType foundCareType = careTypeRepository.findCareTypeByCareTypeId(id);
+        CareType foundCareType = careTypeRepository.findByCareTypeId(id);
         if (foundCareType == null) {
             throw new NotFoundException("CareType not found");
         }
@@ -41,7 +41,7 @@ public class CareTypeService {
         return careTypeRepository.save(foundCareType);
         }
         public void deleteCareType(long id) {
-            CareType foundCareType = careTypeRepository.findCareTypeByCareTypeId(id);
+            CareType foundCareType = careTypeRepository.findByCareTypeId(id);
             if (foundCareType == null) {
                 throw new NotFoundException("CareType not found");
             }
@@ -49,7 +49,7 @@ public class CareTypeService {
             careTypeRepository.save(foundCareType);
         }
         public List<CareType> getAllCareType() {
-        List<CareType> CareTypes = careTypeRepository.findAll();
+        List<CareType> CareTypes = careTypeRepository.findByDeletedFalse();
         return CareTypes;
     }
 }

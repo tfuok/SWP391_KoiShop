@@ -20,9 +20,6 @@ public class CareType {
 
     double costPerDay;
 
-    boolean isDeleted;
-
-
-
+    boolean deleted;
 
 }
