@@ -8,5 +8,5 @@ public class CareTypeRequest {
     @NotBlank(message ="Care Type Name must not be blank")
     String careTypeName;
     @NotBlank(message ="Cost must not be blank")
-    double costPerDay;
+    float costPerDay;
 }

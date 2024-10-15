@@ -32,7 +32,7 @@ public class Consignment implements UserDetails {
 
     String description;
 
-    String cost;
+    float cost;
 
     Date StartDate;
 
@@ -43,11 +43,12 @@ public class Consignment implements UserDetails {
     Status status;
 
     Boolean isDeleted = false;
-    @OneToMany(mappedBy = "consignment",cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "consignment",cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<ConsignmentDetails> consignmentDetails = new ArrayList<>();
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "account_id")
     private Account account;
 
@@ -70,4 +71,7 @@ public class Consignment implements UserDetails {
     public String getUsername() {
         return "";
     }
+    @OneToOne(mappedBy = "consignment")
+    @JsonIgnore
+    private Payment payment;
 }

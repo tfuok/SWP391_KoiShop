@@ -22,9 +22,9 @@ public class ConsignmentAPI {
     private ConsignmentService consignmentService;
 
     @PostMapping()
-    public ResponseEntity<Consignment> createConsignment(@Valid @RequestBody ConsignmentRequest consignment) {
-        Consignment consignmentResponse = consignmentService.createConsignment(consignment);
-        return ResponseEntity.ok(consignmentResponse);
+    public ResponseEntity createConsignment(@RequestBody ConsignmentRequest consignment) throws Exception {
+        String url = consignmentService.createUrl(consignment);
+        return ResponseEntity.ok(url);
     }
 
 
@@ -34,20 +34,27 @@ public class ConsignmentAPI {
         return ResponseEntity.ok(consignmentList);
     }
 
+    @GetMapping("{accountId}")
+    public ResponseEntity<List<Consignment>> getConsignment(@PathVariable long accountId) {
+        List<Consignment> consignmentList = consignmentService.getConsignmentsByAccountId(accountId);
+        return ResponseEntity.ok(consignmentList);
+    }
+    @PostMapping("transactions")
+    public ResponseEntity create(@RequestParam long consignmentID) throws Exception {
+        consignmentService.createTransaction(consignmentID);
+        return ResponseEntity.ok("success");
+    }
+
     @DeleteMapping("{id}")
     public ResponseEntity<Consignment> deleteConsignment(@PathVariable long id) {
         Consignment consignment = consignmentService.deleteConsignment(id);
         return ResponseEntity.ok(consignment);
     }
 
-    @PutMapping("{id}")
-    public ResponseEntity<Consignment> updateConsignment(@Valid @RequestBody ConsignmentRequest consignment, @PathVariable long id) {
-        Consignment consignmentResponse = consignmentService.updateConsignment(consignment, id);
-        return ResponseEntity.ok(consignmentResponse);
+//    @PutMapping("{id}")
+//    public ResponseEntity<Consignment> updateConsignment(@Valid @RequestBody ConsignmentRequest consignment, @PathVariable long id) {
+//        Consignment consignmentResponse = consignmentService.updateConsignment(consignment, id);
+//        return ResponseEntity.ok(consignmentResponse);
     }
-    @GetMapping("{id}")
-    public ResponseEntity<List<Consignment>> getConsignment(@PathVariable long id) {
-        List<Consignment> consignmentList = consignmentService.getConsignmentsByUserId(id);
-        return ResponseEntity.ok(consignmentList);
-    }
-}
+
+

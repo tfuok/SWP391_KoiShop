@@ -25,6 +25,10 @@ public class Payment {
     @JoinColumn(name = "order_id")
     Orders orders;
 
+    @OneToOne
+    @JoinColumn(name = "consignment_id")
+    Consignment consignment;
+
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
     List<Transactions> transactions;
 }

@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 @Getter
@@ -32,40 +33,38 @@ public class Koi {
     private String description;
     private String images;
     private boolean sold = false;
+    private boolean isConsignment = false;
     private boolean isDeleted = false;
     private int quantity;
 
     // Many-to-Many with Breed
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "koi_breed",
+            name = "koi_breed",  // This is the join table name
             joinColumns = @JoinColumn(name = "koi_id"),
             inverseJoinColumns = @JoinColumn(name = "breed_id")
     )
     private Set<Breed> breeds;
 
-    // Many-to-One with Account
+    // Correct ManyToOne mapping with Account
     @ManyToOne
-    @JoinColumn(name = "account_id")
+    @JoinColumn(name = "account_id")  // No need for JoinTable here
     private Account account;
 
-    // One-to-Many with OrderDetails
     @OneToMany(mappedBy = "koi")
     @JsonIgnore
-    private Set<OrderDetails> orderDetails;
+    Set<OrderDetails> orderDetails;
 
-    // One-to-Many with Images
     @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<Images> imagesList = new ArrayList<>(); // Initialized to avoid null references
+    private List<Images> imagesList ; // Initialize the list to avoid null references
 
     // One-to-One with Certificate
     @OneToOne(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("certificate")
     private Certificate certificate;
 
-    // One-to-One with ConsignmentDetails
-    @OneToOne(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("consignmentDetails")
-    private ConsignmentDetails consignmentDetails;
+    // One-to-Many with ConsignmentDetails
+    @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<ConsignmentDetails> consignmentDetails;
 }

@@ -91,7 +91,6 @@ public class ConsignmentRequest {
     /**
      * The ID of the care type associated with the consignment.
      */
-    @NotNull(message = "CareTypeId cannot be null!")
     private Long careTypeId;
 
     /**

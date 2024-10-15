@@ -18,7 +18,7 @@ public class CareType {
 
     String careTypeName;
 
-    double costPerDay;
+    float costPerDay;
 
     boolean deleted;
 

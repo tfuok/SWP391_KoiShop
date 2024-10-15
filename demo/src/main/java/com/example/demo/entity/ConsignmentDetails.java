@@ -23,8 +23,7 @@ public class ConsignmentDetails {
     private Consignment consignment;
 
     // Owning side of the relationship
-    @OneToOne
-    @JoinColumn(name = "koi_id", unique = true)
-    @JsonBackReference("consignmentDetails")
+    @ManyToOne
+    @JoinColumn(name = "koi_id")
     private Koi koi;
 }
