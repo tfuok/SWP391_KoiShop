@@ -25,7 +25,7 @@ public class CertificateService {
     private CertificatePdfGeneratorService certificatePdfGeneratorService;
     @Autowired
     private EmailService emailService;
-    private void createCertificatesAndSendEmail(Orders orders) {
+    public void createCertificatesAndSendEmail(Orders orders) {
         for (OrderDetails orderDetail : orders.getOrderDetails()) {
             Koi koi = orderDetail.getKoi();
 
