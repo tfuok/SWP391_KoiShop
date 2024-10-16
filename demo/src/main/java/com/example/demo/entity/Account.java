@@ -89,13 +89,15 @@ public class Account implements UserDetails {
     Set<Orders> orders;
 
     @OneToMany(mappedBy = "account")
-            @JsonIgnore
+    @JsonIgnore
     Set<Koi> koiLots;
 
     @OneToMany(mappedBy = "from")
+    @JsonIgnore
     List<Transactions> transactionsFrom;
 
     @OneToMany(mappedBy = "to")
+    @JsonIgnore
     List<Transactions> transactionsTo;
 
     @OneToMany(mappedBy = "account")

@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/order")
 @CrossOrigin("*")//cho phép tất cả truy cập
@@ -36,5 +38,11 @@ public class OrderAPI {
         Account account = authenticationService.getCurrentAccount();
         List<Orders> orders = orderRepo.findOrderssByCustomer(account);
         return ResponseEntity.ok(orders);
+    }
+
+    @PostMapping("/transaction")
+    public ResponseEntity createTrans(@RequestParam long id) throws Exception {
+         orderService.createTransaction(id);
+        return ResponseEntity.ok("Success");
     }
 }
