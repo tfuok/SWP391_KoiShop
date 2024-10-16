@@ -4,6 +4,7 @@ import com.example.demo.entity.*;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.ConsignmentDetailRequest;
 import com.example.demo.model.Request.ConsignmentRequest;
+import com.example.demo.model.Request.ConsignmentStatusRequest;
 import com.example.demo.model.Request.OrderRequest;
 import com.example.demo.repository.*;
 import com.example.demo.util.DateUtils;
@@ -104,6 +105,7 @@ public class ConsignmentService {
         List<ConsignmentDetails> consignmentDetailsList = new ArrayList<>();
         for (ConsignmentDetailRequest consignmentDetailRequest : consignmentRequest.getConsignmentDetailRequests()) {
             Koi koi = koiRepository.findKoiByIdAndIsDeletedFalse(consignmentDetailRequest.getId());
+
             if (koi == null) {
                 throw new NotFoundException("Koi not found with ID: " + consignmentDetailRequest.getId());
             }
@@ -113,8 +115,8 @@ public class ConsignmentService {
             ConsignmentDetails consignmentDetail = new ConsignmentDetails();
             consignmentDetail.setConsignment(consignment);
             consignmentDetail.setKoi(koi);
-
             consignmentDetailsList.add(consignmentDetail);
+
         }
 
         consignment.setConsignmentDetails(consignmentDetailsList);
@@ -155,63 +157,63 @@ public class ConsignmentService {
      * @param id                 The ID of the consignment to update.
      * @return The updated Consignment entity.
      */
-//    public Consignment updateConsignment(ConsignmentRequest consignmentRequest, long id) {
-//        Consignment foundConsignment = consignmentRepository.findConsignmentById(id);
-//        if (foundConsignment == null) {
-//            throw new NotFoundException("Consignment not found with ID: " + id);
-//        }
-//
-//        // Update basic fields
-//        foundConsignment.setType(consignmentRequest.getType());
-//        foundConsignment.setDescription(consignmentRequest.getDescription());
-//
-//        // Normalize and set startDate and endDate
-//        Date normalizedStartDate = DateUtils.normalizeDate(consignmentRequest.getStartDate());
-//        Date normalizedEndDate = DateUtils.normalizeDate(consignmentRequest.getEndDate());
-//        foundConsignment.setStartDate(normalizedStartDate);
-//        foundConsignment.setEndDate(normalizedEndDate);
-//
-//        // Update CareType
-//        if (foundConsignment.getType() == Type.OFFLINE) {
-//            CareType careType = careTypeRepository.findByCareTypeId(consignmentRequest.getCareTypeId());
-//            if (careType == null) {
-//                throw new NotFoundException("CareType not found with ID: " + consignmentRequest.getCareTypeId());
-//            }
-//            foundConsignment.setCareType(careType);
-//        }
-//
-//        // Recalculate cost if type is "OFFLINE"
-//        if (foundConsignment.getType() == Type.OFFLINE) {
-//            CareType careType = careTypeRepository.findByCareTypeId(consignmentRequest.getCareTypeId());
-//            float estimateCost = calculateTotalCost(
-//                    careType.getCostPerDay(),
-//                    consignmentRequest.getConsignmentDetailRequests().size(),
-//                    normalizedStartDate,
-//                    normalizedEndDate
-//            );
-//            foundConsignment.setCost(estimateCost);
-//        }
-//
-//        // Update ConsignmentDetails
-//        List<ConsignmentDetails> updatedDetails = new ArrayList<>();
-//        for (ConsignmentDetailRequest detailRequest : consignmentRequest.getConsignmentDetailRequests()) {
-//            Koi koi = koiRepository.findKoiByIdAndIsDeletedFalse(detailRequest.getId());
-//            if (koi == null) {
-//                throw new NotFoundException("Koi not found with ID: " + detailRequest.getId());
-//            }
-//
-//            ConsignmentDetails consignmentDetail = new ConsignmentDetails();
-//            consignmentDetail.setConsignment(foundConsignment);
-//            consignmentDetail.setKoi(koi);
-//            updatedDetails.add(consignmentDetail);
-//        }
-//
-//        // Replace existing details with updated ones
-//        foundConsignment.getConsignmentDetails().clear();
-//        foundConsignment.getConsignmentDetails().addAll(updatedDetails);
-//
-//        return consignmentRepository.save(foundConsignment);
-//    }
+    public Consignment updateConsignment(ConsignmentRequest consignmentRequest, long id) {
+        Consignment foundConsignment = consignmentRepository.findConsignmentById(id);
+        if (foundConsignment == null) {
+            throw new NotFoundException("Consignment not found with ID: " + id);
+        }
+
+        // Update basic fields
+        foundConsignment.setType(consignmentRequest.getType());
+        foundConsignment.setDescription(consignmentRequest.getDescription());
+
+        // Normalize and set startDate and endDate
+        Date normalizedStartDate = DateUtils.normalizeDate(consignmentRequest.getStartDate());
+        Date normalizedEndDate = DateUtils.normalizeDate(consignmentRequest.getEndDate());
+        foundConsignment.setStartDate(normalizedStartDate);
+        foundConsignment.setEndDate(normalizedEndDate);
+
+        // Update CareType
+        if (foundConsignment.getType() == Type.OFFLINE) {
+            CareType careType = careTypeRepository.findByCareTypeId(consignmentRequest.getCareTypeId());
+            if (careType == null) {
+                throw new NotFoundException("CareType not found with ID: " + consignmentRequest.getCareTypeId());
+            }
+            foundConsignment.setCareType(careType);
+        }
+
+        // Recalculate cost if type is "OFFLINE"
+        if (foundConsignment.getType() == Type.OFFLINE) {
+            CareType careType = careTypeRepository.findByCareTypeId(consignmentRequest.getCareTypeId());
+            float estimateCost = calculateTotalCost(
+                    careType.getCostPerDay(),
+                    consignmentRequest.getConsignmentDetailRequests().size(),
+                    normalizedStartDate,
+                    normalizedEndDate
+            );
+            foundConsignment.setCost(estimateCost);
+        }
+
+        // Update ConsignmentDetails
+        List<ConsignmentDetails> updatedDetails = new ArrayList<>();
+        for (ConsignmentDetailRequest detailRequest : consignmentRequest.getConsignmentDetailRequests()) {
+            Koi koi = koiRepository.findKoiByIdAndIsDeletedFalse(detailRequest.getId());
+            if (koi == null) {
+                throw new NotFoundException("Koi not found with ID: " + detailRequest.getId());
+            }
+
+            ConsignmentDetails consignmentDetail = new ConsignmentDetails();
+            consignmentDetail.setConsignment(foundConsignment);
+            consignmentDetail.setKoi(koi);
+            updatedDetails.add(consignmentDetail);
+        }
+
+        // Replace existing details with updated ones
+        foundConsignment.getConsignmentDetails().clear();
+        foundConsignment.getConsignmentDetails().addAll(updatedDetails);
+
+        return consignmentRepository.save(foundConsignment);
+    }
 
 
     /**
@@ -345,7 +347,7 @@ public class ConsignmentService {
 
         Transactions transaction2 = new Transactions();
         //customer -> server
-        Account manager = accountRepository.findAccountByRole(Role.MANAGER);
+        Account manager = accountRepository.findAccountByRole(Role.OWNER);
         transaction2.setFrom(customer);
         transaction2.setTo(manager);
         transaction2.setPayment(payment);
@@ -371,12 +373,19 @@ public class ConsignmentService {
         accountRepository.save(manager);
         accountRepository.save(owner);
         paymentRepository.save(payment);
-        consignment.setStatus(Status.CONFIRMED);
+        consignment.setStatus(Status.PENDING);
         consignmentRepository.save(consignment);
         for (ConsignmentDetails detail : consignment.getConsignmentDetails()) {
             Koi kois = detail.getKoi();
             kois.setConsignment(true);  // Change isConsignment to true
             koiRepository.save(kois);   // Save the updated Koi
+        }
+    }
+    public Consignment updateStatusConsignment(long id, ConsignmentStatusRequest consignmentStatusRequest) {
+        Consignment consignment = consignmentRepository.findConsignmentById(id);
+        consignment.setStatus(consignmentStatusRequest.getStatus());
+        if(consignment.getStatus()==Status.CONFIRMED){
+
         }
     }
 }

@@ -39,7 +39,6 @@ public class Koi {
 
     // Many-to-Many with Breed
     @ManyToMany(fetch = FetchType.EAGER)
-    @JsonIgnore
     @JoinTable(
             name = "koi_breed",  // This is the join table name
             joinColumns = @JoinColumn(name = "koi_id"),
