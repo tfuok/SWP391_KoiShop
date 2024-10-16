@@ -111,7 +111,7 @@ public class AuthenticationService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return (UserDetails) accountRepository.findAccountByEmail(email);
+        return (UserDetails) accountRepository.findAccountByEmailAndIsDeletedFalse(email);
     }
 
     public Account getCurrentAccount() {
@@ -157,7 +157,7 @@ public class AuthenticationService implements UserDetailsService {
 
 
     public void forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
-        Account account = accountRepository.findAccountByEmail(forgotPasswordRequest.getEmail());
+        Account account = accountRepository.findAccountByEmailAndIsDeletedFalse(forgotPasswordRequest.getEmail());
         if (account == null) throw new NotFoundException("Account not exist");
 
         EmailDetails emailDetails = new EmailDetails();
@@ -176,7 +176,7 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public List<Account> getAccountByRole(Role role) {
-        return accountRepository.findByRole(role);
+        return accountRepository.findByRoleAndIsDeletedFalse(role);
     }
 
     private static final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -220,6 +220,8 @@ public class AuthenticationService implements UserDetailsService {
 
     // Method to get accounts by name where role is STAFF
     public List<Account> getAccountsByNameAndRoleStaff(String name) {
-        return accountRepository.findByUsernameContainingAndRole(name, Role.STAFF);
+        List<Account> accounts =  accountRepository.findByUsernameContainingAndRoleAndIsDeletedFalse(name, Role.STAFF);
+        if (accounts == null) throw new NotFoundException("Account not found");
+        return accounts;
     }
 }

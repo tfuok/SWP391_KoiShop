@@ -46,5 +46,7 @@ public class Orders {
     List<OrderDetails> orderDetails;
 
     @OneToOne(mappedBy = "orders")
+    @JsonIgnore
+
     Payment payment;
 }
