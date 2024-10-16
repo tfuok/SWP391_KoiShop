@@ -37,6 +37,9 @@ public class OrderService {
     @Autowired
     PaymentRepository paymentRepository;
 
+    @Autowired
+    CertificateService certificateService;
+
     public Orders create(OrderRequest orderRequest) {
         Orders orders = new Orders();
         Account customer = authenticationService.getCurrentAccount();
@@ -136,64 +139,75 @@ public class OrderService {
         return result.toString();
     }
 
-    public void createTransaction(long id) {
-        Orders orders = orderRepository.findById(id)
-                .orElseThrow((() -> new NotFoundException("Order not found")));
+    public void createTransaction(long id) throws Exception {
+        try {
+            Orders orders = orderRepository.findById(id)
+                    .orElseThrow((() -> new NotFoundException("Order not found")));
 
         /*
         1. tao payment
          */
 
-        Payment payment = new Payment();
-        payment.setOrders(orders);
-        payment.setCreateAt(new Date());
-        payment.setMethod(PaymentEnums.BANKING);
+            Payment payment = new Payment();
+            payment.setOrders(orders);
+            payment.setCreateAt(new Date());
+            payment.setMethod(PaymentEnums.BANKING);
 
-        List<Transactions> transactions = new ArrayList<>();
+            List<Transactions> transactions = new ArrayList<>();
 
-        //tao transaction
-        Transactions transaction1 = new Transactions();
-        //vnpay -> customer
-        transaction1.setFrom(null);
-        Account customer = authenticationService.getCurrentAccount();
-        transaction1.setTo(customer);
-        transaction1.setPayment(payment);
-        transaction1.setStatus(TransactionEnum.SUCCESS);
-        transaction1.setDescription("NAP TIEN VNPAY TO CUSTOMER");
-        transactions.add(transaction1);
+            //tao transaction
+            Transactions transaction1 = new Transactions();
+            //vnpay -> customer
+            transaction1.setFrom(null);
+            Account customer = authenticationService.getCurrentAccount();
+            transaction1.setTo(customer);
+            transaction1.setPayment(payment);
+            transaction1.setStatus(TransactionEnum.SUCCESS);
+            transaction1.setDescription("NAP TIEN VNPAY ");
+            transactions.add(transaction1);
 
-        Transactions transaction2 = new Transactions();
-        //customer -> server
-        Account manager = accountRepository.findAccountByRole(Role.MANAGER);
-        transaction2.setFrom(customer);
-        transaction2.setTo(manager);
-        transaction2.setPayment(payment);
-        transaction2.setStatus(TransactionEnum.SUCCESS);
-        transaction2.setDescription("CUSTOMER TO MANAGER");
-        double newBalance = manager.getBalance() + orders.getTotal() * 0.10f;
-        manager.setBalance(newBalance);
-        transactions.add(transaction2);
+            Transactions transaction2 = new Transactions();
+            //customer -> server
+            Account manager = accountRepository.findAccountByRole(Role.OWNER);
+            transaction2.setFrom(customer);
+            transaction2.setTo(manager);
+            transaction2.setPayment(payment);
+            transaction2.setStatus(TransactionEnum.SUCCESS);
+            transaction2.setDescription("CUSTOMER TO SERVER");
+            double newBalance = manager.getBalance() + orders.getTotal() * 0.10f;
+            manager.setBalance(newBalance);
+            transactions.add(transaction2);
 
-        Transactions transaction3 = new Transactions();
-        transaction3.setPayment(payment);
-        transaction3.setStatus(TransactionEnum.SUCCESS);
-        transaction3.setDescription("MANAGER TO OWNER");
-        transaction3.setFrom(manager);
-        Account owner = orders.getOrderDetails().get(0).getKoi().getAccount();
-        transaction3.setTo(owner);
-        double shopBalance = owner.getBalance() + orders.getTotal() * 0.9f;
-        owner.setBalance(shopBalance);
-        transactions.add(transaction3);
+            Transactions transaction3 = new Transactions();
+            transaction3.setPayment(payment);
+            transaction3.setStatus(TransactionEnum.SUCCESS);
+            transaction3.setDescription("SERVER TO OWNER");
+            transaction3.setFrom(manager);
+            Account owner = orders.getOrderDetails().get(0).getKoi().getAccount();
+            transaction3.setTo(owner);
+            double shopBalance = owner.getBalance() + orders.getTotal() * 0.9f;
+            owner.setBalance(shopBalance);
+            transactions.add(transaction3);
 
-        payment.setTransactions(transactions);
-        Koi koi = new Koi();
-        koi.setAccount(customer);
-        koi.setSold(true);
-        accountRepository.save(manager);
-        accountRepository.save(owner);
-        paymentRepository.save(payment);
+            payment.setTransactions(transactions);
+        Koi koi = null;
+        for (OrderDetails orderDetails : orders.getOrderDetails()) {
+            OrderDetails details = new OrderDetails();
+            koi = koiRepository.findKoiByIdAndIsDeletedFalse(orderDetails.getKoi().getId());
+            koi.setSold(true);
+            koi.setAccount(customer);
+            koiRepository.save(koi);
+        }
+        certificateService.createCertificatesAndSendEmail(orders);
+            accountRepository.save(manager);
+            accountRepository.save(owner);
+            paymentRepository.save(payment);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
-    }
+}
 
 
