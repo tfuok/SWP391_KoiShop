@@ -100,5 +100,13 @@ public class Account implements UserDetails {
     @JsonIgnore
     List<Transactions> transactionsTo;
 
+    @OneToMany(mappedBy = "account")
+            @JsonIgnore
+            List<Consignment> consignments;
     double balance = 0;
+//    @OneToOne(mappedBy = "account")
+//    Cart cart;
+//
+//    @OneToOne(mappedBy = "account")
+//    Address address;
 }

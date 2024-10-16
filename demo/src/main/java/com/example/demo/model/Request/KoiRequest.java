@@ -1,6 +1,5 @@
 package com.example.demo.model.Request;
 
-import com.example.demo.entity.Images;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -38,4 +37,5 @@ public class KoiRequest {
     String imageUrl;
 
 //    List<ImageListRequest> imagesList;
+
 }

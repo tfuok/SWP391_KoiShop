@@ -1,16 +1,17 @@
 package com.example.demo.entity;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -23,30 +24,20 @@ public class Koi {
     private long id;
 
     private String name;
-
     private float price;
-
     private String vendor;
-
     private String gender;
-
     private int bornYear;
-
     private int size;
-
     private String origin;
-
     private String description;
-
     private String images;
-
     private boolean sold = false;
-
+    private boolean isConsignment = false;
     private boolean isDeleted = false;
-
     private int quantity;
 
-    // Correct ManyToMany mapping with Breed
+    // Many-to-Many with Breed
     @ManyToMany(fetch = FetchType.EAGER)
     @JsonIgnore
     @JoinTable(
@@ -69,6 +60,12 @@ public class Koi {
     @JsonIgnore
     private List<Images> imagesList ; // Initialize the list to avoid null references
 
+    // One-to-One with Certificate
+    @OneToOne(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Certificate certificate;
 
-//    boolean isLot;
+    // One-to-Many with ConsignmentDetails
+    @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Set<ConsignmentDetails> consignmentDetails;
 }

@@ -11,6 +11,8 @@ import org.thymeleaf.TemplateEngine;
 
 import org.thymeleaf.context.Context;
 
+import java.io.File;
+
 @Service
 public class EmailService {
     @Autowired
@@ -37,6 +39,27 @@ public class EmailService {
             mimeMessageHelper.setTo(emailDetails.getReceiver().getEmail());
             mimeMessageHelper.setSubject(emailDetails.getSubject());
             mimeMessageHelper.setText(template, true);
+
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            System.out.println("Error sending email: " + e.getMessage());
+        }
+    }
+    public void sendEmailWithAttachment(EmailDetails emailDetails, File attachment) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
+
+            mimeMessageHelper.setFrom("phuocnntse182664@fpt.edu.vn");
+            mimeMessageHelper.setTo(emailDetails.getReceiver().getEmail());
+            mimeMessageHelper.setSubject(emailDetails.getSubject());
+
+            // Add email body
+            String text = "Please find attached your Koi certificate.";
+            mimeMessageHelper.setText(text, false);
+
+            // Add attachment
+            mimeMessageHelper.addAttachment(attachment.getName(), attachment);
 
             mailSender.send(mimeMessage);
         } catch (MessagingException e) {

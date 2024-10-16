@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface KoiRepository extends JpaRepository<Koi, Long> {
+
     Page<Koi> findAllByIsDeletedFalse(Pageable pageable);
 
     Koi findKoiByIdAndIsDeletedFalse(Long id);
@@ -17,4 +18,3 @@ public interface KoiRepository extends JpaRepository<Koi, Long> {
 
     List<Koi> findByBreedsAndIsDeletedFalse(Breed breed);
 }
-

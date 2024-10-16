@@ -28,6 +28,10 @@ public class Payment {
 
     Orders orders;
 
+    @OneToOne
+    @JoinColumn(name = "consignment_id")
+    Consignment consignment;
+
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
     @JsonIgnore
 

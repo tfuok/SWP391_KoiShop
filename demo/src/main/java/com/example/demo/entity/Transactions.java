@@ -14,18 +14,21 @@ public class Transactions {
     long id;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "from_id")
     @JsonIgnore
 
     Account from;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "to_id")
     @JsonIgnore
 
     Account to;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "payment_id")
     @JsonIgnore
 
