@@ -1,9 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.entity.Account;
-import com.example.demo.entity.Breed;
-import com.example.demo.entity.Images;
-import com.example.demo.entity.Koi;
+import com.example.demo.entity.*;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.KoiRequest;
 import com.example.demo.model.Response.KoiPageResponse;
@@ -66,6 +63,9 @@ public class KoiService {
             // Set the account of the creator (authenticated user)
             Account accountRequest = authenticationService.getCurrentAccount();
             koiLot.setAccount(accountRequest);
+            if (accountRequest.getRole() == Role.CUSTOMER) {
+                koiLot.setDeleted(true);
+            }
 
             // Save the KoiLot entity
             return koiLotRepository.save(koiLot);
@@ -194,4 +194,8 @@ public class KoiService {
         return koiLotRepository.findByBreedsAndIsDeletedFalse(breed);
     }
 
+    public List<Koi> getKoiLotByCurrentAccount() {
+    return koiLotRepository.findByAccountId(authenticationService.getCurrentAccount().getId());
+    }
 }
+

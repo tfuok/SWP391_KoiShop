@@ -19,6 +19,7 @@ public class KoiResponse {
     private String description;
     private boolean sold;
     private boolean deleted;
+    private boolean consignment;
     private Long accountId;
     private List<String> breeds;
     private String images;

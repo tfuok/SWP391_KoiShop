@@ -17,4 +17,6 @@ public interface KoiRepository extends JpaRepository<Koi, Long> {
     Koi findByNameContainingAndIsDeletedFalse(String name);
 
     List<Koi> findByBreedsAndIsDeletedFalse(Breed breed);
+
+    List<Koi> findByAccountId(Long accountId);
 }

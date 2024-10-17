@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -21,7 +22,7 @@ public class ConsignmentRequest {
     /**
      * The type of consignment.
      */
-    @NotNull(message = "Type cannot be null!")
+
     private Type type;
 
     /**
@@ -34,7 +35,6 @@ public class ConsignmentRequest {
      * The start date of the consignment.
      * Must be in the future and at least 7 days from the current date.
      */
-    @NotNull(message = "Start Date cannot be null!")
     @Future(message = "Start Date must be in the future!")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date startDate;
@@ -43,7 +43,6 @@ public class ConsignmentRequest {
      * The end date of the consignment.
      * Must be at least 1 day after the start date.
      */
-    @NotNull(message = "End Date cannot be null!")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date endDate;
 
@@ -97,7 +96,7 @@ public class ConsignmentRequest {
      * List of consignment detail requests.
      * Each detail request must be valid.
      */
-    @NotEmpty(message = "ConsignmentDetailRequests cannot be empty!")
+    @NotEmpty(message = "ConsignmentDetail cannot be empty!")
     @Valid
-    private List<ConsignmentDetailRequest> consignmentDetailRequests;
+    private List<ConsignmentDetailRequest> consignmentDetailRequests = new ArrayList<>();
 }

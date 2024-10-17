@@ -1,7 +1,6 @@
 package com.example.demo.api;
 
 import com.example.demo.entity.Consignment;
-import com.example.demo.model.Request.ConsignmentCustomerRequest;
 import com.example.demo.model.Request.ConsignmentRequest;
 import com.example.demo.service.ConsignmentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -39,9 +38,10 @@ public class ConsignmentAPI {
         List<Consignment> consignmentList = consignmentService.getConsignmentsByAccountId(accountId);
         return ResponseEntity.ok(consignmentList);
     }
+
     @PostMapping("transactions")
     public ResponseEntity create(@RequestParam long consignmentID) throws Exception {
-        consignmentService.createTransaction(consignmentID);
+        consignmentService.createConsignmentTransaction(consignmentID);
         return ResponseEntity.ok("success");
     }
 
@@ -51,10 +51,11 @@ public class ConsignmentAPI {
         return ResponseEntity.ok(consignment);
     }
 
-//    @PutMapping("{id}")
-//    public ResponseEntity<Consignment> updateConsignment(@Valid @RequestBody ConsignmentRequest consignment, @PathVariable long id) {
-//        Consignment consignmentResponse = consignmentService.updateConsignment(consignment, id);
-//        return ResponseEntity.ok(consignmentResponse);
+    @PutMapping("{id}")
+    public ResponseEntity<Consignment> updateConsignment(@Valid @RequestBody ConsignmentRequest consignment, @PathVariable long id) {
+        Consignment consignmentResponse = consignmentService.updateConsignment(consignment, id);
+        return ResponseEntity.ok(consignmentResponse);
     }
+}
 
 

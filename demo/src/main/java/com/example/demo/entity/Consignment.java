@@ -44,11 +44,9 @@ public class Consignment implements UserDetails {
 
     Boolean isDeleted = false;
     @OneToMany(mappedBy = "consignment",cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
     private List<ConsignmentDetails> consignmentDetails = new ArrayList<>();
 
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name = "account_id")
     private Account account;
 
