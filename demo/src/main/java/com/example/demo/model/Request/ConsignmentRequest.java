@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -97,5 +98,5 @@ public class ConsignmentRequest {
      */
     @NotEmpty(message = "ConsignmentDetail cannot be empty!")
     @Valid
-    private List<ConsignmentDetailRequest> consignmentDetailRequests;
+    private List<ConsignmentDetailRequest> consignmentDetailRequests = new ArrayList<>();
 }

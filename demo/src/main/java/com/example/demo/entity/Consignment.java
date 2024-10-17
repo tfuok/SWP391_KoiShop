@@ -47,7 +47,6 @@ public class Consignment implements UserDetails {
     private List<ConsignmentDetails> consignmentDetails = new ArrayList<>();
 
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name = "account_id")
     private Account account;
 

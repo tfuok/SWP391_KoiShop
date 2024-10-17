@@ -105,8 +105,12 @@ public class ConsignmentService {
         }
 
         // Initialize ConsignmentDetails list
+        if(consignment.getConsignmentDetails().isEmpty()){
+            throw new NotFoundException("Consignment details not found");
+        }
         List<ConsignmentDetails> consignmentDetailsList = new ArrayList<>();
         for (ConsignmentDetailRequest consignmentDetailRequest : consignmentRequest.getConsignmentDetailRequests()) {
+
             Koi koi = koiRepository.findKoiByIdAndIsDeletedFalse(consignmentDetailRequest.getId());
             if (koi == null) {
                 throw new NotFoundException("Koi not found with ID: " + consignmentDetailRequest.getId());
