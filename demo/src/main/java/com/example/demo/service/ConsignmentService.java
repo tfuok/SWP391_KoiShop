@@ -99,13 +99,13 @@ public class ConsignmentService {
             );
             consignment.setCost(estimateCost);
         } else if (consignment.getType() == Type.ONLINE) {
-            CareType careType = careTypeRepository.findByCareTypeId(consignmentRequest.getCareTypeId());
+            CareType careType = careTypeRepository.findByCareTypeId(consignment.getCareType().getCareTypeId());
             float estimateCost = careType.getCostPerDay();
             consignment.setCost(estimateCost);
         }
 
         // Initialize ConsignmentDetails list
-        if(consignment.getConsignmentDetails().isEmpty()){
+        if(consignmentRequest.getConsignmentDetailRequests().isEmpty()){
             throw new NotFoundException("Consignment details not found");
         }
         List<ConsignmentDetails> consignmentDetailsList = new ArrayList<>();
@@ -387,7 +387,10 @@ public class ConsignmentService {
             }
         }
         else if(consignment.getStatus()==Status.DECLINED){
-
+            Payment payment = new Payment();
+            payment.setConsignment(consignment);
+            payment.setCreateAt(new Date());
+            payment.setMethod(PaymentEnums.BANKING);
         }
         return null;
     }
