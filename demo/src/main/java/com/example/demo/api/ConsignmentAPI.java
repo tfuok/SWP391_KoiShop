@@ -38,9 +38,10 @@ public class ConsignmentAPI {
         List<Consignment> consignmentList = consignmentService.getConsignmentsByAccountId(accountId);
         return ResponseEntity.ok(consignmentList);
     }
+
     @PostMapping("transactions")
     public ResponseEntity create(@RequestParam long consignmentID) throws Exception {
-        consignmentService.createTransaction(consignmentID);
+        consignmentService.createConsignmentTransaction(consignmentID);
         return ResponseEntity.ok("success");
     }
 
@@ -55,5 +56,6 @@ public class ConsignmentAPI {
         Consignment consignmentResponse = consignmentService.updateConsignment(consignment, id);
         return ResponseEntity.ok(consignmentResponse);
     }
+}
 
 

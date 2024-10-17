@@ -54,11 +54,7 @@ public class KoiAPI {
 //    public List<KoiLot> getKoiByBreed(@PathVariable long breedId) {
 //        return koiLotService.getKoiLotByBreed(breedId);
 //    }
-    @GetMapping
-    public ResponseEntity getUserKoi(){
-        List<Koi> kois = koiLotService.getKoiLotByCurrentAccount();
-        return ResponseEntity.ok(kois);
-    }
+
     @GetMapping
     public ResponseEntity<?> getKoi(
             @RequestParam(value = "page", required = false) Integer page,

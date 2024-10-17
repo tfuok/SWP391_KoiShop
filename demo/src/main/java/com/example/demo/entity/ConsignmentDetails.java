@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class ConsignmentDetails {
     private long id;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "consignment_id")
     private Consignment consignment;
 
