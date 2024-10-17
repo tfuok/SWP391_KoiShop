@@ -8,6 +8,6 @@ import java.util.List;
 
 @Data
 public class ConsignmentDetailRequest {
-    @NotNull(message = "Detail field cannot be null!")
-    long id;
+    @NotNull(message = "Koi field cannot be null!")
+    private KoiRequest koiRequest;
 }

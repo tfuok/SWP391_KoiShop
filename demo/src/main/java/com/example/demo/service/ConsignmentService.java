@@ -48,6 +48,8 @@ public class ConsignmentService {
 
     @Autowired
     private CertificateService certificateService;
+    @Autowired
+    private KoiService koiService;
 
     /**
      * Creates a new Consignment based on the provided request.
@@ -111,13 +113,8 @@ public class ConsignmentService {
         List<ConsignmentDetails> consignmentDetailsList = new ArrayList<>();
         for (ConsignmentDetailRequest consignmentDetailRequest : consignmentRequest.getConsignmentDetailRequests()) {
 
-            Koi koi = koiRepository.findKoiByIdAndIsDeletedFalse(consignmentDetailRequest.getId());
-            if (koi == null) {
-                throw new NotFoundException("Koi not found with ID: " + consignmentDetailRequest.getId());
-            }
-            if (koi.isConsignment() == true) {
-                throw new NotFoundException("Koi is in consignment: " + consignmentDetailRequest.getId());
-            }
+            Koi koi = koiService.createKoi(consignmentDetailRequest.getKoiRequest());
+
             ConsignmentDetails consignmentDetail = new ConsignmentDetails();
             consignmentDetail.setConsignment(consignment);
             consignmentDetail.setKoi(koi);
@@ -202,22 +199,22 @@ public class ConsignmentService {
         }
 
         // Update ConsignmentDetails
-        List<ConsignmentDetails> updatedDetails = new ArrayList<>();
-        for (ConsignmentDetailRequest detailRequest : consignmentRequest.getConsignmentDetailRequests()) {
-            Koi koi = koiRepository.findKoiByIdAndIsDeletedFalse(detailRequest.getId());
-            if (koi == null) {
-                throw new NotFoundException("Koi not found with ID: " + detailRequest.getId());
-            }
-
-            ConsignmentDetails consignmentDetail = new ConsignmentDetails();
-            consignmentDetail.setConsignment(foundConsignment);
-            consignmentDetail.setKoi(koi);
-            updatedDetails.add(consignmentDetail);
-        }
-
-        // Replace existing details with updated ones
-        foundConsignment.getConsignmentDetails().clear();
-        foundConsignment.getConsignmentDetails().addAll(updatedDetails);
+//        List<ConsignmentDetails> updatedDetails = new ArrayList<>();
+//        for (ConsignmentDetailRequest detailRequest : consignmentRequest.getConsignmentDetailRequests()) {
+//
+//            if (koi == null) {
+//                throw new NotFoundException("Koi not found with ID: " + detailRequest.getId());
+//            }
+//            Koi koi = detailRequest.getKoiRequest().
+//            ConsignmentDetails consignmentDetail = new ConsignmentDetails();
+//            consignmentDetail.setConsignment(foundConsignment);
+//            consignmentDetail.setKoi(koi);
+//            updatedDetails.add(consignmentDetail);
+//        }
+//
+//        // Replace existing details with updated ones
+//        foundConsignment.getConsignmentDetails().clear();
+//        foundConsignment.getConsignmentDetails().addAll(updatedDetails);
 
         return consignmentRepository.save(foundConsignment);
     }
