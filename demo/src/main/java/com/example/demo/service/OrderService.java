@@ -186,7 +186,9 @@ public class OrderService {
             koi.setSold(true);
             koi.setAccount(customer);
             koiRepository.save(koi);
-            certificateService.sendCertificateEmail(customer,koi.getCertificate());
+            if(koi.getQuantity()==1) {
+                certificateService.sendCertificateEmail(customer, koi.getCertificate());
+            }
         }
             accountRepository.save(manager);
             paymentRepository.save(payment);
