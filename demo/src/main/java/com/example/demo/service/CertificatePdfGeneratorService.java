@@ -24,7 +24,7 @@ public class CertificatePdfGeneratorService {
     }
 
     public String generateHtml(Certificate certificate) {
-        int bornInDate = certificate.getBornIn(); // Assuming this is an integer year
+        int bornInDate = certificate.getKoi().getBornYear(); // Assuming this is an integer year
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
         String formattedIssueDate = dateFormatter.format(certificate.getIssueDate()); // Format the issue date
         String Koiid = Long.toString(certificate.getKoi().getId());
@@ -101,16 +101,16 @@ public class CertificatePdfGeneratorService {
                 "        <h1>Certification of Breeding</h1>" +
                 "        <p>We hereby certify that the Koi shown in the photo was bred by the following breeder and sold by Kodama Koi Farm</p>" +
                 "        <div style=\"display: flex; align-items: center;\">" +
-                "            <img class=\"koi-image\" src='" + certificate.getImageUrl() + "' alt=\"Koi Fish Image\">" +
+                "            <img class=\"koi-image\" src='" + certificate.getKoi().getImages() + "' alt=\"Koi Fish Image\">" +
                 "            <div>" +
                 "                <table class=\"details-table\">" +
                 "                    <tr>" +
                 "                        <td><strong>Variety:</strong></td>" +
-                "                        <td>" + certificate.getVariety() + "</td>" +
+                "                        <td>" + certificate.getKoi().getName() + "</td>" +
                 "                    </tr>" +
                 "                    <tr>" +
                 "                        <td><strong>Breeder:</strong></td>" +
-                "                        <td>" + certificate.getBreeder() + "</td>" +
+                "                        <td>" + certificate.getKoi().getVendor() + "</td>" +
                 "                    </tr>" +
                 "                    <tr>" +
                 "                        <td><strong>Born In:</strong></td>" +
@@ -118,7 +118,7 @@ public class CertificatePdfGeneratorService {
                 "                    </tr>" +
                 "                    <tr>" +
                 "                        <td><strong>Size:</strong></td>" +
-                "                        <td>" + certificate.getSize() + " cm</td>" +
+                "                        <td>" + certificate.getKoi().getSize() + " cm</td>" +
                 "                    </tr>" +
                 "                    <tr>" +
                 "                        <td><strong>Id:</strong></td>" +
@@ -146,7 +146,7 @@ public class CertificatePdfGeneratorService {
         String htmlContent = generateHtml(certificate);
 
         // Define the file path for the PDF
-        String outputPath = "D:/Download/Hoc/TestPDF/" + certificate.getKoi().getId() + ".pdf";
+        String outputPath = "D:/Download/Hoc/TestPDF/" + "Koi "+ certificate.getKoi().getId() + " Certificate.pdf";
         File pdfFile = new File(outputPath);
 
         // Convert HTML to PDF and save it

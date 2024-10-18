@@ -123,7 +123,7 @@ public class ConsignmentService {
         for (ConsignmentDetailRequest consignmentDetailRequest : consignmentRequest.getConsignmentDetailRequests()) {
 
             Koi koi = createConsignmentKoi(consignmentDetailRequest.getKoiRequest());
-
+            Certificate certificate = certificateService.createCertificates(koi);
             ConsignmentDetails consignmentDetail = new ConsignmentDetails();
             consignmentDetail.setConsignment(consignment);
             consignmentDetail.setKoi(koi);

@@ -33,10 +33,10 @@ public class CertificateService {
             // Create and save certificate for each Koi
             Certificate certificate = new Certificate();
             certificate.setKoi(koi);
-            certificate.setVariety(koi.getName());
-            certificate.setBreeder(koi.getVendor());
-            certificate.setBornIn(koi.getBornYear());
-            certificate.setSize(koi.getSize());
+//            certificate.setVariety(koi.getName());
+//            certificate.setBreeder(koi.getVendor());
+//            certificate.setBornIn(koi.getBornYear());
+//            certificate.setSize(koi.getSize());
             certificate.setImageUrl(koi.getImages());
             certificate.setIssueDate(new Date());
 
@@ -72,12 +72,13 @@ public class CertificateService {
         return certificateRepository.findAll();
     }
     // Lấy Certificate theo ID
-    public Certificate getCertificateById(Long id) {
+    public String getCertificateById(Long id) {
         Certificate certificateFound = certificateRepository.findCertificateByCertificateId(id);
         if (certificateFound == null) {
             throw new NotFoundException("certificate not found!");
         }
-        return certificateFound;
+        String imageUrl =certificateFound.getImageUrl();
+        return imageUrl;
     }
     // Cập nhật Certificate
     // Xóa Certificate

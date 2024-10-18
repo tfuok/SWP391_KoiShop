@@ -6,10 +6,9 @@ import com.example.demo.model.Request.KoiRequest;
 import com.example.demo.model.Response.KoiPageResponse;
 import com.example.demo.model.Response.KoiResponse;
 import com.example.demo.repository.BreedRepository;
-<<<<<<< HEAD
-=======
+
 import com.example.demo.repository.CertificateRepository;
->>>>>>> cdc784336f830c9e9dceca00efd8ac3e6f2f5d43
+
 import com.example.demo.repository.KoiRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
