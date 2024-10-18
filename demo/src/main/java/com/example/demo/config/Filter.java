@@ -118,7 +118,8 @@ public class Filter extends OncePerRequestFilter {
             "/swagger-resources/**",
             "/api/login",
             "/api/register",
-            "/api/forgot-password"
+            "/api/forgot-password",
+            "/api/login-google"
     );
 
     // Check if the request is a public GET API
