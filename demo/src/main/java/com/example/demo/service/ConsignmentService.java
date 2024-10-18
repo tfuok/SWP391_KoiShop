@@ -3,10 +3,14 @@ package com.example.demo.service;
 import com.example.demo.entity.*;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.*;
+import com.example.demo.model.Response.KoiPageResponse;
+import com.example.demo.model.Response.KoiResponse;
 import com.example.demo.repository.*;
 import com.example.demo.util.DateUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
@@ -19,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class ConsignmentService {
@@ -31,12 +36,13 @@ public class ConsignmentService {
     private AuthenticationService authenticationService;
 
     @Autowired
-    private KoiRepository koiRepository;
+    private KoiRepository koiLotRepository;
 
     @Autowired
     private CareTypeRepository careTypeRepository;
 
-
+    @Autowired
+    private BreedRepository breedRepository;
     @Autowired
     private AccountRepository accountRepository;
 
@@ -48,6 +54,8 @@ public class ConsignmentService {
 
     @Autowired
     private CertificateService certificateService;
+
+
     @Autowired
     private KoiService koiService;
 
@@ -113,7 +121,7 @@ public class ConsignmentService {
         List<ConsignmentDetails> consignmentDetailsList = new ArrayList<>();
         for (ConsignmentDetailRequest consignmentDetailRequest : consignmentRequest.getConsignmentDetailRequests()) {
 
-            Koi koi = koiService.createKoi(consignmentDetailRequest.getKoiRequest());
+            Koi koi = createConsignmentKoi(consignmentDetailRequest.getKoiRequest());
 
             ConsignmentDetails consignmentDetail = new ConsignmentDetails();
             consignmentDetail.setConsignment(consignment);
@@ -371,6 +379,58 @@ public class ConsignmentService {
             consignmentRepository.save(consignment);
 
         }
+    public Koi createConsignmentKoi(KoiRequest koiLotRequest) {
+        try {
+            // Create a new KoiLot manually without using ModelMapper for the List<Breed>
+            Koi koiLot = new Koi();
+            koiLot.setName(koiLotRequest.getName());
+            koiLot.setPrice(koiLotRequest.getPrice());
+            koiLot.setVendor(koiLotRequest.getVendor());
+            koiLot.setGender(koiLotRequest.getGender());
+            koiLot.setBornYear(koiLotRequest.getBornYear());
+            koiLot.setSize(koiLotRequest.getSize());
+            koiLot.setOrigin(koiLotRequest.getOrigin());
+            koiLot.setDescription(koiLotRequest.getDescription());
+            koiLot.setQuantity(koiLotRequest.getQuantity());
+            koiLot.setImages(koiLotRequest.getImageUrl());
+            koiLot.setDeleted(true);
+
+//            List<Images> imagesList = koiLotRequest.getImagesList().stream().map(imageListRequest -> {
+//                Images image = new Images();
+//                image.setImages(imageListRequest.getImage());
+//                image.setKoi(koiLot);  // Associate the image with the koi
+//                return image;
+//            }).collect(Collectors.toList());
+//
+//            koiLot.setImagesList(imagesList);
+
+            // Map breed IDs to Breed entities
+            Set<Breed> breeds = new HashSet<>();
+            for (Long breedId : koiLotRequest.getBreedId()) {
+                Breed breed = breedRepository.findBreedByIdAndIsDeletedFalse(breedId);
+                if (breed == null) throw new NotFoundException("Breed not exist");
+                breeds.add(breed);
+            }
+            koiLot.setBreeds(breeds);
+
+            // Set the account of the creator (authenticated user)
+            Account accountRequest = authenticationService.getCurrentAccount();
+            koiLot.setAccount(accountRequest);
+            if (accountRequest.getRole() == Role.CUSTOMER) {
+                koiLot.setDeleted(true);
+            }
+
+            // Save the KoiLot entity
+            return koiLotRepository.save(koiLot);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to create KoiLot");
+        }
+    }
+
+
+
 
     public Consignment updateStatusConsignment(long id, ConsignmentStatusRequest consignmentStatusRequest) {
         Consignment consignment = consignmentRepository.findConsignmentById(id);
