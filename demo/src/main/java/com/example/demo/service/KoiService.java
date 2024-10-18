@@ -76,7 +76,9 @@ public class KoiService {
 
             // Save the KoiLot entity
             koiLotRepository.save(koiLot);
-            certificateService.createCertificates(koiLot);
+            if(koiLot.getQuantity()==1) {
+                certificateService.createCertificates(koiLot);
+            }
             return koiLot;
         } catch (Exception e) {
             e.printStackTrace();
