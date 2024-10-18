@@ -105,9 +105,10 @@ public class KoiService {
                     .map(Images::getImages)
                     .collect(Collectors.toList());
             koiLotResponse.setImagesList(imageUrls);  // Set images list in the response
-
-            String certificateImageUrls = koi.getCertificate().getImageUrl();
-            koiLotResponse.setCertificate(certificateImageUrls);
+            if(koiLotResponse.getQuantity()==1) {
+                String certificateImageUrls = koi.getCertificate().getImageUrl();
+                koiLotResponse.setCertificate(certificateImageUrls);
+            }
             koiLotResponses.add(koiLotResponse);
         }
 
