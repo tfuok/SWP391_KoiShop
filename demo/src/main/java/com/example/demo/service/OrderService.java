@@ -60,7 +60,6 @@ public class OrderService {
             orderDetails.add(details);
             total += koi.getPrice();
         }
-
         orders.setOrderDetails(orderDetails);
         orders.setTotal(total);
         return orderRepository.save(orders);
@@ -168,14 +167,15 @@ public class OrderService {
 
             Transactions transaction2 = new Transactions();
             //customer -> server
-            Account manager = orders.getOrderDetails().get(0).getKoi().getAccount();
+//            Account manager = orders.getOrderDetails().get(0).getKoi().getAccount();
+            Account owner = accountRepository.findAccountByRole(Role.OWNER);
             transaction2.setFrom(customer);
-            transaction2.setTo(manager);
+            transaction2.setTo(owner);
             transaction2.setPayment(payment);
             transaction2.setStatus(TransactionEnum.SUCCESS);
             transaction2.setDescription("VNPAY TO SERVER");
-            double newBalance = manager.getBalance() + orders.getTotal();
-            manager.setBalance(newBalance);
+            double newBalance = owner.getBalance() + orders.getTotal();
+            owner.setBalance(newBalance);
             transactions.add(transaction2);
 
             payment.setTransactions(transactions);
@@ -190,12 +190,11 @@ public class OrderService {
                 certificateService.sendCertificateEmail(customer, koi.getCertificate());
             }
         }
-            accountRepository.save(manager);
+            accountRepository.save(owner);
             paymentRepository.save(payment);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
 }

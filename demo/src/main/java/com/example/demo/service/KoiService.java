@@ -72,7 +72,6 @@ public class KoiService {
                 koiLot.setDeleted(true);
                 koiLot.setConsignment(true);
             }
-
             // Save the KoiLot entity
             koiLotRepository.save(koiLot);
             if(koiLot.getQuantity()==1) {
@@ -105,6 +104,7 @@ public class KoiService {
                     .map(Images::getImages)
                     .collect(Collectors.toList());
             koiLotResponse.setImagesList(imageUrls);  // Set images list in the response
+
             if(koiLotResponse.getQuantity()==1) {
                 String certificateImageUrls = koi.getCertificate().getImageUrl();
                 koiLotResponse.setCertificate(certificateImageUrls);
