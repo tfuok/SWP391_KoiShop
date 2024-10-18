@@ -26,6 +26,6 @@ public class KoiResponse {
     private String images;
     private int quantity;
     private boolean isConsignment;
-    private Certificate certificate;
+    private String certificate;
     private List<String> imagesList;
 }
