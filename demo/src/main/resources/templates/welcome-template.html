@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Welcome to Koi Shop!</title>
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f6f6f6;
+            background-image: url('https://example.com/koi-background.jpg'); /* Optional koi background pattern */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        table {
+            border-spacing: 0;
+            width: 100%;
+        }
+        td {
+            padding: 10px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.95); /* Transparent white */
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+        }
+        h1 {
+            font-size: 28px;
+            color: #f1556c;
+            text-align: center;
+            font-family: 'Georgia', serif;
+            border-bottom: 2px solid #f1556c;
+            padding-bottom: 10px;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.7;
+            margin: 20px 0;
+            color: #555;
+        }
+        .btn-primary {
+            display: inline-block;
+            padding: 15px 30px;
+            font-size: 16px;
+            color: white;
+            background-image: linear-gradient(135deg, #f1556c 0%, #f54242 100%);
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #f54242;
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+        .footer {
+            font-size: 12px;
+            text-align: center;
+            color: #999;
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+            .button {
+                padding: 12px 25px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+<table role="presentation">
+    <tr>
+        <td>
+            <div class="container">
+                <!-- Header -->
+                <h1>Koi Shop</h1>
+                <p>Welcome to Koi Shop, <strong th:text="${name}"></strong>!</p>
+
+                <!-- Body -->
+                <p>We’re excited to have you onboard. You have been invited to our system. You can log in and start exploring the world of Koi with us.</p>
+                <p><strong>Email:</strong> <span th:text="${email}"></span></p>
+                <p><strong>Password:</strong> <span th:text="${password}"></span></p>
+                <p>Please make sure to change your password after logging in.</p>
+                <!-- Button -->
+                <p style="text-align: center;">
+                    <a th:href="${link}" class="btn-primary">[[${button}]]</a>
+                </p>
+
+                <!-- Footer -->
+                <p class="footer">
+                    If you did not request this email, please ignore it.<br>
+                    Koi Shop &copy; 2024
+                </p>
+            </div>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
