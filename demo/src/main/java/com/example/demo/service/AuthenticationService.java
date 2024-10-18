@@ -6,7 +6,10 @@ import com.example.demo.exception.DuplicatedEntity;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.*;
 import com.example.demo.model.Response.AccountResponse;
+import com.example.demo.model.Response.LoginGoogleResponse;
 import com.example.demo.repository.AccountRepository;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseToken;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -223,5 +226,28 @@ public class AuthenticationService implements UserDetailsService {
         List<Account> accounts =  accountRepository.findByUsernameContainingAndRoleAndIsDeletedFalse(name, Role.STAFF);
         if (accounts == null) throw new NotFoundException("Account not found");
         return accounts;
+    }
+
+    public LoginGoogleResponse loginGoogle (LoginGoogleRequest loginGoogleRequest) {
+        try{
+            FirebaseToken decodeToken = FirebaseAuth.getInstance().verifyIdToken(loginGoogleRequest.getToken());
+            String email = decodeToken.getEmail();
+            Account user = accountRepository.findAccountByEmailAndIsDeletedFalse(email);
+            if(user == null) {
+                Account newUser = new Account();
+
+                newUser.setEmail(email);
+                newUser.setRole(Role.CUSTOMER);
+                user = accountRepository.save(newUser);
+            }
+            LoginGoogleResponse authenticationResponse = new LoginGoogleResponse();
+            authenticationResponse.setToken(loginGoogleRequest.getToken());
+            authenticationResponse.setToken(tokenService.generateToken(user));
+            return authenticationResponse;
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

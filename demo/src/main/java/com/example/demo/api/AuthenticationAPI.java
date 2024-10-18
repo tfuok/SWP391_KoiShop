@@ -121,5 +121,8 @@ public class AuthenticationAPI {
         return ResponseEntity.ok(allAccounts);
     }
 
-
+    @PostMapping("/login-google")
+    private ResponseEntity checkLoginGoogle(@RequestBody LoginGoogleRequest loginGGRequest){
+        return ResponseEntity.ok(authenticationService.loginGoogle(loginGGRequest));
+    }
 }

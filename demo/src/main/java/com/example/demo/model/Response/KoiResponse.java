@@ -24,5 +24,6 @@ public class KoiResponse {
     private List<String> breeds;
     private String images;
     private int quantity;
+    boolean isConsignment;
 //    List<String> imagesList;
 }
