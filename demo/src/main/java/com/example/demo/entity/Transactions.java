@@ -16,7 +16,6 @@ public class Transactions {
     @ManyToOne
     @JsonIgnore
     @JoinColumn(name = "from_id")
-
     Account from;
 
     @ManyToOne
@@ -29,7 +28,7 @@ public class Transactions {
     @JoinColumn(name = "payment_id")
     Payment payment;
 
-
+    @Enumerated(EnumType.STRING)
     TransactionEnum status;
 
     String description;
