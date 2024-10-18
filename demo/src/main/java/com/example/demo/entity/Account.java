@@ -112,4 +112,5 @@ public class Account implements UserDetails {
     @OneToMany(mappedBy = "shop")
     @JsonIgnore
     List<Feedback> shop_feedbacks;
+
 }

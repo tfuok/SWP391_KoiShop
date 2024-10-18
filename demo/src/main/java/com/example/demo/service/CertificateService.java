@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.entity.*;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.EmailDetails;
+import com.example.demo.model.Request.KoiRequest;
 import com.example.demo.repository.CertificateRepository;
 import com.example.demo.repository.KoiRepository;
 import org.modelmapper.ModelMapper;
@@ -25,6 +26,7 @@ public class CertificateService {
     private CertificatePdfGeneratorService certificatePdfGeneratorService;
     @Autowired
     private EmailService emailService;
+
     public void createCertificatesAndSendEmail(Orders orders) {
         for (OrderDetails orderDetail : orders.getOrderDetails()) {
             Koi koi = orderDetail.getKoi();
