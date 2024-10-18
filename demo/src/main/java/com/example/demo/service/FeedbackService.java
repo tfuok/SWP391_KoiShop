@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class FeedbackService {
@@ -23,16 +24,23 @@ public class FeedbackService {
 
     public Feedback createNewFeedback(FeedbackRequest feedbackRequest) {
         Feedback feedback = new Feedback();
-        Account shop = accountRepository.findById(feedbackRequest.getShopId())
-                .orElseThrow(() -> new EntityNotFoundException("Shop not found"));
+//        Account shop = accountRepository.findById(feedbackRequest.getShopId())
+//                .orElseThrow(() -> new EntityNotFoundException("Shop not found"));
         feedback.setContent(feedbackRequest.getContent());
         feedback.setRating(feedbackRequest.getRating());
         feedback.setCustomer(authenticationService.getCurrentAccount());
-        feedback.setShop(shop);
+//        feedback.setShop(shop);
         return feedbackRepository.save(feedback);
     }
 
     public List<FeedbackResponse> getFeedback() {
-        return feedbackRepository.findFeedbackByShopId(authenticationService.getCurrentAccount().getId());
+        return feedbackRepository.findAll().stream().map(feedback ->
+                new FeedbackResponse(
+                        feedback.getId(),
+                        feedback.getContent(),
+                        feedback.getRating(),
+                        feedback.getCustomer().getUsername()
+                )
+        ).collect(Collectors.toList());
     }
 }

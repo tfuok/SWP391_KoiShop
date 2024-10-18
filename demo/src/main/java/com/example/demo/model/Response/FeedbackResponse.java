@@ -9,5 +9,5 @@ public class FeedbackResponse {
     long id;
     String content;
     int rating;
-    String email;
+    String username;
 }

@@ -10,5 +10,4 @@ public class FeedbackRequest {
 
     private int rating;
 
-    private long shopId;
 }

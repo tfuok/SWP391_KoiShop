@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import com.example.demo.entity.*;
 import com.example.demo.exception.NotFoundException;
-import com.example.demo.model.Request.EmailDetails;
 import com.example.demo.model.Request.OrderDetailRequest;
 import com.example.demo.model.Request.OrderRequest;
 import com.example.demo.repository.*;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -168,14 +166,14 @@ public class OrderService {
             Transactions transaction2 = new Transactions();
             //customer -> server
 //            Account manager = orders.getOrderDetails().get(0).getKoi().getAccount();
-            Account owner = accountRepository.findAccountByRole(Role.OWNER);
+            Account manager = accountRepository.findAccountByRole(Role.MANAGER);
             transaction2.setFrom(customer);
-            transaction2.setTo(owner);
+            transaction2.setTo(manager);
             transaction2.setPayment(payment);
             transaction2.setStatus(TransactionEnum.SUCCESS);
             transaction2.setDescription("VNPAY TO SERVER");
-            double newBalance = owner.getBalance() + orders.getTotal();
-            owner.setBalance(newBalance);
+            double newBalance = manager.getBalance() + orders.getTotal();
+            manager.setBalance(newBalance);
             transactions.add(transaction2);
 
             payment.setTransactions(transactions);
@@ -190,7 +188,7 @@ public class OrderService {
                 certificateService.sendCertificateEmail(customer, koi.getCertificate());
             }
         }
-            accountRepository.save(owner);
+            accountRepository.save(manager);
             paymentRepository.save(payment);
         } catch (Exception e) {
             e.printStackTrace();

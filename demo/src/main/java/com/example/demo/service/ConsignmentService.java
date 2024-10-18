@@ -361,7 +361,7 @@ public class ConsignmentService {
 
             Transactions transaction2 = new Transactions();
             //customer -> server
-            Account manager = accountRepository.findAccountByRole(Role.OWNER);
+            Account manager = accountRepository.findAccountByRole(Role.MANAGER);
             transaction2.setFrom(customer);
             transaction2.setTo(manager);
             transaction2.setPayment(payment);
