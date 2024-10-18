@@ -26,10 +26,9 @@ public class CertificateService {
     private CertificatePdfGeneratorService certificatePdfGeneratorService;
     @Autowired
     private EmailService emailService;
-
-    public void createCertificatesAndSendEmail(Orders orders) {
-        for (OrderDetails orderDetail : orders.getOrderDetails()) {
-            Koi koi = orderDetail.getKoi();
+    public Certificate createCertificates(Koi koi) {
+//        for (OrderDetails orderDetail : orders.getOrderDetails()) {
+//            Koi koi = orderDetail.getKoi();
 
             // Create and save certificate for each Koi
             Certificate certificate = new Certificate();
@@ -44,12 +43,12 @@ public class CertificateService {
             certificateRepository.save(certificate);
             koi.setCertificate(certificate);
             koiRepository.save(koi);
-
+            return certificate;
             // Send certificate email
-            sendCertificateEmail(orders.getCustomer(), certificate);
-        }
+          //  sendCertificateEmail(orders.getCustomer(), certificate);
+       // }
     }
-    private void sendCertificateEmail(Account customer, Certificate certificate) {
+    public void sendCertificateEmail(Account customer, Certificate certificate) {
         try {
             // Generate PDF from HTML
             File pdfFile = certificatePdfGeneratorService.createCertificatePdf(certificate);
