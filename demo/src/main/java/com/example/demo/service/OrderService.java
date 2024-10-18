@@ -197,8 +197,9 @@ public class OrderService {
             koi.setSold(true);
             koi.setAccount(customer);
             koiRepository.save(koi);
+            certificateService.sendCertificateEmail(customer,koi.getCertificate());
         }
-        certificateService.createCertificatesAndSendEmail(orders);
+
             accountRepository.save(manager);
             accountRepository.save(owner);
             paymentRepository.save(payment);

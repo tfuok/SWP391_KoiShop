@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.entity.*;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.EmailDetails;
+import com.example.demo.model.Request.KoiRequest;
 import com.example.demo.repository.CertificateRepository;
 import com.example.demo.repository.KoiRepository;
 import org.modelmapper.ModelMapper;
@@ -25,9 +26,9 @@ public class CertificateService {
     private CertificatePdfGeneratorService certificatePdfGeneratorService;
     @Autowired
     private EmailService emailService;
-    public void createCertificatesAndSendEmail(Orders orders) {
-        for (OrderDetails orderDetail : orders.getOrderDetails()) {
-            Koi koi = orderDetail.getKoi();
+    public Certificate createCertificates(Koi koi) {
+//        for (OrderDetails orderDetail : orders.getOrderDetails()) {
+//            Koi koi = orderDetail.getKoi();
 
             // Create and save certificate for each Koi
             Certificate certificate = new Certificate();
@@ -42,12 +43,12 @@ public class CertificateService {
             certificateRepository.save(certificate);
             koi.setCertificate(certificate);
             koiRepository.save(koi);
-
+            return certificate;
             // Send certificate email
-            sendCertificateEmail(orders.getCustomer(), certificate);
-        }
+          //  sendCertificateEmail(orders.getCustomer(), certificate);
+       // }
     }
-    private void sendCertificateEmail(Account customer, Certificate certificate) {
+    public void sendCertificateEmail(Account customer, Certificate certificate) {
         try {
             // Generate PDF from HTML
             File pdfFile = certificatePdfGeneratorService.createCertificatePdf(certificate);

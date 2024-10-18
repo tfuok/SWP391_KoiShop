@@ -6,6 +6,7 @@ import com.example.demo.model.Request.KoiRequest;
 import com.example.demo.model.Response.KoiPageResponse;
 import com.example.demo.model.Response.KoiResponse;
 import com.example.demo.repository.BreedRepository;
+import com.example.demo.repository.CertificateRepository;
 import com.example.demo.repository.KoiRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,10 @@ public class KoiService {
     AuthenticationService authenticationService;
     @Autowired
     BreedRepository breedRepository;
+    @Autowired
+    private CertificateRepository certificateRepository;
+    @Autowired
+    private CertificateService certificateService;
 
     public Koi createKoi(KoiRequest koiLotRequest) {
         try {
@@ -67,9 +72,12 @@ public class KoiService {
                 koiLot.setDeleted(true);
             }
 
-            // Save the KoiLot entity
-            return koiLotRepository.save(koiLot);
 
+
+            // Save the KoiLot entity
+            koiLotRepository.save(koiLot);
+            certificateService.createCertificates(koiLot);
+            return koiLot;
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to create KoiLot");
