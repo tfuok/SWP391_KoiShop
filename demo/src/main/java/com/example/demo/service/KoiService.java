@@ -47,14 +47,14 @@ public class KoiService {
             koiLot.setQuantity(koiLotRequest.getQuantity());
             koiLot.setImages(koiLotRequest.getImageUrl());
 
-//            List<Images> imagesList = koiLotRequest.getImagesList().stream().map(imageListRequest -> {
-//                Images image = new Images();
-//                image.setImages(imageListRequest.getImage());
-//                image.setKoi(koiLot);  // Associate the image with the koi
-//                return image;
-//            }).collect(Collectors.toList());
-//
-//            koiLot.setImagesList(imagesList);
+            List<Images> imagesList = koiLotRequest.getImagesList().stream().map(imageListRequest -> {
+                Images image = new Images();
+                image.setImages(imageListRequest.getImage());
+                image.setKoi(koiLot);  // Associate the image with the koi
+                return image;
+            }).collect(Collectors.toList());
+
+            koiLot.setImagesList(imagesList);
 
             // Map breed IDs to Breed entities
             Set<Breed> breeds = new HashSet<>();
@@ -101,10 +101,10 @@ public class KoiService {
 
             koiLotResponse.setBreeds(breedNames);
 
-//            List<String> imageUrls = koi.getImagesList().stream()
-//                    .map(Images::getImages)
-//                    .collect(Collectors.toList());
-//            koiLotResponse.setImagesList(imageUrls);  // Set images list in the response
+            List<String> imageUrls = koi.getImagesList().stream()
+                    .map(Images::getImages)
+                    .collect(Collectors.toList());
+            koiLotResponse.setImagesList(imageUrls);  // Set images list in the response
 
             koiLotResponses.add(koiLotResponse);
         }
@@ -137,13 +137,13 @@ public class KoiService {
         foundKoi.setQuantity(koiRequest.getQuantity());
         foundKoi.setImages(koiRequest.getImageUrl());
 
-//        List<Images> updatedImagesList = koiRequest.getImagesList().stream().map(imageListRequest -> {
-//            Images image = new Images();
-//            image.setImages(imageListRequest.getImage());
-//            image.setKoi(foundKoi);  // Associate the image with the existing koi
-//            return image;
-//        }).collect(Collectors.toList());
-//        foundKoi.setImagesList(updatedImagesList);
+        List<Images> updatedImagesList = koiRequest.getImagesList().stream().map(imageListRequest -> {
+            Images image = new Images();
+            image.setImages(imageListRequest.getImage());
+            image.setKoi(foundKoi);  // Associate the image with the existing koi
+            return image;
+        }).collect(Collectors.toList());
+        foundKoi.setImagesList(updatedImagesList);
 
         // Map breed IDs to Breed entities and set the breeds
         Set<Breed> breeds = new HashSet<>();

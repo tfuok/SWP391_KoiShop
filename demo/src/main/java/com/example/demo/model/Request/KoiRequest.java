@@ -36,6 +36,6 @@ public class KoiRequest {
 
     String imageUrl;
 
-//    List<ImageListRequest> imagesList;
+    List<ImageListRequest> imagesList;
 
 }

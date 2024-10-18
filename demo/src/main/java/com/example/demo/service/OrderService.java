@@ -81,7 +81,7 @@ public class OrderService {
         String tmnCode = "VONI2DAD";
         String secretKey = "PIOSTSKRYSENPWY7NW7UG7HGWCHTT4IS";
         String vnpUrl = " https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        String returnUrl = "https://blearning.vn/guide/swp/docker-local?orderID=" + orders.getId(); // trang thong bao thanh toan thanh cong
+        String returnUrl = "http://koishop.site/successful?orderID=" + orders.getId(); // trang thong bao thanh toan thanh cong
         String currCode = "VND";
 
         Map<String, String> vnpParams = new TreeMap<>();
@@ -163,31 +163,20 @@ public class OrderService {
             transaction1.setTo(customer);
             transaction1.setPayment(payment);
             transaction1.setStatus(TransactionEnum.SUCCESS);
-            transaction1.setDescription("NAP TIEN VNPAY ");
+            transaction1.setDescription("CUSTOMER TO VNPAY");
             transactions.add(transaction1);
 
             Transactions transaction2 = new Transactions();
             //customer -> server
-            Account manager = accountRepository.findAccountByRole(Role.OWNER);
+            Account manager = orders.getOrderDetails().get(0).getKoi().getAccount();
             transaction2.setFrom(customer);
             transaction2.setTo(manager);
             transaction2.setPayment(payment);
             transaction2.setStatus(TransactionEnum.SUCCESS);
-            transaction2.setDescription("CUSTOMER TO SERVER");
-            double newBalance = manager.getBalance() + orders.getTotal() * 0.10f;
+            transaction2.setDescription("VNPAY TO SERVER");
+            double newBalance = manager.getBalance() + orders.getTotal();
             manager.setBalance(newBalance);
             transactions.add(transaction2);
-
-            Transactions transaction3 = new Transactions();
-            transaction3.setPayment(payment);
-            transaction3.setStatus(TransactionEnum.SUCCESS);
-            transaction3.setDescription("SERVER TO OWNER");
-            transaction3.setFrom(manager);
-            Account owner = orders.getOrderDetails().get(0).getKoi().getAccount();
-            transaction3.setTo(owner);
-            double shopBalance = owner.getBalance() + orders.getTotal() * 0.9f;
-            owner.setBalance(shopBalance);
-            transactions.add(transaction3);
 
             payment.setTransactions(transactions);
         Koi koi = null;
@@ -200,7 +189,6 @@ public class OrderService {
             certificateService.sendCertificateEmail(customer,koi.getCertificate());
         }
             accountRepository.save(manager);
-            accountRepository.save(owner);
             paymentRepository.save(payment);
         } catch (Exception e) {
             e.printStackTrace();

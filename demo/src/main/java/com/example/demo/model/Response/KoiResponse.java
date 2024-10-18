@@ -1,5 +1,6 @@
 package com.example.demo.model.Response;
 
+import com.example.demo.entity.Certificate;
 import com.example.demo.entity.Images;
 import com.example.demo.model.Request.ImageListRequest;
 import lombok.Data;
@@ -24,6 +25,7 @@ public class KoiResponse {
     private List<String> breeds;
     private String images;
     private int quantity;
-    boolean isConsignment;
-//    List<String> imagesList;
+    private boolean isConsignment;
+    private Certificate certificate;
+    private List<String> imagesList;
 }
