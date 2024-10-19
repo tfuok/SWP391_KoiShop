@@ -8,6 +8,7 @@ import com.example.demo.model.Response.KoiResponse;
 import com.example.demo.repository.BreedRepository;
 import com.example.demo.repository.CertificateRepository;
 import com.example.demo.repository.KoiRepository;
+import org.checkerframework.checker.units.qual.K;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -143,20 +144,20 @@ public class KoiService {
         List<Images> updatedImagesList = koiRequest.getImagesList().stream().map(imageListRequest -> {
             Images image = new Images();
             image.setImages(imageListRequest.getImage());
-            image.setKoi(foundKoi);  // Associate the image with the existing koi
+            image.setKoi(foundKoi);
             return image;
         }).collect(Collectors.toList());
-        foundKoi.setImagesList(updatedImagesList);
+            foundKoi.setImagesList(updatedImagesList);
 
         // Map breed IDs to Breed entities and set the breeds
         Set<Breed> breeds = new HashSet<>();
         for (Long breedId : koiRequest.getBreedId()) {
             Breed breed = breedRepository.findBreedByIdAndIsDeletedFalse(breedId);
             if (breed == null) throw new NotFoundException("Breed not exist");
+            breed.getKois().add(foundKoi);
             breeds.add(breed);
         }
         foundKoi.setBreeds(breeds);
-
         return koiLotRepository.save(foundKoi);
     }
 
@@ -198,13 +199,45 @@ public class KoiService {
         return comparisonResult;
     }
 
-    public List<Koi> getKoiLotByBreed(Long breedId) {
+    public List<KoiResponse> getKoiLotByBreed(Long breedId) {
         // Tìm giống cá (Breed) dựa trên breedId
         Breed breed = breedRepository.findBreedByIdAndIsDeletedFalse(breedId);
         if (breed == null) throw new NotFoundException("Breed not found");
+
         // Tìm tất cả các Koi thuộc giống cá đó
-        return koiLotRepository.findByBreedsAndIsDeletedFalse(breed);
+        List<Koi> kois = koiLotRepository.findByBreedsAndIsDeletedFalse(breed);
+        List<KoiResponse> koiLotResponses = new ArrayList<>();
+
+        for (Koi koi : kois) {
+            KoiResponse koiLotResponse = modelMapper.map(koi, KoiResponse.class);
+
+            // Only include non-deleted breeds
+            List<String> breedNames = koi.getBreeds().stream()
+                    .filter(b -> !b.isDeleted())
+                    .map(Breed::getName)
+                    .collect(Collectors.toList());
+
+            koiLotResponse.setBreeds(breedNames);
+
+            // Map the list of images
+            List<String> imageUrls = koi.getImagesList().stream()
+                    .map(Images::getImages)
+                    .collect(Collectors.toList());
+            koiLotResponse.setImagesList(imageUrls);  // Set images list in the response
+
+            // Set the certificate image if quantity is 1
+            if(koiLotResponse.getQuantity() == 1) {
+                String certificateImageUrls = koi.getCertificate().getImageUrl();
+                koiLotResponse.setCertificate(certificateImageUrls);
+            }
+
+            koiLotResponses.add(koiLotResponse);
+        }
+
+        return koiLotResponses;
     }
+
+
 
     public List<Koi> getKoiLotByCurrentAccount() {
     return koiLotRepository.findByAccountId(authenticationService.getCurrentAccount().getId());

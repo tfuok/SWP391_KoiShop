@@ -44,7 +44,7 @@ public class Koi {
             joinColumns = @JoinColumn(name = "koi_id"),
             inverseJoinColumns = @JoinColumn(name = "breed_id")
     )
-    private Set<Breed> breeds;
+    private Set<Breed> breeds = new HashSet<>();
 
     // Correct ManyToOne mapping with Account
     @ManyToOne
@@ -55,9 +55,9 @@ public class Koi {
     @JsonIgnore
     Set<OrderDetails> orderDetails;
 
-    @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "koi", cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<Images> imagesList ; // Initialize the list to avoid null references
+    private List<Images> imagesList = new ArrayList<>() ; // Initialize the list to avoid null references
 
     // One-to-One with Certificate
     @OneToOne(mappedBy = "koi", cascade = CascadeType.ALL, orphanRemoval = true)

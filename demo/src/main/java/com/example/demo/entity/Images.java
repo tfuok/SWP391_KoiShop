@@ -21,7 +21,7 @@ public class Images {
 
     String images;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "koi_id")
     @JsonIgnore
     private Koi koi;

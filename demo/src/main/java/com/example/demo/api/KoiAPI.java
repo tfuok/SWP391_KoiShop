@@ -3,6 +3,7 @@ package com.example.demo.api;
 import com.example.demo.entity.Koi;
 import com.example.demo.model.Request.KoiRequest;
 import com.example.demo.model.Response.KoiPageResponse;
+import com.example.demo.model.Response.KoiResponse;
 import com.example.demo.service.KoiService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -70,7 +71,7 @@ public class KoiAPI {
 
         // Nếu có breedId, tìm kiếm koi theo breedId
         if (breedId != null) {
-            List<Koi> koiByBreed = koiLotService.getKoiLotByBreed(breedId);
+            List<KoiResponse> koiByBreed = koiLotService.getKoiLotByBreed(breedId);
             return ResponseEntity.ok(koiByBreed);
         }
 

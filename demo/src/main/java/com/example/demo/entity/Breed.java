@@ -28,7 +28,7 @@ public class Breed {
 
     // Correct ManyToMany mapping with KoiLot
 
-    @ManyToMany(mappedBy = "breeds")
+    @ManyToMany(mappedBy = "breeds", cascade =  CascadeType.ALL)
     @JsonIgnore
     private Set<Koi> kois;
 }
