@@ -14,6 +14,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -93,24 +94,29 @@ public class AuthenticationService implements UserDetailsService {
     }
 
     public AccountResponse login(LoginRequest loginRequest) {
-        //        //xử lý logic liên quan đến login
-//        //2 trường hợp xảy ra
-//        /*
-//         *   1. tồn tại
-//         *   2.ko tồn tại
-//         */
         try {
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-            //=> tài khoản có tồn tại
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getEmail(),
+                            loginRequest.getPassword()
+                    )
+            );
+
+            // Extract the authenticated account
             Account account = (Account) authentication.getPrincipal();
             AccountResponse accountResponse = modelMapper.map(account, AccountResponse.class);
             accountResponse.setToken(tokenService.generateToken(account));
+
             return accountResponse;
+
+        } catch (BadCredentialsException e) {
+            throw new EntityNotFoundException("Email or password invalid!");
         } catch (Exception e) {
             e.printStackTrace();
-            throw new EntityNotFoundException("Email or password invalid!");
+            throw new RuntimeException("An unexpected error occurred");
         }
     }
+
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -228,26 +234,41 @@ public class AuthenticationService implements UserDetailsService {
         return accounts;
     }
 
-    public LoginGoogleResponse loginGoogle (LoginGoogleRequest loginGoogleRequest) {
-        try{
-            FirebaseToken decodeToken = FirebaseAuth.getInstance().verifyIdToken(loginGoogleRequest.getToken());
-            String email = decodeToken.getEmail();
-            Account user = accountRepository.findAccountByEmailAndIsDeletedFalse(email);
-            if(user == null) {
-                Account newUser = new Account();
+    public LoginGoogleResponse loginGoogle(LoginGoogleRequest loginGoogleRequest) {
+        try {
+            // Decode Firebase token
+            FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(loginGoogleRequest.getToken());
+            String email = decodedToken.getEmail();
+            String username = decodedToken.getName();
 
-                newUser.setEmail(email);
-                newUser.setRole(Role.CUSTOMER);
-                user = accountRepository.save(newUser);
+            // Check if user exists or create a new one
+            Account user = accountRepository.findAccountByEmailAndIsDeletedFalse(email);
+            if (user == null) {
+                user = new Account();
+                user.setEmail(email);
+                user.setRole(Role.CUSTOMER);
+                user.setUsername(username);
+                user = accountRepository.save(user);
             }
-            LoginGoogleResponse authenticationResponse = new LoginGoogleResponse();
-            authenticationResponse.setToken(loginGoogleRequest.getToken());
-            authenticationResponse.setToken(tokenService.generateToken(user));
-            return authenticationResponse;
-        } catch (Exception e)
-        {
+
+            // Generate a new JWT token
+            String jwtToken = tokenService.generateToken(user);
+
+            // Build the response
+            return LoginGoogleResponse.builder()
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .username(user.getUsername())
+                    .role(user.getRole())
+                    .address(user.getAddress()) // Assuming user has an address field
+                    .phone(user.getPhone()) // Assuming user has a phone field
+                    .token(jwtToken)
+                    .build();
+
+        } catch (Exception e) {
             e.printStackTrace();
+            // Optionally, throw a custom exception or return an error response
+            return null;
         }
-        return null;
     }
 }
