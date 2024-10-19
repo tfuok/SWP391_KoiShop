@@ -88,6 +88,10 @@ public class Account implements UserDetails {
     @JsonIgnore
     Set<Orders> orders;
 
+    @OneToMany(mappedBy = "staff")
+    @JsonIgnore
+    Set<Orders> staff_orders;
+
     @OneToMany(mappedBy = "account")
     @JsonIgnore
     Set<Koi> koiLots;

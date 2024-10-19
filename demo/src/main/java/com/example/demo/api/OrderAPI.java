@@ -3,6 +3,7 @@ package com.example.demo.api;
 import com.example.demo.entity.Account;
 import com.example.demo.entity.Orders;
 import com.example.demo.model.Request.OrderRequest;
+import com.example.demo.model.Response.OrderResponse;
 import com.example.demo.repository.OrderRepository;
 import com.example.demo.service.AuthenticationService;
 import com.example.demo.service.OrderService;
@@ -33,16 +34,27 @@ public class OrderAPI {
         return ResponseEntity.ok(url);
     }
 
-    @GetMapping
+    @GetMapping("/customer")
     public ResponseEntity get(){
         Account account = authenticationService.getCurrentAccount();
         List<Orders> orders = orderRepo.findOrderssByCustomer(account);
         return ResponseEntity.ok(orders);
     }
 
+    @GetMapping
+    public ResponseEntity getAllOrders(){
+        List<OrderResponse> orders = orderService.getAllOrders();
+        return ResponseEntity.ok(orders);
+    }
     @PostMapping("/transaction")
     public ResponseEntity createTrans(@RequestParam long id) throws Exception {
          orderService.createTransaction(id);
         return ResponseEntity.ok("Success");
+    }
+
+    @PutMapping("/assign-staff")
+    public ResponseEntity assignStaff(long orderId, long staffId){
+        OrderResponse orders = orderService.assignStaff(orderId,staffId);
+        return ResponseEntity.ok(orders);
     }
 }

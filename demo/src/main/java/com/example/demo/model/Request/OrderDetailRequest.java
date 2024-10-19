@@ -5,5 +5,4 @@ import lombok.Data;
 @Data
 public class OrderDetailRequest {
     long koiId;
-    double price;
 }

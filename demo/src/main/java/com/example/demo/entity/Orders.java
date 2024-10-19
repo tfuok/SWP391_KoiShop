@@ -41,12 +41,18 @@ public class Orders {
     @JsonIgnore
     Account customer;
 
+    @ManyToOne
+    @JoinColumn(name = "staff_id")
+    @JsonIgnore
+    Account staff;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @JsonIgnore
     List<OrderDetails> orderDetails;
 
     @OneToOne(mappedBy = "orders")
     @JsonIgnore
-
     Payment payment;
+
+
 }

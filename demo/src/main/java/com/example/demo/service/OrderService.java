@@ -4,6 +4,8 @@ import com.example.demo.entity.*;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.OrderDetailRequest;
 import com.example.demo.model.Request.OrderRequest;
+import com.example.demo.model.Response.OrderDetailResponse;
+import com.example.demo.model.Response.OrderResponse;
 import com.example.demo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -195,6 +198,46 @@ public class OrderService {
         }
     }
 
+    public OrderResponse assignStaff(long orderId, long staffId){
+        Orders orders = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+        Account staff = accountRepository.findById(staffId)
+                .orElseThrow(() -> new NotFoundException("Staff not found"));
+
+        orders.setStaff(staff);
+        orderRepository.save(orders);
+        return mapToOrderResponse(orders);
+    }
+
+    public List<OrderResponse> getAllOrders() {
+        return orderRepository.findAll().stream()
+                .map(this::mapToOrderResponse)
+                .collect(Collectors.toList());
+    }
+
+    private OrderResponse mapToOrderResponse(Orders order) {
+        List<OrderDetailResponse> details = order.getOrderDetails().stream()
+                .map(detail -> new OrderDetailResponse(
+                        detail.getKoi().getId(),
+                        detail.getPrice(),
+                        detail.getKoi().getName()
+                ))
+                .collect(Collectors.toList());
+
+        return OrderResponse.builder()
+                .id(order.getId())
+                .date(order.getDate())
+                .total(order.getTotal())
+                .rating(order.getRating())
+                .description(order.getDescription())
+                .status(order.getStatus())
+                .feedback(order.getFeedback())
+                .finalAmount(order.getFinalAmount())
+                .staffId(order.getStaff() != null ? order.getStaff().getId() : null)
+                .customerId(order.getCustomer() != null ? order.getCustomer().getId() : null)
+                .orderDetails(details)
+                .build();
+    }
 }
 
 
