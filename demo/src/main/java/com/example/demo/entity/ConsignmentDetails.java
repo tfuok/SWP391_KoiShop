@@ -17,15 +17,15 @@ public class ConsignmentDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+     long id;
 
     @ManyToOne
     @JsonIgnore
     @JoinColumn(name = "consignment_id")
-    private Consignment consignment;
+     Consignment consignment;
 
     // Owning side of the relationship
     @ManyToOne
     @JoinColumn(name = "koi_id")
-    private Koi koi;
+     Koi koi;
 }

@@ -2,6 +2,7 @@ package com.example.demo.api;
 
 import com.example.demo.entity.Consignment;
 import com.example.demo.model.Request.ConsignmentRequest;
+import com.example.demo.model.Response.KoiOnlineConsignmentResponse;
 import com.example.demo.service.ConsignmentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -55,6 +56,11 @@ public class ConsignmentAPI {
     public ResponseEntity<Consignment> updateConsignment(@Valid @RequestBody ConsignmentRequest consignment, @PathVariable long id) {
         Consignment consignmentResponse = consignmentService.updateConsignment(consignment, id);
         return ResponseEntity.ok(consignmentResponse);
+    }
+    @GetMapping("getOnlineConsignmentKoi")
+    public ResponseEntity<List<KoiOnlineConsignmentResponse>> getConsignment() {
+        List<KoiOnlineConsignmentResponse> consignmentList = consignmentService.getAllOnlineKoi();
+        return ResponseEntity.ok(consignmentList);
     }
 }
 

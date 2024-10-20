@@ -3,6 +3,8 @@ package com.example.demo.service;
 import com.example.demo.entity.*;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.*;
+import com.example.demo.model.Response.KoiOfflineConsignmentResponse;
+import com.example.demo.model.Response.KoiOnlineConsignmentResponse;
 import com.example.demo.model.Response.KoiPageResponse;
 import com.example.demo.model.Response.KoiResponse;
 import com.example.demo.repository.*;
@@ -462,4 +464,38 @@ public class ConsignmentService {
         }
         return consignmentRepository.save(consignment);
     }
+public List<KoiOnlineConsignmentResponse> getAllOnlineKoi() {
+    List<KoiOnlineConsignmentResponse> responses = new ArrayList<>();
+    for (Koi koi : koiLotRepository.findByAccountIdAndPriceIsNotNull(authenticationService.getCurrentAccount().getId())) {
+        KoiOnlineConsignmentResponse response = new KoiOnlineConsignmentResponse();
+        response.setId(koi.getId());
+        response.setName(koi.getName());
+        response.setPrice(koi.getPrice());
+        if (koi.isConsignment() == true && koi.isSold() == true) {
+            response.setStatus("Da duoc ban");
+        } else if (koi.isConsignment() == true && koi.isSold() == false) {
+            response.setStatus("Chua duoc ban");
+        } else {
+            response.setStatus("Chua duoc chap nhan");
+        }
+        response.setImgUrl(koi.getImages());
+        responses.add(response);
+    }
+    return responses;
+}
+//    public List<KoiOfflineConsignmentResponse> getAllOfflineKoi(){
+//        List<KoiOnlineConsignmentResponse> responses = new ArrayList<>();
+//        for(Koi koi : koiLotRepository.findByAccountIdAndPriceIsNull(authenticationService.getCurrentAccount().getId())){
+//            KoiOfflineConsignmentResponse response = new KoiOfflineConsignmentResponse();
+//            response.setId(koi.getId());
+//            consignmentRepository.findBy
+//            response.setEndDate(koi.getOrderDetails().);
+//            response.setPrice(koi.getPrice());
+//            response.setIsSold(
+//            response.setImgUrl(koi.getImagesList().get(0).getImages());
+//            responses.add(response);
+//        }
+//        return responses;
+//
+//    }
 }
