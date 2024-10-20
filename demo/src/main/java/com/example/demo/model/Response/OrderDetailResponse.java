@@ -11,4 +11,5 @@ public class OrderDetailResponse {
     private long koiId;
     private double price;
     private String koiName;
+    private String imageUrl;
 }
