@@ -184,16 +184,17 @@ public class OrderService {
             //Account manager = accountRepository.findAccountByRole(Role.MANAGER);
             Transactions transaction3 = new Transactions();
             for (OrderDetails orderDetails : orders.getOrderDetails()) {
-                if(orderDetails.getKoi().getAccount().getRole()== Role.CUSTOMER)
-                transaction3.setFrom(manager);
-                transaction3.setTo(orderDetails.getKoi().getAccount());
-                transaction3.setPayment(payment);
-                transaction3.setStatus(TransactionEnum.SUCCESS);
-                transaction3.setDescription("MANAGER TO CONSIGNMENT VENDOR");
-                double MinusBalance = manager.getBalance() - orderDetails.getPrice()* 0.9 ;
-                manager.setBalance(MinusBalance);
-                orderDetails.getKoi().getAccount().setBalance(orderDetails.getPrice()*0.9);
-                transactions.add(transaction3);
+                if(orderDetails.getKoi().getAccount().getRole()== Role.CUSTOMER) {
+                    transaction3.setFrom(manager);
+                    transaction3.setTo(orderDetails.getKoi().getAccount());
+                    transaction3.setPayment(payment);
+                    transaction3.setStatus(TransactionEnum.SUCCESS);
+                    transaction3.setDescription("MANAGER TO CONSIGNMENT VENDOR");
+                    double MinusBalance = manager.getBalance() - orderDetails.getPrice() * 0.9;
+                    manager.setBalance(MinusBalance);
+                    orderDetails.getKoi().getAccount().setBalance(orderDetails.getPrice() * 0.9);
+                    transactions.add(transaction3);
+                }
             }
             payment.setTransactions(transactions);
             Koi koi = null;
