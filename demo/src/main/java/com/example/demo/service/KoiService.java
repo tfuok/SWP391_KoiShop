@@ -87,40 +87,52 @@ public class KoiService {
 
 
     public KoiPageResponse getAllKoi(int page, int size) {
-        Page<Koi> kois = koiLotRepository.findAllByIsDeletedFalse(PageRequest.of(page, size));
-        List<KoiResponse> koiLotResponses = new ArrayList<>();
+        try {
+            Page<Koi> kois = koiLotRepository.findAllByIsDeletedFalse(PageRequest.of(page, size));
+            List<KoiResponse> koiLotResponses = new ArrayList<>();
 
-        for (Koi koi : kois.getContent()) {
-            KoiResponse koiLotResponse = modelMapper.map(koi, KoiResponse.class);
+            for (Koi koi : kois.getContent()) {
+                KoiResponse koiLotResponse = modelMapper.map(koi, KoiResponse.class);
 
-            // Only include non-deleted breeds
-            List<String> breedNames = koi.getBreeds().stream()
-                    .filter(breed -> !breed.isDeleted())
-                    .map(Breed::getName)
-                    .collect(Collectors.toList());
+                // Only include non-deleted breeds
+                List<String> breedNames = koi.getBreeds().stream()
+                        .filter(breed -> !breed.isDeleted())
+                        .map(Breed::getName)
+                        .collect(Collectors.toList());
+                koiLotResponse.setBreeds(breedNames);
 
-            koiLotResponse.setBreeds(breedNames);
+                // Map image URLs
+                List<String> imageUrls = koi.getImagesList().stream()
+                        .map(Images::getImages)
+                        .collect(Collectors.toList());
+                koiLotResponse.setImagesList(imageUrls);  // Set images list in the response
 
-            List<String> imageUrls = koi.getImagesList().stream()
-                    .map(Images::getImages)
-                    .collect(Collectors.toList());
-            koiLotResponse.setImagesList(imageUrls);  // Set images list in the response
+                // Check if the certificate exists before accessing its properties
+                if (koiLotResponse.getQuantity() == 1 && koi.getCertificate() != null) {
+                    String certificateImageUrl = koi.getCertificate().getImageUrl();
+                    koiLotResponse.setCertificate(certificateImageUrl);
+                } else {
+                    koiLotResponse.setCertificate(null); // Handle case where no certificate exists
+                }
 
-            if(koiLotResponse.getQuantity()==1) {
-                String certificateImageUrls = koi.getCertificate().getImageUrl();
-                koiLotResponse.setCertificate(certificateImageUrls);
+                koiLotResponses.add(koiLotResponse);
             }
-            koiLotResponses.add(koiLotResponse);
+
+            // Prepare the response
+            KoiPageResponse koiResponse = new KoiPageResponse();
+            koiResponse.setTotalPages(kois.getTotalPages());
+            koiResponse.setContent(koiLotResponses);
+            koiResponse.setPageNumber(kois.getNumber());
+            koiResponse.setTotalElements(kois.getTotalElements());
+
+            return koiResponse;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to fetch koi data", e); // Provide meaningful error messages
         }
-
-        KoiPageResponse koiResponse = new KoiPageResponse();
-        koiResponse.setTotalPages(kois.getTotalPages());
-        koiResponse.setContent(koiLotResponses);
-        koiResponse.setPageNumber(kois.getNumber());
-        koiResponse.setTotalElements(kois.getTotalElements());
-
-        return koiResponse;
     }
+
 
 
     public Koi updateKoi(KoiRequest koiRequest, long id) {
@@ -226,9 +238,11 @@ public class KoiService {
             koiLotResponse.setImagesList(imageUrls);  // Set images list in the response
 
             // Set the certificate image if quantity is 1
-            if(koiLotResponse.getQuantity() == 1) {
+            if(koiLotResponse.getQuantity() == 1 && koi.getCertificate() != null) {
                 String certificateImageUrls = koi.getCertificate().getImageUrl();
                 koiLotResponse.setCertificate(certificateImageUrls);
+            }else {
+                koiLotResponse.setCertificate(null);
             }
 
             koiLotResponses.add(koiLotResponse);

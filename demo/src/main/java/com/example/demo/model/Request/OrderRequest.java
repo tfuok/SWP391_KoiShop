@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 public class OrderRequest {
-    List<OrderDetailRequest> detail;
-    String description;
-    Date endDate;
+    private List<OrderDetailRequest> detail;
+    private String description;
+    private Date endDate;
 }

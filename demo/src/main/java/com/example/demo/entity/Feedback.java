@@ -20,4 +20,8 @@ public class Feedback {
     @ManyToOne
     @JoinColumn(name = "customer_id")
     Account customer;
+
+    @OneToOne
+    @JoinColumn(name = "order_id")
+    Orders orders;
 }

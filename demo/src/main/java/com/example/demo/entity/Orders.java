@@ -25,14 +25,11 @@ public class Orders {
 
     double total;
 
-    int rating;
-
     String description;
 
     @Enumerated(EnumType.STRING)
     Status status;
 
-    String feedback;
 
     double finalAmount;
 
@@ -40,11 +37,6 @@ public class Orders {
     @JoinColumn(name = "customer_id")
     @JsonIgnore
     Account customer;
-
-    @ManyToOne
-    @JoinColumn(name = "staff_id")
-    @JsonIgnore
-    Account staff;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     @JsonIgnore
@@ -54,5 +46,12 @@ public class Orders {
     @JsonIgnore
     Payment payment;
 
+    @ManyToOne
+    @JoinColumn(name = "staff_id")
+    @JsonIgnore
+    Account staff;
 
+    @OneToOne(mappedBy = "orders")
+    @JsonIgnore
+    Feedback feedback;
 }

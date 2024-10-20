@@ -4,6 +4,7 @@ import com.example.demo.entity.*;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.OrderDetailRequest;
 import com.example.demo.model.Request.OrderRequest;
+import com.example.demo.model.Response.FeedbackResponse;
 import com.example.demo.model.Response.OrderDetailResponse;
 import com.example.demo.model.Response.OrderResponse;
 import com.example.demo.repository.*;
@@ -180,17 +181,19 @@ public class OrderService {
             transactions.add(transaction2);
 
             payment.setTransactions(transactions);
-        Koi koi = null;
-        for (OrderDetails orderDetails : orders.getOrderDetails()) {
-            OrderDetails details = new OrderDetails();
-            koi = koiRepository.findKoiByIdAndIsDeletedFalse(orderDetails.getKoi().getId());
-            koi.setSold(true);
-            koi.setAccount(customer);
-            koiRepository.save(koi);
-            if(koi.getQuantity()==1) {
-                certificateService.sendCertificateEmail(customer, koi.getCertificate());
+            Koi koi = null;
+            for (OrderDetails orderDetails : orders.getOrderDetails()) {
+                OrderDetails details = new OrderDetails();
+                koi = koiRepository.findKoiByIdAndIsDeletedFalse(orderDetails.getKoi().getId());
+                koi.setSold(true);
+                koi.setAccount(customer);
+                koiRepository.save(koi);
+                if (koi.getQuantity() == 1) {
+                    certificateService.sendCertificateEmail(customer, koi.getCertificate());
+                }
             }
-        }
+            orders.setStatus(Status.PAID);
+            orderRepository.save(orders);
             accountRepository.save(manager);
             paymentRepository.save(payment);
         } catch (Exception e) {
@@ -198,7 +201,7 @@ public class OrderService {
         }
     }
 
-    public OrderResponse assignStaff(long orderId, long staffId){
+    public OrderResponse assignStaff(long orderId, long staffId) {
         Orders orders = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
         Account staff = accountRepository.findById(staffId)
@@ -215,6 +218,20 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    public List<OrderResponse> getOrdersForCurrentUser() {
+        // Get the currently authenticated user
+        Account customer = authenticationService.getCurrentAccount();
+
+        // Find all orders by this customer
+        List<Orders> ordersList = orderRepository.findOrderssByCustomer(customer);
+
+        // Convert the list of Orders entities to OrderResponse objects
+        return ordersList.stream()
+                .map(this::mapToOrderResponse)  // Reuse the existing mapToOrderResponse method
+                .collect(Collectors.toList());
+    }
+
+
     private OrderResponse mapToOrderResponse(Orders order) {
         List<OrderDetailResponse> details = order.getOrderDetails().stream()
                 .map(detail -> new OrderDetailResponse(
@@ -224,18 +241,28 @@ public class OrderService {
                 ))
                 .collect(Collectors.toList());
 
+        Feedback feedback = order.getFeedback();
+        FeedbackResponse feedbackResponse = null;
+        if (feedback != null) {
+            feedbackResponse = new FeedbackResponse(
+                    feedback.getId(),
+                    feedback.getContent(),
+                    feedback.getRating(),
+                    feedback.getCustomer() != null ? feedback.getCustomer().getUsername() : null,
+                    order.getId()
+            );
+        }
         return OrderResponse.builder()
                 .id(order.getId())
                 .date(order.getDate())
                 .total(order.getTotal())
-                .rating(order.getRating())
                 .description(order.getDescription())
                 .status(order.getStatus())
-                .feedback(order.getFeedback())
                 .finalAmount(order.getFinalAmount())
                 .staffId(order.getStaff() != null ? order.getStaff().getId() : null)
                 .customerId(order.getCustomer() != null ? order.getCustomer().getId() : null)
                 .orderDetails(details)
+                .feedback(feedbackResponse)
                 .build();
     }
 }

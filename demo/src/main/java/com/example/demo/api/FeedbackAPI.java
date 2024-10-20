@@ -20,15 +20,21 @@ public class FeedbackAPI {
     @Autowired
     FeedbackService feedbackService;
 
-    @PostMapping
-    public ResponseEntity create(@RequestBody FeedbackRequest feedbackRequest) {
-        Feedback feedback = feedbackService.createNewFeedback(feedbackRequest);
-        return ResponseEntity.ok(feedback);
-    }
+//    @PostMapping
+//    public ResponseEntity create(@RequestBody FeedbackRequest feedbackRequest) {
+//        Feedback feedback = feedbackService.createNewFeedback(feedbackRequest);
+//        return ResponseEntity.ok(feedback);
+//    }
 
     @GetMapping
     public ResponseEntity getFeedback() {
         List<FeedbackResponse> feedback = feedbackService.getFeedback();
+        return ResponseEntity.ok(feedback);
+    }
+
+    @PostMapping("/on-orders")
+    public ResponseEntity feedbackOnOrders(@RequestBody FeedbackRequest feedbackRequest, long id){
+        Feedback feedback = feedbackService.feedbackOnOrders(feedbackRequest,id);
         return ResponseEntity.ok(feedback);
     }
 }

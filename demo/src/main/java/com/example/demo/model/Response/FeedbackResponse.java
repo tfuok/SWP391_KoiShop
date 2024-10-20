@@ -10,4 +10,5 @@ public class FeedbackResponse {
     String content;
     int rating;
     String username;
+    long orderId;
 }

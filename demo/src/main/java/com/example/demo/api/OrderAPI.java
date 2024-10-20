@@ -36,8 +36,7 @@ public class OrderAPI {
 
     @GetMapping("/customer")
     public ResponseEntity get(){
-        Account account = authenticationService.getCurrentAccount();
-        List<Orders> orders = orderRepo.findOrderssByCustomer(account);
+        List<OrderResponse> orders = orderService.getOrdersForCurrentUser();
         return ResponseEntity.ok(orders);
     }
 

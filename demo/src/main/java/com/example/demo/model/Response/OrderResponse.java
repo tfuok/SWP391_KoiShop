@@ -17,13 +17,11 @@ public class OrderResponse {
     private long id;
     private Date date;
     private double total;
-    private int rating;
     private String description;
     private Status status;
-    private String feedback;
     private double finalAmount;
     private Long staffId;
     private Long customerId;
     private List<OrderDetailResponse> orderDetails;
-
+    private FeedbackResponse feedback;
 }
