@@ -30,7 +30,6 @@ public class Orders {
     @Enumerated(EnumType.STRING)
     Status status;
 
-
     double finalAmount;
 
     @ManyToOne
