@@ -30,17 +30,6 @@ public class FeedbackService {
     @Autowired
     ReportRepository reportRepository;
 
-//    public Feedback createNewFeedback(FeedbackRequest feedbackRequest) {
-//        Feedback feedback = new Feedback();
-////        Account shop = accountRepository.findById(feedbackRequest.getShopId())
-////                .orElseThrow(() -> new EntityNotFoundException("Shop not found"));
-//        feedback.setContent(feedbackRequest.getContent());
-//        feedback.setRating(feedbackRequest.getRating());
-//        feedback.setCustomer(authenticationService.getCurrentAccount());
-////        feedback.setShop(shop);
-//        return feedbackRepository.save(feedback);
-//    }
-
     public Feedback feedbackOnOrders(FeedbackRequest feedbackRequest, long orderId) {
         Feedback feedback = new Feedback();
         Orders orders = orderRepository.findById(orderId)
@@ -53,18 +42,7 @@ public class FeedbackService {
     }
 
     public List<FeedbackResponse> getFeedback() {
-        return feedbackRepository.findAll().stream()
-                .map(feedback -> {
-                    Orders orders = feedback.getOrders();
-                    return new FeedbackResponse(
-                            feedback.getId(),
-                            feedback.getContent(),
-                            feedback.getRating(),
-                            feedback.getCustomer() != null ? feedback.getCustomer().getUsername() : null,
-                            orders.getId()
-                    );
-                })
-                .collect(Collectors.toList());
+        return feedbackRepository.findAllFeedbackWithDetails();
     }
 
     public Report submitReport(ReportRequest reportRequest) {
@@ -79,14 +57,45 @@ public class FeedbackService {
     }
 
     public List<ReportResponse> getAllReports() {
-        List<Report> reports = reportRepository.findAll();
-        return reports.stream()
-                .map(report -> new ReportResponse(
-                        report.getId(),
-                        report.getReportMessage(),
-                        report.getCustomer().getUsername(),
-                        report.getOrders().getId()
-                ))
-                .collect(Collectors.toList());
+        return reportRepository.findAllReportsWithDetails();
     }
+
+
+    //    public Feedback createNewFeedback(FeedbackRequest feedbackRequest) {
+//        Feedback feedback = new Feedback();
+////        Account shop = accountRepository.findById(feedbackRequest.getShopId())
+////                .orElseThrow(() -> new EntityNotFoundException("Shop not found"));
+//        feedback.setContent(feedbackRequest.getContent());
+//        feedback.setRating(feedbackRequest.getRating());
+//        feedback.setCustomer(authenticationService.getCurrentAccount());
+////        feedback.setShop(shop);
+//        return feedbackRepository.save(feedback);
+//    }
+
+//    public List<ReportResponse> getAllReports() {
+//        List<Report> reports = reportRepository.findAll();
+//        return reports.stream()
+//                .map(report -> new ReportResponse(
+//                        report.getId(),
+//                        report.getReportMessage(),
+//                        report.getCustomer().getUsername(),
+//                        report.getOrders().getId()
+//                ))
+//                .collect(Collectors.toList());
+//    }
+
+    //    public List<FeedbackResponse> getFeedback() {
+//        return feedbackRepository.findAll().stream()
+//                .map(feedback -> {
+//                    Orders orders = feedback.getOrders();
+//                    return new FeedbackResponse(
+//                            feedback.getId(),
+//                            feedback.getContent(),
+//                            feedback.getRating(),
+//                            feedback.getCustomer() != null ? feedback.getCustomer().getUsername() : null,
+//                            orders.getId()
+//                    );
+//                })
+//                .collect(Collectors.toList());
+//    }
 }
