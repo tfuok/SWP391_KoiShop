@@ -24,10 +24,7 @@ public class VoucherService {
     public Voucher createVoucher(VoucherRequest voucherRequest) {
         try {
             Voucher voucher = modelMapper.map(voucherRequest, Voucher.class);
-            Account accountRequest = authenticationService.getCurrentAccount();
-            voucher.setAccount(accountRequest);
-            Voucher newVoucher = voucherRepository.save(voucher);
-            return newVoucher;
+            return voucherRepository.save(voucher);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -52,9 +49,8 @@ public class VoucherService {
         voucher.setDiscountValue(voucherRequest.getDiscountValue());
         voucher.setExpiredDate(voucherRequest.getExpiredDate());
         voucher.setQuantity(voucherRequest.getQuantity());
-        voucher.setDescription(voucherRequest.getDescription());
-        voucher.setMinimumPoints(voucherRequest.getMinimumPoints());
-        voucher.setMinimumPrice(voucherRequest.getMinimumPrice());
+        voucher.setCode(voucher.getCode());
+        voucher.setName(voucherRequest.getName());
         return voucherRepository.save(voucher);
     }
 }

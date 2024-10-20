@@ -2,6 +2,7 @@ package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,10 +28,14 @@ public class Orders {
 
     String description;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
     Status status;
 
     double finalAmount;
+
+    String image;
 
     @ManyToOne
     @JoinColumn(name = "customer_id")

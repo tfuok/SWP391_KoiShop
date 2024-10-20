@@ -2,6 +2,7 @@ package com.example.demo.api;
 
 import com.example.demo.entity.Account;
 import com.example.demo.entity.Orders;
+import com.example.demo.entity.Status;
 import com.example.demo.model.Request.OrderRequest;
 import com.example.demo.model.Response.OrderResponse;
 import com.example.demo.repository.OrderRepository;
@@ -34,7 +35,7 @@ public class OrderAPI {
         return ResponseEntity.ok(url);
     }
 
-    @GetMapping("/customer")
+    @GetMapping("/my-orders")
     public ResponseEntity get(){
         List<OrderResponse> orders = orderService.getOrdersForCurrentUser();
         return ResponseEntity.ok(orders);
@@ -55,5 +56,14 @@ public class OrderAPI {
     public ResponseEntity assignStaff(long orderId, long staffId){
         OrderResponse orders = orderService.assignStaff(orderId,staffId);
         return ResponseEntity.ok(orders);
+    }
+
+    @PutMapping("/{orderId}/status")
+    public ResponseEntity<Orders> updateOrderStatus(
+            @PathVariable Long orderId,
+            @RequestParam Status newStatus) {
+
+        Orders updatedOrder = orderService.updateOrderStatusByStaff(orderId, newStatus);
+        return ResponseEntity.ok(updatedOrder);
     }
 }

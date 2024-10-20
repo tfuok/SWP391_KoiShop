@@ -9,4 +9,6 @@ public interface VoucherRepository extends JpaRepository<Voucher, Long> {
     Voucher findVoucherById(long id);
 
     List<Voucher> findVoucherByIsDeletedFalse();
+
+    Voucher findVoucherByCodeAndIsDeletedFalse(String code);
 }
