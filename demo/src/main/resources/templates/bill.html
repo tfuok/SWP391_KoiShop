@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Bill</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            width: 400px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .total {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Order Bill</h1>
+<p>Date: <strong id="order-date"></strong></p>
+<p>Customer: <strong id="customer-name">John Doe</strong></p>
+<p>Description: <strong id="order-description">Order for Koi Fish and Supplies</strong></p>
+<p>Status: <strong id="order-status">CONFIRMED</strong></p>
+
+<table>
+    <thead>
+    <tr>
+        <th>Koi</th> <!-- Koi Column -->
+        <th>Price</th>
+    </tr>
+    </thead>
+    <tbody id="order-details">
+    <!-- Order details will be populated here -->
+    </tbody>
+    <tfoot>
+    <tr>
+        <td class="total">Grand Total:</td>
+        <td class="total" id="grand-total">$0.00</td>
+    </tr>
+    </tfoot>
+</table>
+
+<p>Thank you for your order!</p>
+
+<script>
+    // Example order data - this should be replaced with actual data from your backend
+    const order = {
+        date: new Date().toLocaleDateString(),
+        customerName: "John Doe",
+        description: "Order for Koi Fish and Supplies",
+        status: "CONFIRMED",
+        orderDetails: [
+            { koi: { name: "Koi Fish 1", price: 30.00 } },
+            { koi: { name: "Fish Food", price: 10.00 } },
+            { koi: { name: "Water Conditioner", price: 5.00 } },
+            { koi: { name: "Koi Fish 2", price: 30.00 } },
+            { koi: { name: "Fish Food", price: 10.00 } },
+            { koi: { name: "Water Conditioner", price: 5.00 } }
+        ]
+    };
+
+    // Populate order information
+    document.getElementById('order-date').innerText = order.date;
+    document.getElementById('customer-name').innerText = order.customerName;
+    document.getElementById('order-description').innerText = order.description;
+    document.getElementById('order-status').innerText = order.status;
+
+    const orderDetailsContainer = document.getElementById('order-details');
+    let grandTotal = 0;
+
+    order.orderDetails.forEach(detail => {
+        // Calculate total for each item but do not display it
+        grandTotal += detail.koi.price;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${detail.koi.name}</td>
+            <td>$${detail.koi.price.toFixed(2)}</td>
+        `;
+        orderDetailsContainer.appendChild(row);
+    });
+
+    document.getElementById('grand-total').innerText = `$${grandTotal.toFixed(2)}`;
+</script>
+
+</body>
+</html>

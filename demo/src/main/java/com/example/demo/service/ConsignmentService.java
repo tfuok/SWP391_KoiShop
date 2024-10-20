@@ -237,14 +237,9 @@ public class ConsignmentService {
     }
 
 
-    /**
-     * Retrieves consignments associated with a specific user (account) ID.
-     *
-     * @param accountId The ID of the account.
-     * @return A list of Consignments linked to the account.
-     */
-    public List<Consignment> getConsignmentsByAccountId(long accountId) {
-        return consignmentRepository.findByAccount_IdAndIsDeletedFalse(accountId);
+
+    public List<Consignment> getStaffConsignments() {
+        return consignmentRepository.findByStaff_Id(authenticationService.getCurrentAccount().getId());
     }
 
     /**

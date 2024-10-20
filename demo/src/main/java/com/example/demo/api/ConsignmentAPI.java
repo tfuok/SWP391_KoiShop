@@ -29,15 +29,15 @@ public class ConsignmentAPI {
     }
 
 
-    @GetMapping()
+    @GetMapping("manager")
     public ResponseEntity<List<Consignment>> showConsignments() {
         List<Consignment> consignmentList = consignmentService.getAllConsignments();
         return ResponseEntity.ok(consignmentList);
     }
 
-    @GetMapping("{accountId}")
-    public ResponseEntity<List<Consignment>> getConsignment(@PathVariable long accountId) {
-        List<Consignment> consignmentList = consignmentService.getConsignmentsByAccountId(accountId);
+    @GetMapping("staff")
+    public ResponseEntity<List<Consignment>> getConsignment() {
+        List<Consignment> consignmentList = consignmentService.getStaffConsignments();
         return ResponseEntity.ok(consignmentList);
     }
 
