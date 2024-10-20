@@ -40,7 +40,9 @@ public class Consignment implements UserDetails {
 
     Date createDate;
 
-    Status status;
+
+    @Enumerated(EnumType.STRING)  // Use EnumType.STRING to match ENUM in database
+    private Status status;
 
     Boolean isDeleted = false;
     @OneToMany(mappedBy = "consignment",cascade = CascadeType.ALL, orphanRemoval = true)
