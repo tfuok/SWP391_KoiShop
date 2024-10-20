@@ -122,11 +122,13 @@ public class ConsignmentService {
         }
 
         // Initialize ConsignmentDetails list
+
         if(consignmentRequest.getConsignmentDetailRequests().isEmpty()){
             throw new NotFoundException("Consignment details not found");
         }
         List<ConsignmentDetails> consignmentDetailsList = new ArrayList<>();
         for (ConsignmentDetailRequest consignmentDetailRequest : consignmentRequest.getConsignmentDetailRequests()) {
+
 
             Koi koi = createConsignmentKoi(consignmentDetailRequest.getKoiRequest());
             //Certificate certificate = certificateService.createCertificates(koi);
@@ -466,36 +468,38 @@ public class ConsignmentService {
     }
 public List<KoiOnlineConsignmentResponse> getAllOnlineKoi() {
     List<KoiOnlineConsignmentResponse> responses = new ArrayList<>();
-    for (Koi koi : koiLotRepository.findByAccountIdAndPriceIsNotNull(authenticationService.getCurrentAccount().getId())) {
+    for (Koi koi : koiLotRepository.findAllKoiByAccountIdAndConsignmentType(authenticationService.getCurrentAccount().getId(),Type.ONLINE)) {
         KoiOnlineConsignmentResponse response = new KoiOnlineConsignmentResponse();
-        response.setId(koi.getId());
+        response.setId(koiLotRepository.findConsignmentByKoiId(koi.getId()).getId());
         response.setName(koi.getName());
         response.setPrice(koi.getPrice());
         if (koi.isConsignment() == true && koi.isSold() == true) {
-            response.setStatus("Da duoc ban");
+            response.setStatus("Sold");
         } else if (koi.isConsignment() == true && koi.isSold() == false) {
-            response.setStatus("Chua duoc ban");
+            response.setStatus("Not Sold");
         } else {
-            response.setStatus("Chua duoc chap nhan");
+            response.setStatus("Not Accepted");
         }
         response.setImgUrl(koi.getImages());
         responses.add(response);
     }
     return responses;
 }
-//    public List<KoiOfflineConsignmentResponse> getAllOfflineKoi(){
-//        List<KoiOnlineConsignmentResponse> responses = new ArrayList<>();
-//        for(Koi koi : koiLotRepository.findByAccountIdAndPriceIsNull(authenticationService.getCurrentAccount().getId())){
-//            KoiOfflineConsignmentResponse response = new KoiOfflineConsignmentResponse();
-//            response.setId(koi.getId());
-//            consignmentRepository.findBy
-//            response.setEndDate(koi.getOrderDetails().);
-//            response.setPrice(koi.getPrice());
-//            response.setIsSold(
-//            response.setImgUrl(koi.getImagesList().get(0).getImages());
-//            responses.add(response);
-//        }
-//        return responses;
-//
-//    }
+    public List<KoiOfflineConsignmentResponse> getAllOfflineKoi(){
+        List<KoiOfflineConsignmentResponse> responses = new ArrayList<>();
+        for(Koi koi : koiLotRepository.findAllKoiByAccountIdAndConsignmentType(authenticationService.getCurrentAccount().getId(),Type.OFFLINE)){
+            KoiOfflineConsignmentResponse response = new KoiOfflineConsignmentResponse();
+            response.setId(koiLotRepository.findConsignmentByKoiId(koi.getId()).getId());
+            response.setEndDate(koiLotRepository.findConsignmentByKoiId(koi.getId()).getEndDate());
+            response.setImgUrl(koi.getImages());
+            if(koi.isConsignment()==true) {
+                response.setIsConsignment("Consigned");
+            }else{
+                response.setIsConsignment("Not Consigned");
+            }
+            responses.add(response);
+        }
+        return responses;
+
+    }
 }

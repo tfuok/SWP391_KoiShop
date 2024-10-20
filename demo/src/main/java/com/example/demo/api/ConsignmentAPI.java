@@ -2,6 +2,7 @@ package com.example.demo.api;
 
 import com.example.demo.entity.Consignment;
 import com.example.demo.model.Request.ConsignmentRequest;
+import com.example.demo.model.Response.KoiOfflineConsignmentResponse;
 import com.example.demo.model.Response.KoiOnlineConsignmentResponse;
 import com.example.demo.service.ConsignmentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -58,8 +59,13 @@ public class ConsignmentAPI {
         return ResponseEntity.ok(consignmentResponse);
     }
     @GetMapping("getOnlineConsignmentKoi")
-    public ResponseEntity<List<KoiOnlineConsignmentResponse>> getConsignment() {
+    public ResponseEntity<List<KoiOnlineConsignmentResponse>> getOnlineConsignmentKoi() {
         List<KoiOnlineConsignmentResponse> consignmentList = consignmentService.getAllOnlineKoi();
+        return ResponseEntity.ok(consignmentList);
+    }
+    @GetMapping("getOfflineConsignmentKoi")
+    public ResponseEntity<List<KoiOfflineConsignmentResponse>> getOfflineConsignmentKoi() {
+        List<KoiOfflineConsignmentResponse> consignmentList = consignmentService.getAllOfflineKoi();
         return ResponseEntity.ok(consignmentList);
     }
 }
