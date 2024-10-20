@@ -107,10 +107,14 @@ public class Account implements UserDetails {
     @OneToMany(mappedBy = "account")
     @JsonIgnore
     List<Consignment> consignments;
+
     double balance = 0;
 
     @OneToMany(mappedBy = "customer")
     @JsonIgnore
     List<Feedback> customer_feedbacks;
 
+    @OneToMany(mappedBy = "customer")
+    @JsonIgnore
+    List<Report> customer_report;
 }

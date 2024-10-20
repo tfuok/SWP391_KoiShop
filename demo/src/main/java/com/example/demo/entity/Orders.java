@@ -53,4 +53,8 @@ public class Orders {
     @OneToOne(mappedBy = "orders")
     @JsonIgnore
     Feedback feedback;
+
+    @OneToOne(mappedBy = "orders")
+    @JsonIgnore
+    Report report;
 }

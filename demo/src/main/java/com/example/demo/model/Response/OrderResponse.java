@@ -24,4 +24,5 @@ public class OrderResponse {
     private Long customerId;
     private List<OrderDetailResponse> orderDetails;
     private FeedbackResponse feedback;
+    private ReportResponse report;
 }

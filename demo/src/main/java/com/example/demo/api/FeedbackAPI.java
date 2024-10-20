@@ -2,8 +2,11 @@ package com.example.demo.api;
 
 import com.example.demo.entity.Feedback;
 import com.example.demo.entity.Koi;
+import com.example.demo.entity.Report;
 import com.example.demo.model.Request.FeedbackRequest;
+import com.example.demo.model.Request.ReportRequest;
 import com.example.demo.model.Response.FeedbackResponse;
+import com.example.demo.model.Response.ReportResponse;
 import com.example.demo.service.FeedbackService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +35,9 @@ public class FeedbackAPI {
         return ResponseEntity.ok(feedback);
     }
 
-    @PostMapping("/on-orders")
-    public ResponseEntity feedbackOnOrders(@RequestBody FeedbackRequest feedbackRequest, long id){
-        Feedback feedback = feedbackService.feedbackOnOrders(feedbackRequest,id);
+    @PostMapping
+    public ResponseEntity feedbackOnOrders(@RequestBody FeedbackRequest feedbackRequest, long id) {
+        Feedback feedback = feedbackService.feedbackOnOrders(feedbackRequest, id);
         return ResponseEntity.ok(feedback);
     }
 }

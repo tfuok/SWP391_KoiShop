@@ -7,6 +7,7 @@ import com.example.demo.model.Request.OrderRequest;
 import com.example.demo.model.Response.FeedbackResponse;
 import com.example.demo.model.Response.OrderDetailResponse;
 import com.example.demo.model.Response.OrderResponse;
+import com.example.demo.model.Response.ReportResponse;
 import com.example.demo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -269,6 +270,16 @@ public class OrderService {
                     order.getId()
             );
         }
+        Report report = order.getReport();
+        ReportResponse reportResponse = null;
+        if (report != null) {
+            reportResponse = new ReportResponse(
+                    report.getId(),
+                    report.getReportMessage(),
+                    report.getCustomer() != null ? report.getCustomer().getUsername() : null,
+                    order.getId()
+            );
+        }
         return OrderResponse.builder()
                 .id(order.getId())
                 .date(order.getDate())
@@ -280,6 +291,7 @@ public class OrderService {
                 .customerId(order.getCustomer() != null ? order.getCustomer().getId() : null)
                 .orderDetails(details)
                 .feedback(feedbackResponse)
+                .report(reportResponse)
                 .build();
     }
 }
