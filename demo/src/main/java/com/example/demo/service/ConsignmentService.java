@@ -278,7 +278,7 @@ public class ConsignmentService {
         String tmnCode = "VONI2DAD";
         String secretKey = "PIOSTSKRYSENPWY7NW7UG7HGWCHTT4IS";
         String vnpUrl = " https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        String returnUrl = "https://blearning.vn/guide/swp/docker-local?consignment=" + consignment.getId(); // trang thong bao thanh toan thanh cong
+        String returnUrl = "https://blearning.vn/guide/swp/docker-local?orderID=" + consignment.getId(); // trang thong bao thanh toan thanh cong
         String currCode = "VND";
 
         Map<String, String> vnpParams = new TreeMap<>();
