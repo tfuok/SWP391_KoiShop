@@ -22,14 +22,14 @@ public class KoiAPI {
     KoiService koiLotService;
 
     @PostMapping
-    public ResponseEntity create(@Valid @RequestBody KoiRequest koiLotRequest){
+    public ResponseEntity create(@Valid @RequestBody KoiRequest koiLotRequest) {
         Koi koiLot = koiLotService.createKoi(koiLotRequest);
         return ResponseEntity.ok(koiLot);
     }
 
     @PutMapping("{id}")
     public ResponseEntity updateKoi(@Valid @RequestBody KoiRequest koiLotRequest, @PathVariable long id) {
-        Koi newKoi = koiLotService.updateKoi(koiLotRequest,id);
+        Koi newKoi = koiLotService.updateKoi(koiLotRequest, id);
         return ResponseEntity.ok(newKoi);
     }
 
@@ -53,7 +53,7 @@ public class KoiAPI {
 //
 //    @GetMapping("/by-breed/{breedId}")
 //    public List<KoiLot> getKoiByBreed(@PathVariable long breedId) {
-//        return koiLotService.getKoiLotByBreed(breedId);
+//        return koiLotService.getKoiByBreed(breedId);
 //    }
 
     @GetMapping
@@ -71,7 +71,7 @@ public class KoiAPI {
 
         // Nếu có breedId, tìm kiếm koi theo breedId
         if (breedId != null) {
-            List<KoiResponse> koiByBreed = koiLotService.getKoiLotByBreed(breedId);
+            List<KoiResponse> koiByBreed = koiLotService.getKoiByBreed(breedId);
             return ResponseEntity.ok(koiByBreed);
         }
 
@@ -85,4 +85,10 @@ public class KoiAPI {
         return ResponseEntity.badRequest().body("Missing search criteria. Please enter page(0,1,2,...)");
     }
 
+    @GetMapping("/manager")
+    public ResponseEntity getKoiForManager(@RequestParam(value = "page", required = false) Integer page,
+                                           @RequestParam(value = "size", required = false, defaultValue = "5") Integer size) {
+        KoiPageResponse koiPage = koiLotService.getAllKoiManager(page, size);
+        return ResponseEntity.ok(koiPage);
+    }
 }
