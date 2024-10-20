@@ -384,8 +384,6 @@ public class ConsignmentService {
             double newBalance = manager.getBalance() + consignment.getCost();
             manager.setBalance(newBalance);
             transactions.add(transaction2);
-
-
             payment.setTransactions(transactions);
 
             accountRepository.save(manager);

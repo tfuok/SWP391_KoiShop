@@ -25,4 +25,5 @@ public class OrderResponse {
     private List<OrderDetailResponse> orderDetails;
     private FeedbackResponse feedback;
     private ReportResponse report;
+    private String image;
 }

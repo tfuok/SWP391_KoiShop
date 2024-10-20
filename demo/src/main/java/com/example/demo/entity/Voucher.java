@@ -21,26 +21,19 @@ public class Voucher {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
 
+    private String name;
+
     private double discountValue;
 
-    @Temporal(TemporalType.DATE)
-    private Date createDate;
+    private String code;
 
-    @Temporal(TemporalType.DATE)
     private Date expiredDate;
 
     private int quantity;
-    private int usedCount;
 
-    private String description;
-
-    private int minimumPoints; // Minimum points required to use the voucher
-
-    private double minimumPrice; // Minimum order price required to use the voucher
-
-    @ManyToOne
-    @JoinColumn(name = "account_id")
-    private Account account;
+//    @ManyToOne
+//    @JoinColumn(name = "account_id")
+//    private Account account;
 
     private boolean isDeleted;
 }

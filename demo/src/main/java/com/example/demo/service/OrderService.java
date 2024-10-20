@@ -43,6 +43,9 @@ public class OrderService {
     @Autowired
     CertificateService certificateService;
 
+    @Autowired
+    VoucherRepository voucherRepository;
+
     public Orders create(OrderRequest orderRequest) {
         Orders orders = new Orders();
         Account customer = authenticationService.getCurrentAccount();
@@ -65,6 +68,23 @@ public class OrderService {
         }
         orders.setOrderDetails(orderDetails);
         orders.setTotal(total);
+        if (orderRequest.getVoucherCode() != null) {
+            Voucher voucher = voucherRepository.findVoucherByCodeAndIsDeletedFalse(orderRequest.getVoucherCode());
+            if (voucher == null || voucher.getExpiredDate().before(new Date()) || voucher.getQuantity() <= 0) {
+                throw new NotFoundException("Invalid or expired voucher.");
+            }
+
+            // Apply discount
+            double discount = voucher.getDiscountValue();
+            double finalAmount = total - (total * discount / 100);  // Assuming percentage-based discount
+            orders.setFinalAmount(finalAmount);
+
+            // Decrease voucher quantity
+            voucher.setQuantity(voucher.getQuantity() - 1);
+            voucherRepository.save(voucher);
+        } else {
+            orders.setFinalAmount(total);  // No voucher, final amount remains the same
+        }
         return orderRepository.save(orders);
     }
 
@@ -77,7 +97,7 @@ public class OrderService {
          1.tao order
          */
         Orders orders = create(orderRequest);
-        double money = orders.getTotal() * 100;
+        double money = orders.getFinalAmount() * 100;
         String amount = String.valueOf((int) money);
 
         String tmnCode = "VONI2DAD";
@@ -209,10 +229,10 @@ public class OrderService {
                    // certificateService.sendCertificateEmail(customer, koi.getCertificate());
                 }
             }
-            orders.setStatus(Status.PAID);
-            orderRepository.save(orders);
             accountRepository.save(manager);
             paymentRepository.save(payment);
+            orders.setStatus(Status.PAID);
+            orderRepository.save(orders);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -237,17 +257,26 @@ public class OrderService {
 
     public List<OrderResponse> getOrdersForCurrentUser() {
         // Get the currently authenticated user
-        Account customer = authenticationService.getCurrentAccount();
-
-        // Find all orders by this customer
-        List<Orders> ordersList = orderRepository.findOrderssByCustomer(customer);
-
+        Account account = authenticationService.getCurrentAccount();
+        List<Orders> ordersList = null;
+        if(account.getRole().equals(Role.STAFF)){
+            ordersList = orderRepository.findByStaff(account);
+        }else {
+            ordersList = orderRepository.findOrdersByCustomer(account);
+        }
         // Convert the list of Orders entities to OrderResponse objects
         return ordersList.stream()
                 .map(this::mapToOrderResponse)  // Reuse the existing mapToOrderResponse method
                 .collect(Collectors.toList());
     }
 
+    public Orders updateOrderStatusByStaff(Long orderId, Status newStatus) {
+        Account currentStaff = authenticationService.getCurrentAccount();
+        Orders order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+        order.setStatus(newStatus);
+        return orderRepository.save(order);
+    }
 
     private OrderResponse mapToOrderResponse(Orders order) {
         List<OrderDetailResponse> details = order.getOrderDetails().stream()
@@ -294,6 +323,7 @@ public class OrderService {
                 .report(reportResponse)
                 .build();
     }
+
 }
 
 
