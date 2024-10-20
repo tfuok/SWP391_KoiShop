@@ -180,6 +180,21 @@ public class OrderService {
             manager.setBalance(newBalance);
             transactions.add(transaction2);
 
+            //server -> user (if koi is consignment online)
+            //Account manager = accountRepository.findAccountByRole(Role.MANAGER);
+            Transactions transaction3 = new Transactions();
+            for (OrderDetails orderDetails : orders.getOrderDetails()) {
+                if(orderDetails.getKoi().getAccount().getRole()== Role.CUSTOMER)
+                transaction3.setFrom(manager);
+                transaction3.setTo(orderDetails.getKoi().getAccount());
+                transaction3.setPayment(payment);
+                transaction3.setStatus(TransactionEnum.SUCCESS);
+                transaction3.setDescription("MANAGER TO CONSIGNMENT VENDOR");
+                double MinusBalance = manager.getBalance() - orderDetails.getPrice()* 0.9 ;
+                manager.setBalance(MinusBalance);
+                orderDetails.getKoi().getAccount().setBalance(orderDetails.getPrice()*0.9);
+                transactions.add(transaction3);
+            }
             payment.setTransactions(transactions);
             Koi koi = null;
             for (OrderDetails orderDetails : orders.getOrderDetails()) {
@@ -189,7 +204,7 @@ public class OrderService {
                 koi.setAccount(customer);
                 koiRepository.save(koi);
                 if (koi.getQuantity() == 1) {
-                    certificateService.sendCertificateEmail(customer, koi.getCertificate());
+                   // certificateService.sendCertificateEmail(customer, koi.getCertificate());
                 }
             }
             orders.setStatus(Status.PAID);

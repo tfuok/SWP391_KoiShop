@@ -66,7 +66,7 @@ public class ConsignmentService {
      * @param consignmentRequest The request containing consignment details.
      * @return The newly created Consignment entity.
      */
-    public Consignment createConsignment(ConsignmentRequest consignmentRequest) {
+    public Consignment createConsignment(ConsignmentRequest consignmentRequest) throws Exception {
         // Map from ConsignmentRequest to Consignment entity
         //Consignment consignment = modelMapper.map(consignmentRequest, Consignment.class);
         Consignment consignment = new Consignment();
@@ -96,8 +96,12 @@ public class ConsignmentService {
             }
             consignment.setCareType(careType);
         } else if (consignment.getType() == Type.ONLINE) {
-            CareType careType = careTypeRepository.findByCareTypeName("Phi Ky Gui Online");
-            consignment.setCareType(careType);
+            if(careTypeRepository.findByCareTypeName("Phi Ky Gui Online") == null){
+                throw new NotFoundException("Chua Co Phi Ky Gui Online O CareType");
+            }else {
+                CareType careType = careTypeRepository.findByCareTypeName("Phi Ky Gui Online");
+                consignment.setCareType(careType);
+            }
         }
         // Calculate and set cost if type is "OFFLINE"
         if (consignment.getType() == Type.OFFLINE) {
@@ -123,7 +127,7 @@ public class ConsignmentService {
         for (ConsignmentDetailRequest consignmentDetailRequest : consignmentRequest.getConsignmentDetailRequests()) {
 
             Koi koi = createConsignmentKoi(consignmentDetailRequest.getKoiRequest());
-            Certificate certificate = certificateService.createCertificates(koi);
+            //Certificate certificate = certificateService.createCertificates(koi);
             ConsignmentDetails consignmentDetail = new ConsignmentDetails();
             consignmentDetail.setConsignment(consignment);
             consignmentDetail.setKoi(koi);
@@ -274,7 +278,7 @@ public class ConsignmentService {
         String tmnCode = "VONI2DAD";
         String secretKey = "PIOSTSKRYSENPWY7NW7UG7HGWCHTT4IS";
         String vnpUrl = " https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        String returnUrl = "https://blearning.vn/guide/swp/docker-local?orderID=" + consignment.getId(); // trang thong bao thanh toan thanh cong
+        String returnUrl = "https://blearning.vn/guide/swp/docker-local?consignment=" + consignment.getId(); // trang thong bao thanh toan thanh cong
         String currCode = "VND";
 
         Map<String, String> vnpParams = new TreeMap<>();
@@ -334,8 +338,10 @@ public class ConsignmentService {
 
 
         public void createConsignmentTransaction(long id){
-            Consignment consignment = consignmentRepository.findById(id)
-                    .orElseThrow((() -> new NotFoundException("Order not found")));
+            Consignment consignment = consignmentRepository.findConsignmentById(id);
+            if(consignment == null){
+                throw new NotFoundException("Consignment not found111");
+            }
 
         /*
         1. tao payment
@@ -366,7 +372,11 @@ public class ConsignmentService {
             transaction2.setTo(manager);
             transaction2.setPayment(payment);
             transaction2.setStatus(TransactionEnum.SUCCESS);
-            transaction2.setDescription("CHUYEN TIEN KY GUI OFFLINE VE OWNER");
+            if(consignment.getType() == Type.OFFLINE){
+                transaction2.setDescription("CHUYEN PHI KY GUI OFFLINE VE MANAGER");
+            }else{
+                transaction2.setDescription("CHUYEN PHI KY GUI ONLINE VE MANAGER");
+            }
             double newBalance = manager.getBalance() + consignment.getCost();
             manager.setBalance(newBalance);
             transactions.add(transaction2);
@@ -376,7 +386,7 @@ public class ConsignmentService {
 
             accountRepository.save(manager);
             paymentRepository.save(payment);
-            consignment.setStatus(Status.PENDING);
+            consignment.setStatus(Status.PAID);
             consignmentRepository.save(consignment);
 
         }
@@ -396,14 +406,14 @@ public class ConsignmentService {
             koiLot.setImages(koiLotRequest.getImageUrl());
             koiLot.setDeleted(true);
 
-//            List<Images> imagesList = koiLotRequest.getImagesList().stream().map(imageListRequest -> {
-//                Images image = new Images();
-//                image.setImages(imageListRequest.getImage());
-//                image.setKoi(koiLot);  // Associate the image with the koi
-//                return image;
-//            }).collect(Collectors.toList());
-//
-//            koiLot.setImagesList(imagesList);
+            List<Images> imagesList = koiLotRequest.getImagesList().stream().map(imageListRequest -> {
+                Images image = new Images();
+                image.setImages(imageListRequest.getImage());
+                image.setKoi(koiLot);  // Associate the image with the koi
+                return image;
+            }).collect(Collectors.toList());
+
+            koiLot.setImagesList(imagesList);
 
             // Map breed IDs to Breed entities
             Set<Breed> breeds = new HashSet<>();
@@ -433,9 +443,9 @@ public class ConsignmentService {
 
 
 
-    public Consignment updateStatusConsignment(long id, ConsignmentStatusRequest consignmentStatusRequest) {
+    public Consignment updateStatusConsignment(long id, Status status) {
         Consignment consignment = consignmentRepository.findConsignmentById(id);
-        consignment.setStatus(consignmentStatusRequest.getStatus());
+        consignment.setStatus(status);
         if(consignment.getStatus()==Status.CONFIRMED){
             for(ConsignmentDetails consignmentDetails : consignment.getConsignmentDetails()){
                 consignmentDetails.getKoi().setConsignment(true);
@@ -450,6 +460,6 @@ public class ConsignmentService {
             payment.setCreateAt(new Date());
             payment.setMethod(PaymentEnums.BANKING);
         }
-        return null;
+        return consignmentRepository.save(consignment);
     }
 }
