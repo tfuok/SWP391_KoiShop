@@ -45,6 +45,8 @@ public class OrderService {
 
     @Autowired
     VoucherRepository voucherRepository;
+    @Autowired
+    private EmailService emailService;
 
     public Orders create(OrderRequest orderRequest) {
         Orders orders = new Orders();
@@ -233,6 +235,8 @@ public class OrderService {
             paymentRepository.save(payment);
             orders.setStatus(Status.PAID);
             orderRepository.save(orders);
+            // Send email with the order bill
+            emailService.sendOrderBillEmail(orders, customer.getEmail()); // Ensure to get customer's email
         } catch (Exception e) {
             e.printStackTrace();
         }

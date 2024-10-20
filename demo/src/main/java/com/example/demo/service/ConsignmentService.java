@@ -61,6 +61,8 @@ public class ConsignmentService {
 
     @Autowired
     private KoiService koiService;
+    @Autowired
+    private EmailService emailService;
 
     /**
      * Creates a new Consignment based on the provided request.
@@ -339,12 +341,16 @@ public class ConsignmentService {
         public void createConsignmentTransaction(long id){
             Consignment consignment = consignmentRepository.findConsignmentById(id);
             if(consignment == null){
-                throw new NotFoundException("Consignment not found111");
+                throw new NotFoundException("Consignment not found");
             }
 
         /*
         1. tao payment
          */
+            Payment existingPayment = paymentRepository.findByConsignment(consignment);
+            if (existingPayment != null) {
+                throw new IllegalStateException("Payment for this consignment already exists.");
+            }
 
             Payment payment = new Payment();
             payment.setConsignment(consignment);
@@ -385,7 +391,7 @@ public class ConsignmentService {
             paymentRepository.save(payment);
             consignment.setStatus(Status.PAID);
             consignmentRepository.save(consignment);
-
+            emailService.sendConsignmentBillEmail(consignment,customer.getEmail());
         }
     public Koi createConsignmentKoi(KoiRequest koiLotRequest) {
         try {
