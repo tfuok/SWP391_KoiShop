@@ -19,4 +19,11 @@ public interface KoiRepository extends JpaRepository<Koi, Long> {
     List<Koi> findByBreedsAndIsDeletedFalse(Breed breed);
 
     List<Koi> findByAccountId(Long accountId);
+
+    List<Koi> findByAccountIdAndPriceIsNull(Long accountId);
+
+    List<Koi> findByAccountIdAndPriceIsNotNull(Long accountId);
+
+
+    Koi findById(long id);
 }
