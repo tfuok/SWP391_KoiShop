@@ -237,7 +237,8 @@ public class OrderService {
                 .map(detail -> new OrderDetailResponse(
                         detail.getKoi().getId(),
                         detail.getPrice(),
-                        detail.getKoi().getName()
+                        detail.getKoi().getName(),
+                        detail.getKoi().getImages()
                 ))
                 .collect(Collectors.toList());
 
