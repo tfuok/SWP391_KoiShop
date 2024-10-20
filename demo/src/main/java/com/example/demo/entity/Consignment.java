@@ -25,7 +25,7 @@ public class Consignment implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
-
+    @Enumerated(EnumType.STRING)
     Type type;
 
     String address;
@@ -41,7 +41,7 @@ public class Consignment implements UserDetails {
     Date createDate;
 
 
-    @Enumerated(EnumType.STRING)  // Use EnumType.STRING to match ENUM in database
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     Boolean isDeleted = false;
@@ -56,6 +56,10 @@ public class Consignment implements UserDetails {
     @JoinColumn(name = "care_type_id")
     private CareType careType;
 
+    @ManyToOne
+    @JoinColumn(name = "staff_id")
+    @JsonIgnore
+    private Account staff;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
