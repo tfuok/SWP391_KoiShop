@@ -3,11 +3,15 @@ package com.example.demo.model.Response;
 import com.example.demo.entity.Certificate;
 import com.example.demo.entity.Images;
 import com.example.demo.model.Request.ImageListRequest;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class KoiResponse {
     private Long id;
     private String name;

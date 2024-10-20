@@ -230,18 +230,15 @@ public class KoiService {
     public Koi searchByName(String name) {
         Koi koi = koiLotRepository.findByNameContainingAndIsDeletedFalseAndSoldFalse(name);
         if (koi == null) throw new NotFoundException("Koi not existed");
-//        KoiLotResponse koiLot = modelMapper.map(koi, KoiLotResponse.class);
         return koi;
     }
 
     public Map<String, Object> compareKoi(long id1, long id2) {
         Koi koi1 = koiLotRepository.findKoiByIdAndIsDeletedFalse(id1);
         Koi koi2 = koiLotRepository.findKoiByIdAndIsDeletedFalse(id2);
-
         if (koi1 == null || koi2 == null) {
             throw new NotFoundException("One or both Koi not found");
         }
-
         // So sánh các thuộc tính của 2 cá thể Koi
         Map<String, Object> comparisonResult = new HashMap<>();
         comparisonResult.put("nameMatch", koi1.getName().equals(koi2.getName()));

@@ -9,8 +9,11 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
-//    @Query("SELECT new com.example.demo.model.Response.FeedbackResponse(f.id, f.content, f.rating, a.email) " +
-//            "FROM Feedback f JOIN Account a ON f.shop.id = a.id WHERE f.shop.id = :shopID")
-//    List<FeedbackResponse> findFeedbackByShopId();
+    @Query("SELECT new com.example.demo.model.Response.FeedbackResponse(f.id, f.content, f.rating, " +
+            "CASE WHEN f.customer IS NOT NULL THEN f.customer.username ELSE NULL END, o.id) " +
+            "FROM Feedback f " +
+            "LEFT JOIN f.customer c " +
+            "JOIN f.orders o")
+    List<FeedbackResponse> findAllFeedbackWithDetails();
 }
 
