@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -16,6 +17,8 @@ public class KoiResponse {
     private Long id;
     private String name;
     private float price;
+    private float salePrice;
+    private float salePercentage;
     private String vendor;
     private String gender;
     private int bornYear;
@@ -32,4 +35,6 @@ public class KoiResponse {
     private boolean isConsignment;
     private String certificate;
     private List<String> imagesList;
+    private LocalDateTime saleStartTime;
+    private LocalDateTime saleEndTime;
 }

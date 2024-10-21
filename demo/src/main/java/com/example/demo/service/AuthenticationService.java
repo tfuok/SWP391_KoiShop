@@ -125,7 +125,7 @@ public class AuthenticationService implements UserDetailsService {
 
     public Account getCurrentAccount() {
         Account account = (Account) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return accountRepository.findAccountByIdAndIsDeletedFalse(account.getId());
+        return accountRepository.findAccountById(account.getId());
     }
 
     public Account deleteAccount(long id) {

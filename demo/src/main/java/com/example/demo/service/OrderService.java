@@ -62,11 +62,12 @@ public class OrderService {
         for (OrderDetailRequest orderDetailRequest : orderRequest.getDetail()) {
             OrderDetails details = new OrderDetails();
             Koi koi = koiRepository.findKoiByIdAndIsDeletedFalse(orderDetailRequest.getKoiId());
+            double price = (koi.getSalePrice() > 0) ? koi.getSalePrice() : koi.getPrice();
             details.setKoi(koi);
             details.setOrder(orders);
             details.setPrice(koi.getPrice());
             orderDetails.add(details);
-            total += koi.getPrice();
+            total += price;
         }
         orders.setOrderDetails(orderDetails);
         orders.setTotal(total);
@@ -184,6 +185,7 @@ public class OrderService {
             //vnpay -> customer
             transaction1.setFrom(null);
             Account customer = authenticationService.getCurrentAccount();
+            System.out.println(customer);
             transaction1.setTo(customer);
             transaction1.setPayment(payment);
             transaction1.setStatus(TransactionEnum.SUCCESS);
@@ -192,7 +194,6 @@ public class OrderService {
 
             Transactions transaction2 = new Transactions();
             //customer -> server
-//            Account manager = orders.getOrderDetails().get(0).getKoi().getAccount();
             Account manager = accountRepository.findAccountByRole(Role.MANAGER);
             transaction2.setFrom(customer);
             transaction2.setTo(manager);
@@ -203,22 +204,22 @@ public class OrderService {
             manager.setBalance(newBalance);
             transactions.add(transaction2);
 
-            //server -> user (if koi is consignment online)
-            //Account manager = accountRepository.findAccountByRole(Role.MANAGER);
-            for (OrderDetails orderDetails : orders.getOrderDetails()) {
-                if (orderDetails.getKoi().getAccount().getRole() == Role.CUSTOMER) {
-                    Transactions transaction3 = new Transactions(); // create a new instance inside the loop
-                    transaction3.setFrom(manager);
-                    transaction3.setTo(orderDetails.getKoi().getAccount());
-                    transaction3.setPayment(payment);
-                    transaction3.setStatus(TransactionEnum.SUCCESS);
-                    transaction3.setDescription("MANAGER TO CONSIGNMENT VENDOR");
-                    double consignmentAmount = orderDetails.getPrice() * 0.9;
-                    manager.setBalance(manager.getBalance() - consignmentAmount);
-                    orderDetails.getKoi().getAccount().setBalance(orderDetails.getKoi().getAccount().getBalance() + consignmentAmount);
-                    transactions.add(transaction3);
-                }
-            }
+//            //server -> user (if koi is consignment online)
+//            //Account manager = accountRepository.findAccountByRole(Role.MANAGER);
+//            for (OrderDetails orderDetails : orders.getOrderDetails()) {
+//                if (orderDetails.getKoi().getAccount().getRole() == Role.CUSTOMER) {
+//                    Transactions transaction3 = new Transactions(); // create a new instance inside the loop
+//                    transaction3.setFrom(manager);
+//                    transaction3.setTo(orderDetails.getKoi().getAccount());
+//                    transaction3.setPayment(payment);
+//                    transaction3.setStatus(TransactionEnum.SUCCESS);
+//                    transaction3.setDescription("MANAGER TO CONSIGNMENT VENDOR");
+//                    double consignmentAmount = orderDetails.getPrice() * 0.9;
+//                    manager.setBalance(manager.getBalance() - consignmentAmount);
+//                    orderDetails.getKoi().getAccount().setBalance(orderDetails.getKoi().getAccount().getBalance() + consignmentAmount);
+//                    transactions.add(transaction3);
+//                }
+//            }
             payment.setTransactions(transactions);
             Koi koi = null;
             for (OrderDetails orderDetails : orders.getOrderDetails()) {

@@ -42,4 +42,5 @@ public class KoiRequest {
 
     List<ImageListRequest> imagesList;
 
+    float salePrice;
 }

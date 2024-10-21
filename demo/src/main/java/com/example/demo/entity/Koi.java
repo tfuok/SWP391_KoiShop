@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +27,8 @@ public class Koi {
 
     private String name;
     private float price;
+    private float salePrice;
+    private float salePercentage;
     private String vendor;
     private String gender;
     private int bornYear;
@@ -36,6 +40,9 @@ public class Koi {
     private boolean isConsignment = false;
     private boolean isDeleted = false;
     private int quantity;
+
+    private LocalDateTime saleStartTime;
+    private LocalDateTime saleEndTime;
 
     // Many-to-Many with Breed
     @ManyToMany(fetch = FetchType.EAGER)

@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.entity.*;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.KoiRequest;
+import com.example.demo.model.Request.SaleRequest;
 import com.example.demo.model.Response.KoiPageResponse;
 import com.example.demo.model.Response.KoiResponse;
 import com.example.demo.repository.BreedRepository;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -170,7 +172,6 @@ public class KoiService {
             koiResponse.setContent(koiLotResponses);
             koiResponse.setPageNumber(kois.getNumber());
             koiResponse.setTotalElements(kois.getTotalElements());
-
             return koiResponse;
 
         } catch (Exception e) {
@@ -291,6 +292,40 @@ public class KoiService {
 
         return koiLotResponses;
     }
+
+//    public void applySale(SaleRequest saleRequest) {
+//        Koi koi = koiLotRepository.findKoiByIdAndIsDeletedFalse(saleRequest.getKoiId());
+//        float salePrice = koi.getPrice() - (koi.getPrice() * saleRequest.getSalePercentage() / 100);
+//        koi.setSalePrice(salePrice);
+//        koi.setSalePercentage(saleRequest.getSalePercentage());
+//        koi.setSaleStartTime(saleRequest.getSaleStartTime());
+//        koi.setSaleEndTime(saleRequest.getSaleEndTime());
+//        koiLotRepository.save(koi);
+//    }
+
+    public SaleRequest sale(SaleRequest saleRequest) {
+        Koi koi = koiLotRepository.findKoiByIdAndIsDeletedFalse(saleRequest.getKoiId());
+        LocalDateTime now = LocalDateTime.now();
+        // Cập nhật thông tin giảm giá bất kể thời gian thực
+        koi.setSalePercentage(saleRequest.getSalePercentage());
+        koi.setSaleStartTime(saleRequest.getSaleStartTime());
+        koi.setSaleEndTime(saleRequest.getSaleEndTime());
+        // Kiểm tra nếu thời gian hiện tại nằm trong khoảng thời gian sale
+        if (now.isAfter(saleRequest.getSaleStartTime()) && now.isBefore(saleRequest.getSaleEndTime())) {
+            // Tính toán giá sale
+            float salePrice = koi.getPrice() - (koi.getPrice() * saleRequest.getSalePercentage() / 100);
+            koi.setSalePrice(salePrice);
+        } else if (now.isAfter(saleRequest.getSaleEndTime())) {
+            // Nếu sale đã kết thúc, khôi phục giá gốc
+            koi.setSalePrice(0);
+            koi.setSalePercentage(0);
+        }
+        // Lưu thông tin vào cơ sở dữ liệu
+        koiLotRepository.save(koi);
+        return saleRequest;
+    }
+
+
 
     public List<Koi> getKoiByCurrentAccount() {
         return koiLotRepository.findByAccountId(authenticationService.getCurrentAccount().getId());

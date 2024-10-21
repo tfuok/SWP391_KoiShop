@@ -2,6 +2,7 @@ package com.example.demo.api;
 
 import com.example.demo.entity.Koi;
 import com.example.demo.model.Request.KoiRequest;
+import com.example.demo.model.Request.SaleRequest;
 import com.example.demo.model.Response.KoiPageResponse;
 import com.example.demo.model.Response.KoiResponse;
 import com.example.demo.service.KoiService;
@@ -90,5 +91,11 @@ public class KoiAPI {
                                            @RequestParam(value = "size", required = false, defaultValue = "5") Integer size) {
         KoiPageResponse koiPage = koiLotService.getAllKoiManager(page, size);
         return ResponseEntity.ok(koiPage);
+    }
+
+    @PostMapping("/sale")
+    public ResponseEntity applyDiscount(@RequestBody SaleRequest saleRequest) {
+        SaleRequest salePrice = koiLotService.sale(saleRequest);
+        return ResponseEntity.ok(salePrice);
     }
 }
