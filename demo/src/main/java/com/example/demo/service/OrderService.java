@@ -325,6 +325,7 @@ public class OrderService {
                 .orderDetails(details)
                 .feedback(feedbackResponse)
                 .report(reportResponse)
+                .image(order.getImage())
                 .build();
     }
 

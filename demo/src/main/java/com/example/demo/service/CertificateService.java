@@ -60,7 +60,7 @@ public class CertificateService {
             emailDetails.setLink("http://koishop.site/");
 
             // Send the email with the PDF attachment
-            emailService.sendEmailWithAttachment(emailDetails, pdfFile);
+//            emailService.sendEmailWithAttachment(emailDetails, pdfFile);
         } catch (Exception e) {
             e.printStackTrace();
             // Handle exception (log or retry)
