@@ -3,10 +3,7 @@ package com.example.demo.service;
 import com.example.demo.entity.*;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.*;
-import com.example.demo.model.Response.KoiOfflineConsignmentResponse;
-import com.example.demo.model.Response.KoiOnlineConsignmentResponse;
-import com.example.demo.model.Response.KoiPageResponse;
-import com.example.demo.model.Response.KoiResponse;
+import com.example.demo.model.Response.*;
 import com.example.demo.repository.*;
 import com.example.demo.util.DateUtils;
 import org.modelmapper.ModelMapper;
@@ -153,8 +150,15 @@ public class ConsignmentService {
      *
      * @return A list of active Consignments.
      */
-    public List<Consignment> getAllConsignments() {
-        return consignmentRepository.findByIsDeletedFalse();
+    public List<ConsignmentResponse> getAllConsignments() {
+
+        List<Consignment> consignmentsList = consignmentRepository.findByIsDeletedFalse();
+        List<ConsignmentResponse> consignmentResponseList = new ArrayList<>();
+        for(Consignment consignment : consignmentsList){
+            ConsignmentResponse consignmentResponse = mapToConsignmentResponse(consignment);
+            consignmentResponseList.add(consignmentResponse);
+        }
+        return consignmentResponseList;
     }
 
     /**
@@ -240,8 +244,14 @@ public class ConsignmentService {
 
 
 
-    public List<Consignment> getStaffConsignments() {
-        return consignmentRepository.findByStaff_Id(authenticationService.getCurrentAccount().getId());
+    public List<ConsignmentResponse> getStaffConsignments() {
+        List<Consignment> consignmentList = consignmentRepository.findByStaff_Id(authenticationService.getCurrentAccount().getId());
+        List<ConsignmentResponse> consignmentResponseList = new ArrayList<>();
+        for(Consignment consignment : consignmentList){
+            ConsignmentResponse consignmentResponse = mapToConsignmentResponse(consignment);
+            consignmentResponseList.add(consignmentResponse);
+        }
+        return consignmentResponseList;
     }
 
     /**
@@ -499,6 +509,38 @@ public List<KoiOnlineConsignmentResponse> getAllOnlineKoi() {
             responses.add(response);
         }
         return responses;
-
     }
+    public ConsignmentDetailResponse mapToConsignmentDetailResponse(Koi koi) {
+        ConsignmentDetailResponse detailResponse = new ConsignmentDetailResponse();
+        detailResponse.setKoiId(koi.getId());
+        detailResponse.setPrice(koi.getPrice());
+        detailResponse.setKoiName(koi.getName());
+        // Assuming imagesList is not empty and contains the main image URL
+        if (koi.getImagesList() != null && !koi.getImagesList().isEmpty()) {
+            detailResponse.setImageUrl(koi.getImages()); // Adjust to get the correct URL
+        }
+        return detailResponse;
+    }
+    public ConsignmentResponse mapToConsignmentResponse(Consignment consignment) {
+        ConsignmentResponse response = new ConsignmentResponse();
+        response.setConsignmentID(consignment.getId());
+        response.setType(consignment.getType().toString());
+        response.setAddress(consignment.getAddress());
+        response.setDescription(consignment.getDescription());
+        response.setCost(String.valueOf(consignment.getCost())); // Adjust as per your currency formatting
+        response.setStartDate(consignment.getStartDate());
+        response.setEndDate(consignment.getEndDate());
+        response.setCreateDate(consignment.getCreateDate());
+        response.setStatus(consignment.getStatus().toString());
+        response.setCareTypeName(consignment.getCareType() != null ? consignment.getCareType().getCareTypeName() : "N/A");
+
+        // Map the consignment details (Koi) to the response list
+        List<ConsignmentDetailResponse> details = consignment.getConsignmentDetails().stream()
+                .map(consignmentDetail -> mapToConsignmentDetailResponse(consignmentDetail.getKoi()))
+                .collect(Collectors.toList());
+
+        response.setDetails(details);
+        return response;
+    }
+
 }

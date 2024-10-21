@@ -43,6 +43,7 @@ public class ConsignmentRequest {
      * The end date of the consignment.
      * Must be at least 1 day after the start date.
      */
+    @Future(message = "End Date must be in the future!")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Date endDate;
 
