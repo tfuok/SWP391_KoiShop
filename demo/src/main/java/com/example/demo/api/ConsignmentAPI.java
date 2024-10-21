@@ -2,6 +2,7 @@ package com.example.demo.api;
 
 import com.example.demo.entity.Consignment;
 import com.example.demo.model.Request.ConsignmentRequest;
+import com.example.demo.model.Response.ConsignmentResponse;
 import com.example.demo.model.Response.KoiOfflineConsignmentResponse;
 import com.example.demo.model.Response.KoiOnlineConsignmentResponse;
 import com.example.demo.service.ConsignmentService;
@@ -30,14 +31,14 @@ public class ConsignmentAPI {
 
 
     @GetMapping("manager")
-    public ResponseEntity<List<Consignment>> showConsignments() {
-        List<Consignment> consignmentList = consignmentService.getAllConsignments();
+    public ResponseEntity<List<ConsignmentResponse>> showConsignments() {
+        List<ConsignmentResponse> consignmentList = consignmentService.getAllConsignments();
         return ResponseEntity.ok(consignmentList);
     }
 
     @GetMapping("staff")
-    public ResponseEntity<List<Consignment>> getConsignment() {
-        List<Consignment> consignmentList = consignmentService.getStaffConsignments();
+    public ResponseEntity<List<ConsignmentResponse>> getConsignment() {
+        List<ConsignmentResponse> consignmentList = consignmentService.getStaffConsignments();
         return ResponseEntity.ok(consignmentList);
     }
 

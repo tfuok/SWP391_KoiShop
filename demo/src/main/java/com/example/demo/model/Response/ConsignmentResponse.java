@@ -18,7 +18,7 @@ public class ConsignmentResponse{
     private Date createDate;
     private String status;
     private String careTypeName; // only careTypeName here
-    private List<Koi> kois;
+    private List<ConsignmentDetailResponse> details;
 
 
 }
