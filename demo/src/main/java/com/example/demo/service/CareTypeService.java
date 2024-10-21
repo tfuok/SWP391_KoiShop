@@ -40,6 +40,7 @@ public class CareTypeService {
         foundCareType.setCostPerDay(careTypeRequest.getCostPerDay());
         return careTypeRepository.save(foundCareType);
         }
+
         public void deleteCareType(long id) {
             CareType foundCareType = careTypeRepository.findByCareTypeId(id);
             if (foundCareType == null) {
@@ -48,8 +49,13 @@ public class CareTypeService {
             foundCareType.setDeleted(true);
             careTypeRepository.save(foundCareType);
         }
-        public List<CareType> getAllCareType() {
-        List<CareType> CareTypes = careTypeRepository.findByDeletedFalse();
-        return CareTypes;
+
+        public List<CareType> getAllOfflineCareType() {
+            List<CareType> CareTypes = careTypeRepository.findByCareTypeNameNot("Phi Ky Gui Online");
+            return CareTypes;
+        }
+            public List<CareType> getAllCareType() {
+            List<CareType> CareTypes = careTypeRepository.findByDeletedFalse();
+            return CareTypes;
     }
 }

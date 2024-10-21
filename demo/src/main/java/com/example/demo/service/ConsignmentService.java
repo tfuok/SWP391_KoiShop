@@ -391,7 +391,7 @@ public class ConsignmentService {
             paymentRepository.save(payment);
             consignment.setStatus(Status.PAID);
             consignmentRepository.save(consignment);
-            emailService.sendConsignmentBillEmail(consignment,customer.getEmail());
+            emailService.sendConsignmentBillEmail(consignment,consignment.getAccount().getEmail());
         }
     public Koi createConsignmentKoi(KoiRequest koiLotRequest) {
         try {

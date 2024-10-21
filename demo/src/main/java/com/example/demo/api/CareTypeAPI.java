@@ -60,6 +60,15 @@ public class CareTypeAPI {
     @GetMapping
     public ResponseEntity<List<CareType>> getAllCareType() {
         try {
+            List<CareType> careTypes = careTypeService.getAllOfflineCareType();
+            return ResponseEntity.ok(careTypes);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
+        }
+    }
+    @GetMapping("/Manager")
+    public ResponseEntity<List<CareType>> getCareTypes() {
+        try {
             List<CareType> careTypes = careTypeService.getAllCareType();
             return ResponseEntity.ok(careTypes);
         } catch (Exception e) {

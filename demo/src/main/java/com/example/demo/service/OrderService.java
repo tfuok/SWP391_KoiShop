@@ -236,7 +236,7 @@ public class OrderService {
             orders.setStatus(Status.PAID);
             orderRepository.save(orders);
             // Send email with the order bill
-            emailService.sendOrderBillEmail(orders, customer.getEmail()); // Ensure to get customer's email
+            emailService.sendOrderBillEmail(orders, orders.getCustomer().getEmail()); // Ensure to get customer's email
         } catch (Exception e) {
             e.printStackTrace();
         }

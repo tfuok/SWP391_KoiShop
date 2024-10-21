@@ -16,4 +16,7 @@ public interface CareTypeRepository extends JpaRepository<CareType, Long> {
 
     // Adjusted method name to match the interpreted property name
     List<CareType> findByDeletedFalse();
+
+    List<CareType> findByCareTypeNameNot(String careTypeName);
+
 }
