@@ -287,6 +287,14 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
+    public Orders staffConfirmOrdersByImage(Long orderId, String image){
+        Account currentStaff = authenticationService.getCurrentAccount();
+        Orders order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+        order.setImage(image);
+        return orderRepository.save(order);
+    }
+
     private OrderResponse mapToOrderResponse(Orders order) {
         List<OrderDetailResponse> details = order.getOrderDetails().stream()
                 .map(detail -> new OrderDetailResponse(

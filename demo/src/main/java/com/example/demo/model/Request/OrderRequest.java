@@ -9,7 +9,5 @@ import java.util.List;
 public class OrderRequest {
     private List<OrderDetailRequest> detail;
     private String description;
-    private Date endDate;
     private String voucherCode;
-    private String image;
 }

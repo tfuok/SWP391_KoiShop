@@ -58,12 +58,16 @@ public class OrderAPI {
         return ResponseEntity.ok(orders);
     }
 
-    @PutMapping("/{orderId}/status")
-    public ResponseEntity<Orders> updateOrderStatus(
-            @PathVariable Long orderId,
-            @RequestParam Status newStatus) {
+    @PutMapping("/status")
+    public ResponseEntity updateOrderStatus(Long orderId,Status newStatus) {
 
         Orders updatedOrder = orderService.updateOrderStatusByStaff(orderId, newStatus);
         return ResponseEntity.ok(updatedOrder);
+    }
+
+    @PutMapping("/confirm")
+    public ResponseEntity uploadOrderPic(long orderId, String image){
+        Orders orders = orderService.staffConfirmOrdersByImage(orderId,image);
+        return ResponseEntity.ok(orders);
     }
 }
