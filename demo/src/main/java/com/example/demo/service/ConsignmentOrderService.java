@@ -149,7 +149,7 @@ public class ConsignmentOrderService {
         String tmnCode = "VONI2DAD";
         String secretKey = "PIOSTSKRYSENPWY7NW7UG7HGWCHTT4IS";
         String vnpUrl = " https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        String returnUrl = "http://koishop.site/successful?orderID=" + orders.getId() +  "+" + consignment.getId();
+        String returnUrl = "http://koishop.site/successful?orderID=" + orders.getId() +  "&consignmentID=" + consignment.getId();
         String currCode = "VND";
 
         Map<String, String> vnpParams = new TreeMap<>();
