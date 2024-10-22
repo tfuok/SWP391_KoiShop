@@ -13,6 +13,5 @@ public class OrderConsignmentRequest {
     private Date endDate;
     private String voucherCode;
     private long careTypeId;
-    private String image;
 
 }

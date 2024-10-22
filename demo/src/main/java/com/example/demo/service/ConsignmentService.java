@@ -440,7 +440,7 @@ public class ConsignmentService {
         }
     }
 
-    public Consignment updateConsignmentStatusByStaff(long id, Status status) {
+    public Consignment updateConsignmentStatus(long id, Status status) {
         Consignment consignment = consignmentRepository.findConsignmentById(id);
         if (consignment == null) {
             throw new NotFoundException("Consignment not exist");
