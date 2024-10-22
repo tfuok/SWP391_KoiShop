@@ -96,11 +96,11 @@ public class Account implements UserDetails {
     @JsonIgnore
     Set<Koi> koiLots;
 
-    @OneToMany(mappedBy = "from")
+    @OneToMany(mappedBy = "from", cascade = CascadeType.ALL)
     @JsonIgnore
     List<Transactions> transactionsFrom;
 
-    @OneToMany(mappedBy = "to")
+    @OneToMany(mappedBy = "to", cascade = CascadeType.ALL)
     @JsonIgnore
     List<Transactions> transactionsTo;
 
