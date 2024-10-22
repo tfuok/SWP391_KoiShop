@@ -8,6 +8,7 @@ import com.example.demo.repository.*;
 import com.example.demo.util.DateUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.pulsar.PulsarProperties;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -289,7 +290,7 @@ public class ConsignmentService {
         String tmnCode = "VONI2DAD";
         String secretKey = "PIOSTSKRYSENPWY7NW7UG7HGWCHTT4IS";
         String vnpUrl = " https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        String returnUrl = "https://blearning.vn/guide/swp/docker-local?orderID=" + consignment.getId(); // trang thong bao thanh toan thanh cong
+        String returnUrl = "http://koishop.site/successful-consign" + consignment.getId(); // trang thong bao thanh toan thanh cong
         String currCode = "VND";
 
         Map<String, String> vnpParams = new TreeMap<>();
@@ -453,16 +454,13 @@ public class ConsignmentService {
         }
     }
 
-
-
-
-    public Consignment updateStatusConsignment(long id, Status status) {
+    public Consignment updateConsignmentStatusByStaff(long id, Status status) {
         Consignment consignment = consignmentRepository.findConsignmentById(id);
         consignment.setStatus(status);
-        if(consignment.getStatus()==Status.CONFIRMED){
-            for(ConsignmentDetails consignmentDetails : consignment.getConsignmentDetails()){
+        if(consignment.getStatus()==Status.CONFIRMED) {
+            for (ConsignmentDetails consignmentDetails : consignment.getConsignmentDetails()) {
                 consignmentDetails.getKoi().setConsignment(true);
-                if(consignment.getType()==Type.ONLINE) {
+                if (consignment.getType() == Type.ONLINE) {
                     consignmentDetails.getKoi().setDeleted(false);
                 }
             }
@@ -472,6 +470,16 @@ public class ConsignmentService {
             payment.setConsignment(consignment);
             payment.setCreateAt(new Date());
             payment.setMethod(PaymentEnums.BANKING);
+
+            Transactions transactions1 = new Transactions();
+            Account manager = accountRepository.findAccountByRole(Role.MANAGER);
+
+            transactions1.setFrom(manager);
+            transactions1.setTo(consignment.getAccount());
+            transactions1.setPayment(payment);
+            transactions1.setStatus(TransactionEnum.SUCCESS);
+            transactions1.setDescription("Refund to the customer");
+
         }
         return consignmentRepository.save(consignment);
     }
@@ -510,6 +518,16 @@ public List<KoiOnlineConsignmentResponse> getAllOnlineKoi() {
         }
         return responses;
     }
+    public ConsignmentResponse assignStaff(long consignmentId, long staffId) {
+        Consignment consignment = consignmentRepository.findById(consignmentId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+        Account staff = accountRepository.findById(staffId)
+                .orElseThrow(() -> new NotFoundException("Staff not found"));
+
+        consignment.setStaff(staff);
+        consignmentRepository.save(consignment);
+        return mapToConsignmentResponse(consignment);
+    }
     public ConsignmentDetailResponse mapToConsignmentDetailResponse(Koi koi) {
         ConsignmentDetailResponse detailResponse = new ConsignmentDetailResponse();
         detailResponse.setKoiId(koi.getId());
@@ -533,7 +551,7 @@ public List<KoiOnlineConsignmentResponse> getAllOnlineKoi() {
         response.setCreateDate(consignment.getCreateDate());
         response.setStatus(consignment.getStatus().toString());
         response.setCareTypeName(consignment.getCareType() != null ? consignment.getCareType().getCareTypeName() : "N/A");
-
+        response.setStaffid(consignment.getStaff() != null ? consignment.getStaff().getId() : 0); // Get staff ID
         // Map the consignment details (Koi) to the response list
         List<ConsignmentDetailResponse> details = consignment.getConsignmentDetails().stream()
                 .map(consignmentDetail -> mapToConsignmentDetailResponse(consignmentDetail.getKoi()))

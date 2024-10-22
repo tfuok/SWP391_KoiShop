@@ -5,6 +5,7 @@ import com.example.demo.model.Request.ConsignmentRequest;
 import com.example.demo.model.Response.ConsignmentResponse;
 import com.example.demo.model.Response.KoiOfflineConsignmentResponse;
 import com.example.demo.model.Response.KoiOnlineConsignmentResponse;
+import com.example.demo.model.Response.OrderResponse;
 import com.example.demo.service.ConsignmentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -28,8 +29,6 @@ public class ConsignmentAPI {
         String url = consignmentService.createUrl(consignment);
         return ResponseEntity.ok(url);
     }
-
-
     @GetMapping("manager")
     public ResponseEntity<List<ConsignmentResponse>> showConsignments() {
         List<ConsignmentResponse> consignmentList = consignmentService.getAllConsignments();
@@ -41,23 +40,20 @@ public class ConsignmentAPI {
         List<ConsignmentResponse> consignmentList = consignmentService.getStaffConsignments();
         return ResponseEntity.ok(consignmentList);
     }
-
+    @PutMapping("/assign-staff")
+    public ResponseEntity assignStaff(long consignmentId, long staffId){
+        ConsignmentResponse consignmentResponse = consignmentService.assignStaff(consignmentId,staffId);
+        return ResponseEntity.ok(consignmentResponse);
+    }
     @PostMapping("transactions")
     public ResponseEntity create(@RequestParam long consignmentID) throws Exception {
         consignmentService.createConsignmentTransaction(consignmentID);
         return ResponseEntity.ok("success");
     }
-
     @DeleteMapping("{id}")
     public ResponseEntity<Consignment> deleteConsignment(@PathVariable long id) {
         Consignment consignment = consignmentService.deleteConsignment(id);
         return ResponseEntity.ok(consignment);
-    }
-
-    @PutMapping("{id}")
-    public ResponseEntity<Consignment> updateConsignment(@Valid @RequestBody ConsignmentRequest consignment, @PathVariable long id) {
-        Consignment consignmentResponse = consignmentService.updateConsignment(consignment, id);
-        return ResponseEntity.ok(consignmentResponse);
     }
     @GetMapping("getOnlineConsignmentKoi")
     public ResponseEntity<List<KoiOnlineConsignmentResponse>> getOnlineConsignmentKoi() {
