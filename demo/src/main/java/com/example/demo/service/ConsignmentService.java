@@ -178,13 +178,7 @@ public class ConsignmentService {
         return consignmentRepository.save(consignment);
     }
 
-    /**
-     * Updates an existing Consignment based on the provided request.
-     *
-     * @param consignmentRequest The request containing updated consignment details.
-     * @param id                 The ID of the consignment to update.
-     * @return The updated Consignment entity.
-     */
+    
 //    public Consignment updateConsignment(ConsignmentRequest consignmentRequest, long id) {
 //        Consignment foundConsignment = consignmentRepository.findConsignmentById(id);
 //        if (foundConsignment == null) {
