@@ -299,8 +299,8 @@ public class ConsignmentService {
         vnpParams.put("vnp_TmnCode", tmnCode);
         vnpParams.put("vnp_Locale", "vn");
         vnpParams.put("vnp_CurrCode", currCode);
-        vnpParams.put("vnp_TxnRef", String.valueOf(consignment.getId()));
-        vnpParams.put("vnp_OrderInfo", "Thanh toan cho ma GD: " + consignment.getId());
+        vnpParams.put("vnp_TxnRef", String.valueOf(consignment.getId()+1000));
+        vnpParams.put("vnp_OrderInfo", "Thanh toan cho ma GD: " + consignment.getId()+1000);
         vnpParams.put("vnp_OrderType", "other");
         vnpParams.put("vnp_Amount", amount);
 
