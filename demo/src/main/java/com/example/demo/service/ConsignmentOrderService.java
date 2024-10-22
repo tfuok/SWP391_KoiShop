@@ -202,9 +202,9 @@ public class ConsignmentOrderService {
         return result.toString();
     }
 
-    public void createTransaction(long orderid, long consignmentId) throws Exception {
+    public void createTransaction(long orderId, long consignmentId) throws Exception {
         try {
-            Orders orders = orderRepository.findById(orderid)
+            Orders orders = orderRepository.findById(orderId)
                     .orElseThrow((() -> new NotFoundException("Order not found")));
             Consignment consignment = consignmentRepository.findById(consignmentId)
                     .orElseThrow((() -> new NotFoundException("Consignment not found")));
