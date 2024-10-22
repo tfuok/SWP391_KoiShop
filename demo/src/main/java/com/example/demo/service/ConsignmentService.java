@@ -6,11 +6,7 @@ import com.example.demo.model.Request.*;
 import com.example.demo.model.Response.*;
 import com.example.demo.repository.*;
 import com.example.demo.util.DateUtils;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.pulsar.PulsarProperties;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
@@ -49,9 +45,6 @@ public class ConsignmentService {
 
     @Autowired
     private PaymentRepository paymentRepository;
-
-    @Autowired
-    private OrderRepository orderRepository;
 
     @Autowired
     private CertificateService certificateService;
@@ -178,7 +171,7 @@ public class ConsignmentService {
         return consignmentRepository.save(consignment);
     }
 
-    
+
 //    public Consignment updateConsignment(ConsignmentRequest consignmentRequest, long id) {
 //        Consignment foundConsignment = consignmentRepository.findConsignmentById(id);
 //        if (foundConsignment == null) {
@@ -371,7 +364,7 @@ public class ConsignmentService {
             transaction1.setTo(customer);
             transaction1.setPayment(payment);
             transaction1.setStatus(TransactionEnum.SUCCESS);
-            transaction1.setDescription("NAP TIEN VNPAY TO CUSTOMER");
+            transaction1.setDescription("VNPAY TO CUSTOMER");
             transactions.add(transaction1);
 
             Transactions transaction2 = new Transactions();
@@ -382,9 +375,9 @@ public class ConsignmentService {
             transaction2.setPayment(payment);
             transaction2.setStatus(TransactionEnum.SUCCESS);
             if(consignment.getType() == Type.OFFLINE){
-                transaction2.setDescription("CHUYEN PHI KY GUI OFFLINE VE MANAGER");
+                transaction2.setDescription("OFFLINE CONSIGNMENT COST TO MANAGER");
             }else{
-                transaction2.setDescription("CHUYEN PHI KY GUI ONLINE VE MANAGER");
+                transaction2.setDescription("ONLINE CONSIGNMENT COST TO MANAGER");
             }
             double newBalance = manager.getBalance() + consignment.getCost();
             manager.setBalance(newBalance);
@@ -449,8 +442,11 @@ public class ConsignmentService {
 
     public Consignment updateConsignmentStatusByStaff(long id, Status status) {
         Consignment consignment = consignmentRepository.findConsignmentById(id);
+        if (consignment == null) {
+            throw new NotFoundException("Consignment not exist");
+        }
         consignment.setStatus(status);
-        if(consignment.getStatus()==Status.CONFIRMED) {
+        if (consignment.getStatus() == Status.CONFIRMED) {
             for (ConsignmentDetails consignmentDetails : consignment.getConsignmentDetails()) {
                 consignmentDetails.getKoi().setConsignment(true);
                 if (consignment.getType() == Type.ONLINE) {
@@ -458,43 +454,27 @@ public class ConsignmentService {
                 }
             }
         }
-        else if(consignment.getStatus()==Status.DECLINED){
-            Payment payment = new Payment();
-            payment.setConsignment(consignment);
-            payment.setCreateAt(new Date());
-            payment.setMethod(PaymentEnums.BANKING);
-
-            Transactions transactions1 = new Transactions();
-            Account manager = accountRepository.findAccountByRole(Role.MANAGER);
-
-            transactions1.setFrom(manager);
-            transactions1.setTo(consignment.getAccount());
-            transactions1.setPayment(payment);
-            transactions1.setStatus(TransactionEnum.SUCCESS);
-            transactions1.setDescription("Refund to the customer");
-
-        }
         return consignmentRepository.save(consignment);
     }
 public List<KoiOnlineConsignmentResponse> getAllOnlineKoi() {
-    List<KoiOnlineConsignmentResponse> responses = new ArrayList<>();
-    for (Koi koi : koiLotRepository.findAllKoiByAccountIdAndConsignmentType(authenticationService.getCurrentAccount().getId(),Type.ONLINE)) {
-        KoiOnlineConsignmentResponse response = new KoiOnlineConsignmentResponse();
-        response.setId(koiLotRepository.findConsignmentByKoiId(koi.getId()).getId());
-        response.setName(koi.getName());
-        response.setPrice(koi.getPrice());
-        if (koi.isConsignment() == true && koi.isSold() == true) {
-            response.setStatus("Sold");
-        } else if (koi.isConsignment() == true && koi.isSold() == false) {
-            response.setStatus("Not Sold");
-        } else {
-            response.setStatus("Not Accepted");
-        }
-        response.setImgUrl(koi.getImages());
-        responses.add(response);
-    }
-    return responses;
-}
+                List<KoiOnlineConsignmentResponse> responses = new ArrayList<>();
+                for (Koi koi : koiLotRepository.findAllKoiByAccountIdAndConsignmentType(authenticationService.getCurrentAccount().getId(), Type.ONLINE)) {
+                    KoiOnlineConsignmentResponse response = new KoiOnlineConsignmentResponse();
+                    response.setId(koiLotRepository.findConsignmentByKoiId(koi.getId()).getId());
+                    response.setName(koi.getName());
+                    response.setPrice(koi.getPrice());
+                    if (koi.isConsignment() == true && koi.isSold() == true) {
+                        response.setStatus("Sold");
+                    } else if (koi.isConsignment() == true && koi.isSold() == false) {
+                        response.setStatus("Not Sold");
+                    } else {
+                        response.setStatus("Not Accepted");
+                    }
+                    response.setImgUrl(koi.getImages());
+                    responses.add(response);
+                }
+                return responses;
+            }
     public List<KoiOfflineConsignmentResponse> getAllOfflineKoi(){
         List<KoiOfflineConsignmentResponse> responses = new ArrayList<>();
         for(Koi koi : koiLotRepository.findAllKoiByAccountIdAndConsignmentType(authenticationService.getCurrentAccount().getId(),Type.OFFLINE)){

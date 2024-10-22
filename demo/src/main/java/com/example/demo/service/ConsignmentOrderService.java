@@ -2,21 +2,16 @@ package com.example.demo.service;
 
 import com.example.demo.entity.*;
 import com.example.demo.exception.NotFoundException;
-import com.example.demo.model.Request.ConsignmentDetailRequest;
 import com.example.demo.model.Request.OrderConsignmentRequest;
 import com.example.demo.model.Request.OrderDetailRequest;
-import com.example.demo.model.Request.OrderRequest;
 import com.example.demo.model.Response.OrderConsignmentResponse;
-import com.example.demo.model.Response.OrderResponse;
 import com.example.demo.repository.*;
 import com.example.demo.util.DateUtils;
-import org.hibernate.query.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.print.attribute.standard.MediaSize;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -149,7 +144,7 @@ public class ConsignmentOrderService {
         String tmnCode = "VONI2DAD";
         String secretKey = "PIOSTSKRYSENPWY7NW7UG7HGWCHTT4IS";
         String vnpUrl = " https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        String returnUrl = "http://koishop.site/successful?orderID=" + orders.getId() +  "&consignmentID=" + consignment.getId();
+        String returnUrl = "https://koishop.site/successful-consignment?orderID=" + orders.getId() +  "&consignmentID=" + consignment.getId();
         String currCode = "VND";
 
         Map<String, String> vnpParams = new TreeMap<>();

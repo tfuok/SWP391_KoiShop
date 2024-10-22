@@ -1,14 +1,13 @@
 package com.example.demo.api;
 
 import com.example.demo.entity.Consignment;
+import com.example.demo.entity.Status;
 import com.example.demo.model.Request.ConsignmentRequest;
 import com.example.demo.model.Response.ConsignmentResponse;
 import com.example.demo.model.Response.KoiOfflineConsignmentResponse;
 import com.example.demo.model.Response.KoiOnlineConsignmentResponse;
-import com.example.demo.model.Response.OrderResponse;
 import com.example.demo.service.ConsignmentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/consignment/")
+@RequestMapping("/api/consignment")
 @CrossOrigin("*")
 @SecurityRequirement(name = "api")
 public class ConsignmentAPI {
@@ -29,13 +28,13 @@ public class ConsignmentAPI {
         String url = consignmentService.createUrl(consignment);
         return ResponseEntity.ok(url);
     }
-    @GetMapping("manager")
+    @GetMapping("/manager")
     public ResponseEntity<List<ConsignmentResponse>> showConsignments() {
         List<ConsignmentResponse> consignmentList = consignmentService.getAllConsignments();
         return ResponseEntity.ok(consignmentList);
     }
 
-    @GetMapping("staff")
+    @GetMapping("/staff")
     public ResponseEntity<List<ConsignmentResponse>> getConsignment() {
         List<ConsignmentResponse> consignmentList = consignmentService.getStaffConsignments();
         return ResponseEntity.ok(consignmentList);
@@ -45,25 +44,32 @@ public class ConsignmentAPI {
         ConsignmentResponse consignmentResponse = consignmentService.assignStaff(consignmentId,staffId);
         return ResponseEntity.ok(consignmentResponse);
     }
-    @PostMapping("transactions")
+    @PostMapping("/transactions")
     public ResponseEntity create(@RequestParam long consignmentID) throws Exception {
         consignmentService.createConsignmentTransaction(consignmentID);
         return ResponseEntity.ok("success");
     }
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Consignment> deleteConsignment(@PathVariable long id) {
         Consignment consignment = consignmentService.deleteConsignment(id);
         return ResponseEntity.ok(consignment);
     }
-    @GetMapping("getOnlineConsignmentKoi")
+    @GetMapping("/getOnlineConsignmentKoi")
     public ResponseEntity<List<KoiOnlineConsignmentResponse>> getOnlineConsignmentKoi() {
         List<KoiOnlineConsignmentResponse> consignmentList = consignmentService.getAllOnlineKoi();
         return ResponseEntity.ok(consignmentList);
     }
-    @GetMapping("getOfflineConsignmentKoi")
+    @GetMapping("/getOfflineConsignmentKoi")
     public ResponseEntity<List<KoiOfflineConsignmentResponse>> getOfflineConsignmentKoi() {
         List<KoiOfflineConsignmentResponse> consignmentList = consignmentService.getAllOfflineKoi();
         return ResponseEntity.ok(consignmentList);
+    }
+    @PutMapping("/status")
+    public ResponseEntity<Consignment> updateConsignmentStatus(
+           @PathVariable Long consignmentId,
+           @RequestParam Status newStatus) {
+        Consignment updatedConsignment  = consignmentService.updateConsignmentStatusByStaff(consignmentId, newStatus);
+        return ResponseEntity.ok(updatedConsignment);
     }
 }
 
