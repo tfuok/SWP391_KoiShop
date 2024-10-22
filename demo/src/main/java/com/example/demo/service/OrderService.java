@@ -172,6 +172,10 @@ public class OrderService {
         /*
         1. tao payment
          */
+            Payment existingPayment = paymentRepository.findByOrders(orders);
+            if (existingPayment != null) {
+                throw new IllegalStateException("Payment for this order already exists.");
+            }
 
             Payment payment = new Payment();
             payment.setOrders(orders);
