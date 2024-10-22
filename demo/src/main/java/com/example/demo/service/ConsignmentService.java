@@ -185,44 +185,44 @@ public class ConsignmentService {
      * @param id                 The ID of the consignment to update.
      * @return The updated Consignment entity.
      */
-    public Consignment updateConsignment(ConsignmentRequest consignmentRequest, long id) {
-        Consignment foundConsignment = consignmentRepository.findConsignmentById(id);
-        if (foundConsignment == null) {
-            throw new NotFoundException("Consignment not found with ID: " + id);
-        }
-
-        // Update basic fields
-        foundConsignment.setType(consignmentRequest.getType());
-        foundConsignment.setDescription(consignmentRequest.getDescription());
-
-        // Normalize and set startDate and endDate
-        Date normalizedStartDate = DateUtils.normalizeDate(consignmentRequest.getStartDate());
-        Date normalizedEndDate = DateUtils.normalizeDate(consignmentRequest.getEndDate());
-        foundConsignment.setStartDate(normalizedStartDate);
-        foundConsignment.setEndDate(normalizedEndDate);
-
-        // Update CareType
-        if (foundConsignment.getType() == Type.OFFLINE) {
-            CareType careType = careTypeRepository.findByCareTypeId(consignmentRequest.getCareTypeId());
-            if (careType == null) {
-                throw new NotFoundException("CareType not found with ID: " + consignmentRequest.getCareTypeId());
-            }
-            foundConsignment.setCareType(careType);
-        }
-
-        // Recalculate cost if type is "OFFLINE"
-        if (foundConsignment.getType() == Type.OFFLINE) {
-            CareType careType = careTypeRepository.findByCareTypeId(consignmentRequest.getCareTypeId());
-            float estimateCost = calculateTotalCost(
-                    careType.getCostPerDay(),
-                    consignmentRequest.getConsignmentDetailRequests().size(),
-                    normalizedStartDate,
-                    normalizedEndDate
-            );
-            foundConsignment.setCost(estimateCost);
-        }
-
-        // Update ConsignmentDetails
+//    public Consignment updateConsignment(ConsignmentRequest consignmentRequest, long id) {
+//        Consignment foundConsignment = consignmentRepository.findConsignmentById(id);
+//        if (foundConsignment == null) {
+//            throw new NotFoundException("Consignment not found with ID: " + id);
+//        }
+//
+//        // Update basic fields
+//        foundConsignment.setType(consignmentRequest.getType());
+//        foundConsignment.setDescription(consignmentRequest.getDescription());
+//
+//        // Normalize and set startDate and endDate
+//        Date normalizedStartDate = DateUtils.normalizeDate(consignmentRequest.getStartDate());
+//        Date normalizedEndDate = DateUtils.normalizeDate(consignmentRequest.getEndDate());
+//        foundConsignment.setStartDate(normalizedStartDate);
+//        foundConsignment.setEndDate(normalizedEndDate);
+//
+//        // Update CareType
+//        if (foundConsignment.getType() == Type.OFFLINE) {
+//            CareType careType = careTypeRepository.findByCareTypeId(consignmentRequest.getCareTypeId());
+//            if (careType == null) {
+//                throw new NotFoundException("CareType not found with ID: " + consignmentRequest.getCareTypeId());
+//            }
+//            foundConsignment.setCareType(careType);
+//        }
+//
+//        // Recalculate cost if type is "OFFLINE"
+//        if (foundConsignment.getType() == Type.OFFLINE) {
+//            CareType careType = careTypeRepository.findByCareTypeId(consignmentRequest.getCareTypeId());
+//            float estimateCost = calculateTotalCost(
+//                    careType.getCostPerDay(),
+//                    consignmentRequest.getConsignmentDetailRequests().size(),
+//                    normalizedStartDate,
+//                    normalizedEndDate
+//            );
+//            foundConsignment.setCost(estimateCost);
+//        }
+//
+//        // Update ConsignmentDetails
 //        List<ConsignmentDetails> updatedDetails = new ArrayList<>();
 //        for (ConsignmentDetailRequest detailRequest : consignmentRequest.getConsignmentDetailRequests()) {
 //
@@ -239,9 +239,8 @@ public class ConsignmentService {
 //        // Replace existing details with updated ones
 //        foundConsignment.getConsignmentDetails().clear();
 //        foundConsignment.getConsignmentDetails().addAll(updatedDetails);
-
-        return consignmentRepository.save(foundConsignment);
-    }
+//
+//        return consignmentRepository.save(foundConsignment);//   }
 
 
 
