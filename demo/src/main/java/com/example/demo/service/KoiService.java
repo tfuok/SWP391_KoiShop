@@ -286,22 +286,25 @@ public class KoiService {
 
     public SaleRequest sale(SaleRequest saleRequest) {
         Koi koi = koiLotRepository.findKoiByIdAndIsDeletedFalse(saleRequest.getKoiId());
-        LocalDateTime now = LocalDateTime.now();
+//        LocalDateTime now = LocalDateTime.now();
         koi.setSalePercentage(saleRequest.getSalePercentage());
-        koi.setSaleStartTime(saleRequest.getSaleStartTime());
-        koi.setSaleEndTime(saleRequest.getSaleEndTime());
-        if (now.isAfter(saleRequest.getSaleStartTime()) && now.isBefore(saleRequest.getSaleEndTime())) {
-            float salePrice = koi.getPrice() - (koi.getPrice() * saleRequest.getSalePercentage() / 100);
-            koi.setSalePrice(salePrice);
-        } else if (now.isAfter(saleRequest.getSaleEndTime())) {
-            koi.setSalePrice(0);
-            koi.setSalePercentage(0);
-        }
+//        if (now.isAfter(saleRequest.getSaleStartTime()) && now.isBefore(saleRequest.getSaleEndTime())) {
+        float salePrice = koi.getPrice() - (koi.getPrice() * saleRequest.getSalePercentage() / 100);
+        koi.setSalePrice(salePrice);
+//        } else if (now.isAfter(saleRequest.getSaleEndTime())) {
+//            koi.setSalePrice(0);
+//            koi.setSalePercentage(0);
+//        }
         koiLotRepository.save(koi);
         return saleRequest;
     }
 
-
+    public void unSale(long id) {
+        Koi koi = koiLotRepository.findById(id);
+        koi.setSalePrice(0);
+        koi.setSalePercentage(0);
+        koiLotRepository.save(koi);
+    }
 
     public List<Koi> getKoiByCurrentAccount() {
         return koiLotRepository.findByAccountId(authenticationService.getCurrentAccount().getId());
