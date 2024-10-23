@@ -66,7 +66,7 @@ public class ConsignmentAPI {
     }
     @PutMapping("/status")
     public ResponseEntity<Consignment> updateConsignmentStatus(
-           long consignmentId, Status newStatus) {
+           long consignmentId, Status newStatus) throws Exception {
         Consignment updatedConsignment  = consignmentService.updateConsignmentStatus(consignmentId, newStatus);
         return ResponseEntity.ok(updatedConsignment);
     }

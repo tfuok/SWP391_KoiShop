@@ -10,4 +10,5 @@ public class KoiOfflineConsignmentResponse {
     String imgUrl;
     Date endDate;
     String isConsignment;
+    float price;
 }

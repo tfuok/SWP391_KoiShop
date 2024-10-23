@@ -198,6 +198,15 @@ public class OrderService {
             transaction1.setCreateAt(new Date());
             transactions.add(transaction1);
 
+            double MoneySendToVendor = 0;
+            for (OrderDetails orderDetails : orders.getOrderDetails()) {
+                if (orderDetails.getKoi().getAccount().getRole() == Role.CUSTOMER) {
+                    double orderAmount = orderDetails.getPrice() * 0.9;
+                    MoneySendToVendor += orderAmount;
+                }
+            }
+            double MoneySendtoManager = orders.getFinalAmount() - MoneySendToVendor;
+
             Transactions transaction2 = new Transactions();
             //customer -> server
             Account manager = accountRepository.findAccountByRole(Role.MANAGER);
@@ -206,8 +215,8 @@ public class OrderService {
             transaction2.setPayment(payment);
             transaction2.setStatus(TransactionEnum.SUCCESS);
             transaction2.setDescription("VNPAY TO SERVER");
-            double newBalance = manager.getBalance() + orders.getTotal();
-            transaction2.setAmount(orders.getTotal());
+            double newBalance = manager.getBalance() + MoneySendtoManager;
+            transaction2.setAmount(MoneySendtoManager);
             transaction2.setCreateAt(new Date());
             manager.setBalance(newBalance);
             transactions.add(transaction2);
@@ -225,7 +234,6 @@ public class OrderService {
                     transaction3.setCreateAt(new Date());
                     double orderAmount = orderDetails.getPrice() * 0.9;
                     transaction3.setAmount(orderAmount);
-                    manager.setBalance(manager.getBalance() - orderAmount);
                     Account vendor = orderDetails.getKoi().getAccount();
                     vendor.setBalance(vendor.getBalance() + orderAmount);
                     accountRepository.save(vendor);

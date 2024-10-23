@@ -146,7 +146,7 @@ public class ConsignmentOrderService {
         String tmnCode = "VONI2DAD";
         String secretKey = "PIOSTSKRYSENPWY7NW7UG7HGWCHTT4IS";
         String vnpUrl = " https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        String returnUrl = "https://koishop.site/successful-consignment?orderID=" + orders.getId() +  "&consignmentID=" + consignment.getId();
+        String returnUrl = "http://koishop.site/successful-consignment?orderID=" + orders.getId() +  "&consignmentID=" + consignment.getId();
         String currCode = "VND";
 
         Map<String, String> vnpParams = new TreeMap<>();
@@ -237,18 +237,27 @@ public class ConsignmentOrderService {
             transaction1.setDescription("VNPAY TO CUSTOMER");
             transactions.add(transaction1);
 
-            Transactions transaction2 = new Transactions();
+            double MoneySendToVendor = 0;
+            Account manager = accountRepository.findAccountByRole(Role.MANAGER);
+            for (OrderDetails orderDetails : orders.getOrderDetails()) {
+                if (orderDetails.getKoi().getAccount().getRole() == Role.CUSTOMER) {
+                    double orderAmount = orderDetails.getPrice() * 0.9;
+                    MoneySendToVendor += orderAmount;
+                }
+            }
+            double MoneySendtoManager = orders.getFinalAmount() - MoneySendToVendor;
+
             //customer -> server
 //            Account manager = orders.getOrderDetails().get(0).getKoi().getAccount();
-            Account manager = accountRepository.findAccountByRole(Role.MANAGER);
+            Transactions transaction2 = new Transactions();
             transaction2.setFrom(customer);
             transaction2.setTo(manager);
             transaction2.setPayment(payment);
             transaction2.setStatus(TransactionEnum.SUCCESS);
-            transaction2.setAmount(orders.getFinalAmount());
+            transaction2.setAmount(MoneySendtoManager);
             transaction2.setCreateAt(new Date());
             transaction2.setDescription("CUSTOMER TO MANAGER");
-            double newBalance = manager.getBalance() + orders.getTotal() ;
+            double newBalance = manager.getBalance() + MoneySendtoManager ;
             manager.setBalance(newBalance);
             transactions.add(transaction2);
 
@@ -264,7 +273,6 @@ public class ConsignmentOrderService {
                     transaction3.setCreateAt(new Date());
                     double orderAmount = orderDetails.getPrice() * 0.9;
                     transaction3.setAmount(orderAmount);
-                    manager.setBalance(manager.getBalance() - orderAmount);
                     Account vendor = orderDetails.getKoi().getAccount();
                     vendor.setBalance(vendor.getBalance() + orderAmount);
                     accountRepository.save(vendor);

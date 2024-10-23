@@ -124,7 +124,7 @@ public class ConsignmentService {
 
 
             Koi koi = createConsignmentKoi(consignmentDetailRequest.getKoiRequest());
-            //Certificate certificate = certificateService.createCertificates(koi);
+
             ConsignmentDetails consignmentDetail = new ConsignmentDetails();
             consignmentDetail.setConsignment(consignment);
             consignmentDetail.setKoi(koi);
@@ -444,7 +444,7 @@ public class ConsignmentService {
         }
     }
 
-    public Consignment updateConsignmentStatus(long id, Status status) {
+    public Consignment updateConsignmentStatus(long id, Status status) throws Exception {
         Consignment consignment = consignmentRepository.findConsignmentById(id);
         if (consignment == null) {
             throw new NotFoundException("Consignment not exist");
@@ -455,46 +455,100 @@ public class ConsignmentService {
                 consignmentDetails.getKoi().setConsignment(true);
                 if (consignment.getType() == Type.ONLINE) {
                     consignmentDetails.getKoi().setDeleted(false);
+                    Certificate certificate = certificateService.createCertificates(consignmentDetails.getKoi());
+                    Koi koi = consignmentDetails.getKoi();
+                    koi.setCertificate(certificate);
+                    koiLotRepository.save(koi);
                 }
             }
         }
         return consignmentRepository.save(consignment);
     }
 public List<KoiOnlineConsignmentResponse> getAllOnlineKoi() {
-                List<KoiOnlineConsignmentResponse> responses = new ArrayList<>();
-                for (Koi koi : koiLotRepository.findAllKoiByAccountIdAndConsignmentType(authenticationService.getCurrentAccount().getId(), Type.ONLINE)) {
-                    KoiOnlineConsignmentResponse response = new KoiOnlineConsignmentResponse();
-                    response.setId(koiLotRepository.findConsignmentByKoiId(koi.getId()).getId());
-                    response.setName(koi.getName());
-                    response.setPrice(koi.getPrice());
-                    if (koi.isConsignment() == true && koi.isSold() == true) {
-                        response.setStatus("Sold");
-                    } else if (koi.isConsignment() == true && koi.isSold() == false) {
-                        response.setStatus("Not Sold");
-                    } else {
-                        response.setStatus("Not Accepted");
-                    }
-                    response.setImgUrl(koi.getImages());
-                    responses.add(response);
-                }
-                return responses;
-            }
-    public List<KoiOfflineConsignmentResponse> getAllOfflineKoi(){
+    List<KoiOnlineConsignmentResponse> responses = new ArrayList<>();
+
+    // Get the current account ID
+    Long accountId = authenticationService.getCurrentAccount().getId();
+
+    // Fetch all koi consigned offline by the current account
+    List<Koi> koiList = koiLotRepository.findAllKoiByAccountIdAndConsignmentType(accountId, Type.ONLINE);
+    // Fetch all koi consigned offline by the current account
+    for (Koi koi : koiList) {
+        KoiOnlineConsignmentResponse response = new KoiOnlineConsignmentResponse();
+
+        // Fetch the consignment details once
+        Consignment consignment = koiLotRepository.findConsignmentByKoiId(koi.getId());
+
+        if (consignment != null) {
+            // Populate the response using the consignment
+            response.setId(consignment.getId());
+            response.setPrice(koi.getPrice());
+            response.setName(koi.getName());
+        }
+
+        // Populate other Koi details
+        response.setImgUrl(koi.getImages());
+
+        // Set consignment status based on the current Koi and consignment details
+        if (koi.isConsignment() && consignment != null && consignment.getStatus() == Status.CONFIRMED) {
+            response.setStatus("CONSIGNED");
+        } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.PAID) {
+            response.setStatus("ON SELL");
+        } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.DECLINED) {
+            response.setStatus("DECLINED");
+        } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.PENDING) {
+            response.setStatus("PENDING");
+        }
+
+        // Add the response to the list
+        responses.add(response);
+    }
+    return responses;
+}
+
+    public List<KoiOfflineConsignmentResponse> getAllOfflineKoi() {
         List<KoiOfflineConsignmentResponse> responses = new ArrayList<>();
-        for(Koi koi : koiLotRepository.findAllKoiByAccountIdAndConsignmentType(authenticationService.getCurrentAccount().getId(),Type.OFFLINE)){
+
+        // Get the current account ID
+        Long accountId = authenticationService.getCurrentAccount().getId();
+
+        // Fetch all koi consigned offline by the current account
+        List<Koi> koiList = koiLotRepository.findAllKoiByAccountIdAndConsignmentType(accountId, Type.OFFLINE);
+
+        for (Koi koi : koiList) {
             KoiOfflineConsignmentResponse response = new KoiOfflineConsignmentResponse();
-            response.setId(koiLotRepository.findConsignmentByKoiId(koi.getId()).getId());
-            response.setEndDate(koiLotRepository.findConsignmentByKoiId(koi.getId()).getEndDate());
-            response.setImgUrl(koi.getImages());
-            if(koi.isConsignment()==true) {
-                response.setIsConsignment("Consigned");
-            }else{
-                response.setIsConsignment("Not Consigned");
+
+            // Fetch the consignment details once
+            Consignment consignment = koiLotRepository.findConsignmentByKoiId(koi.getId());
+
+            if (consignment != null) {
+                // Populate the response using the consignment
+                response.setId(consignment.getId());
+                response.setEndDate(consignment.getEndDate());
+                response.setPrice(consignment.getCost());
             }
+
+            // Populate other Koi details
+            response.setImgUrl(koi.getImages());
+
+            // Set consignment status based on the current Koi and consignment details
+            if (koi.isConsignment() && consignment != null && consignment.getStatus() == Status.CONFIRMED) {
+                response.setIsConsignment("CONSIGNED");
+            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.PAID) {
+                response.setIsConsignment("PAID");
+            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.DECLINED) {
+                response.setIsConsignment("DECLINED");
+            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.PENDING) {
+                response.setIsConsignment("PENDING");
+            }
+
+            // Add the response to the list
             responses.add(response);
         }
+
         return responses;
     }
+
     public ConsignmentResponse assignStaff(long consignmentId, long staffId) {
         Consignment consignment = consignmentRepository.findById(consignmentId)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
