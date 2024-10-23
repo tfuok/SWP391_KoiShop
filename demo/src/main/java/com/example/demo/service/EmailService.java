@@ -63,7 +63,7 @@ public class EmailService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true); // true indicates multipart message
 
             // Set email properties
-            helper.setFrom("your-email@example.com");
+            helper.setFrom("phuocnntse182664@fpt.edu.vn");
             helper.setTo(emailDetails.getReceiver().getEmail());
             helper.setSubject(emailDetails.getSubject());
             helper.setText("Please find your Koi Certificate attached.");

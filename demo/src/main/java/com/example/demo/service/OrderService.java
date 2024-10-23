@@ -207,7 +207,7 @@ public class OrderService {
             transaction2.setStatus(TransactionEnum.SUCCESS);
             transaction2.setDescription("VNPAY TO SERVER");
             double newBalance = manager.getBalance() + orders.getTotal();
-            transaction2.setAmount(newBalance);
+            transaction2.setAmount(orders.getTotal());
             transaction2.setCreateAt(new Date());
             manager.setBalance(newBalance);
             transactions.add(transaction2);
@@ -226,11 +226,10 @@ public class OrderService {
                     double orderAmount = orderDetails.getPrice() * 0.9;
                     transaction3.setAmount(orderAmount);
                     manager.setBalance(manager.getBalance() - orderAmount);
-                    transactions.add(transaction3);
                     Account vendor = orderDetails.getKoi().getAccount();
                     vendor.setBalance(vendor.getBalance() + orderAmount);
                     accountRepository.save(vendor);
-                    accountRepository.save(manager);
+                    transactions.add(transaction3);
                 }
             }
             payment.setTransactions(transactions);

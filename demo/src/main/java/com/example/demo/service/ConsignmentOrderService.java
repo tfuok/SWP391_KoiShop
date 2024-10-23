@@ -41,6 +41,8 @@ public class ConsignmentOrderService {
     private PaymentRepository paymentRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private CertificateService certificateService;
 
     public OrderConsignmentResponse CreateConsignmentOrder(OrderConsignmentRequest orderConsignmentRequest) {
         Orders orders = new Orders();
@@ -252,23 +254,22 @@ public class ConsignmentOrderService {
             transactions.add(transaction2);
 
             //server -> user (if koi is consignment online)
-            //Account manager = accountRepository.findAccountByRole(Role.MANAGER);
             for (OrderDetails orderDetails : orders.getOrderDetails()) {
                 if (orderDetails.getKoi().getAccount().getRole() == Role.CUSTOMER) {
-                    Transactions transaction3 = new Transactions(); // create a new instance inside the loop
+                    Transactions transaction3 = new Transactions();
                     transaction3.setFrom(manager);
                     transaction3.setTo(orderDetails.getKoi().getAccount());
                     transaction3.setPayment(payment);
-                    transaction3.setCreateAt(new Date());
                     transaction3.setStatus(TransactionEnum.SUCCESS);
                     transaction3.setDescription("MANAGER TO CONSIGNMENT VENDOR");
+                    transaction3.setCreateAt(new Date());
                     double orderAmount = orderDetails.getPrice() * 0.9;
                     transaction3.setAmount(orderAmount);
                     manager.setBalance(manager.getBalance() - orderAmount);
                     Account vendor = orderDetails.getKoi().getAccount();
                     vendor.setBalance(vendor.getBalance() + orderAmount);
-                    transactions.add(transaction3);
                     accountRepository.save(vendor);
+                    transactions.add(transaction3);
                 }
             }
             Koi koi = null;
@@ -279,13 +280,13 @@ public class ConsignmentOrderService {
                 koi.setAccount(customer);
                 koiRepository.save(koi);
                 if (koi.getQuantity() == 1) {
-                    // certificateService.sendCertificateEmail(customer, koi.getCertificate());
+                     certificateService.sendCertificateEmail(customer, koi.getCertificate().getCertificateId());
                 }
             }
             //tao transaction
             Transactions transaction5 = new Transactions();
             //customer -> server
-            manager = accountRepository.findAccountByRole(Role.MANAGER);
+
             transaction5.setFrom(customer);
             transaction5.setTo(manager);
             transaction5.setPayment(payment);
