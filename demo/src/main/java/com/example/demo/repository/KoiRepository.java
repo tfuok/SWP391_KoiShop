@@ -41,4 +41,12 @@ public interface KoiRepository extends JpaRepository<Koi, Long> {
     Consignment findConsignmentByKoiId(@Param("koiId") Long koiId);
 
     Koi findById(long id);
+
+    @Query("SELECT b.name, COUNT(k.id) AS totalSold FROM Koi k " +
+            "JOIN k.breeds b " +
+            "JOIN k.orderDetails od " +
+            "WHERE k.sold = true " +
+            "GROUP BY b.name " +
+            "ORDER BY totalSold DESC")
+    List<Object[]> findTopBreeds();
 }

@@ -181,6 +181,7 @@ public class OrderService {
             payment.setOrders(orders);
             payment.setCreateAt(new Date());
             payment.setMethod(PaymentEnums.BANKING);
+            payment.setTotal(orders.getTotal());
 
             List<Transactions> transactions = new ArrayList<>();
 
@@ -194,6 +195,7 @@ public class OrderService {
             transaction1.setPayment(payment);
             transaction1.setStatus(TransactionEnum.SUCCESS);
             transaction1.setDescription("CUSTOMER TO VNPAY");
+            transaction1.setCreateAt(new Date());
             transactions.add(transaction1);
 
             Transactions transaction2 = new Transactions();
@@ -205,6 +207,8 @@ public class OrderService {
             transaction2.setStatus(TransactionEnum.SUCCESS);
             transaction2.setDescription("VNPAY TO SERVER");
             double newBalance = manager.getBalance() + orders.getTotal();
+            transaction2.setAmount(newBalance);
+            transaction2.setCreateAt(new Date());
             manager.setBalance(newBalance);
             transactions.add(transaction2);
 
@@ -218,7 +222,9 @@ public class OrderService {
 //                    transaction3.setPayment(payment);
 //                    transaction3.setStatus(TransactionEnum.SUCCESS);
 //                    transaction3.setDescription("MANAGER TO CONSIGNMENT VENDOR");
+//                    transaction3.setCreateAt(new Date());
 //                    double consignmentAmount = orderDetails.getPrice() * 0.9;
+//                    transaction3.setAmount(consignmentAmount);
 //                    manager.setBalance(manager.getBalance() - consignmentAmount);
 //                    orderDetails.getKoi().getAccount().setBalance(orderDetails.getKoi().getAccount().getBalance() + consignmentAmount);
 //                    transactions.add(transaction3);

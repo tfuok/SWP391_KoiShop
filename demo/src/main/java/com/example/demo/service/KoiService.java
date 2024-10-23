@@ -249,78 +249,54 @@ public class KoiService {
         comparisonResult.put("sizeDifference", Math.abs(koi1.getSize() - koi2.getSize()));
         comparisonResult.put("breedMatch", koi1.getBreeds().equals(koi2.getBreeds()));
         comparisonResult.put("originMatch", koi1.getOrigin().equals(koi2.getOrigin()));
-
         return comparisonResult;
     }
 
     public List<KoiResponse> getKoiByBreed(Long breedId) {
-        // Tìm giống cá (Breed) dựa trên breedId
         Breed breed = breedRepository.findBreedByIdAndIsDeletedFalse(breedId);
         if (breed == null) throw new NotFoundException("Breed not found");
 
-        // Tìm tất cả các Koi thuộc giống cá đó
         List<Koi> kois = koiLotRepository.findByBreedsAndIsDeletedFalseAndSoldFalse(breed);
         List<KoiResponse> koiLotResponses = new ArrayList<>();
 
         for (Koi koi : kois) {
             KoiResponse koiLotResponse = modelMapper.map(koi, KoiResponse.class);
 
-            // Only include non-deleted breeds
             List<String> breedNames = koi.getBreeds().stream()
                     .filter(b -> !b.isDeleted())
                     .map(Breed::getName)
                     .collect(Collectors.toList());
-
             koiLotResponse.setBreeds(breedNames);
 
-            // Map the list of images
             List<String> imageUrls = koi.getImagesList().stream()
                     .map(Images::getImages)
                     .collect(Collectors.toList());
-            koiLotResponse.setImagesList(imageUrls);  // Set images list in the response
+            koiLotResponse.setImagesList(imageUrls);
 
-            // Set the certificate image if quantity is 1
             if (koiLotResponse.getQuantity() == 1 && koi.getCertificate() != null) {
                 String certificateImageUrls = koi.getCertificate().getImageUrl();
                 koiLotResponse.setCertificate(certificateImageUrls);
             } else {
                 koiLotResponse.setCertificate(null);
             }
-
             koiLotResponses.add(koiLotResponse);
         }
-
         return koiLotResponses;
     }
-
-//    public void applySale(SaleRequest saleRequest) {
-//        Koi koi = koiLotRepository.findKoiByIdAndIsDeletedFalse(saleRequest.getKoiId());
-//        float salePrice = koi.getPrice() - (koi.getPrice() * saleRequest.getSalePercentage() / 100);
-//        koi.setSalePrice(salePrice);
-//        koi.setSalePercentage(saleRequest.getSalePercentage());
-//        koi.setSaleStartTime(saleRequest.getSaleStartTime());
-//        koi.setSaleEndTime(saleRequest.getSaleEndTime());
-//        koiLotRepository.save(koi);
-//    }
 
     public SaleRequest sale(SaleRequest saleRequest) {
         Koi koi = koiLotRepository.findKoiByIdAndIsDeletedFalse(saleRequest.getKoiId());
         LocalDateTime now = LocalDateTime.now();
-        // Cập nhật thông tin giảm giá bất kể thời gian thực
         koi.setSalePercentage(saleRequest.getSalePercentage());
         koi.setSaleStartTime(saleRequest.getSaleStartTime());
         koi.setSaleEndTime(saleRequest.getSaleEndTime());
-        // Kiểm tra nếu thời gian hiện tại nằm trong khoảng thời gian sale
         if (now.isAfter(saleRequest.getSaleStartTime()) && now.isBefore(saleRequest.getSaleEndTime())) {
-            // Tính toán giá sale
             float salePrice = koi.getPrice() - (koi.getPrice() * saleRequest.getSalePercentage() / 100);
             koi.setSalePrice(salePrice);
         } else if (now.isAfter(saleRequest.getSaleEndTime())) {
-            // Nếu sale đã kết thúc, khôi phục giá gốc
             koi.setSalePrice(0);
             koi.setSalePercentage(0);
         }
-        // Lưu thông tin vào cơ sở dữ liệu
         koiLotRepository.save(koi);
         return saleRequest;
     }

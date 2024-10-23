@@ -19,13 +19,14 @@ public class Payment {
 
     Date createAt;
 
+    double total;
+
     @Enumerated(EnumType.STRING)
     PaymentEnums method;
 
     @OneToOne
     @JoinColumn(name = "order_id")
     @JsonIgnore
-
     Orders orders;
 
     @OneToOne
@@ -34,6 +35,5 @@ public class Payment {
 
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
     @JsonIgnore
-
     List<Transactions> transactions;
 }
