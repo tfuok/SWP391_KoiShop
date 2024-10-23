@@ -464,47 +464,51 @@ public class ConsignmentService {
         }
         return consignmentRepository.save(consignment);
     }
-public List<KoiOnlineConsignmentResponse> getAllOnlineKoi() {
-    List<KoiOnlineConsignmentResponse> responses = new ArrayList<>();
+    public List<KoiOnlineConsignmentResponse> getAllOnlineKoi() {
+        List<KoiOnlineConsignmentResponse> responses = new ArrayList<>();
 
-    // Get the current account ID
-    Long accountId = authenticationService.getCurrentAccount().getId();
+        // Get the current account ID
+        Long accountId = authenticationService.getCurrentAccount().getId();
 
-    // Fetch all koi consigned offline by the current account
-    List<Koi> koiList = koiLotRepository.findAllKoiByAccountIdAndConsignmentType(accountId, Type.ONLINE);
-    // Fetch all koi consigned offline by the current account
-    for (Koi koi : koiList) {
-        KoiOnlineConsignmentResponse response = new KoiOnlineConsignmentResponse();
+        // Fetch all Koi consigned online by the current account
+        List<Koi> koiList = koiLotRepository.findAllKoiByAccountIdAndConsignmentType(accountId, Type.ONLINE);
 
-        // Fetch the consignment details once
-        Consignment consignment = koiLotRepository.findConsignmentByKoiId(koi.getId());
+        for (Koi koi : koiList) {
+            KoiOnlineConsignmentResponse response = new KoiOnlineConsignmentResponse();
 
-        if (consignment != null) {
-            // Populate the response using the consignment
-            response.setId(consignment.getId());
-            response.setPrice(koi.getPrice());
-            response.setName(koi.getName());
+            // Fetch all consignments associated with the current Koi
+            List<Consignment> consignments = koiLotRepository.findConsignmentsByKoiId(koi.getId());
+
+            // Assuming you want to work with the first consignment (if any)
+            Consignment consignment = !consignments.isEmpty() ? consignments.get(consignments.size() - 1) : null;
+
+            if (consignment != null) {
+                // Populate the response using the consignment
+                response.setId(consignment.getId());
+                response.setPrice(koi.getPrice());
+                response.setName(koi.getName());
+            }
+
+            // Populate other Koi details
+            response.setImgUrl(koi.getImages());
+
+            // Set consignment status based on the current Koi and consignment details
+            if (koi.isConsignment() && consignment != null && consignment.getStatus() == Status.CONFIRMED) {
+                response.setStatus("CONSIGNED");
+            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.PAID) {
+                response.setStatus("ON SELL");
+            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.DECLINED) {
+                response.setStatus("DECLINED");
+            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.PENDING) {
+                response.setStatus("PENDING");
+            }
+
+            // Add the response to the list
+            responses.add(response);
         }
-
-        // Populate other Koi details
-        response.setImgUrl(koi.getImages());
-
-        // Set consignment status based on the current Koi and consignment details
-        if (koi.isConsignment() && consignment != null && consignment.getStatus() == Status.CONFIRMED) {
-            response.setStatus("CONSIGNED");
-        } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.PAID) {
-            response.setStatus("ON SELL");
-        } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.DECLINED) {
-            response.setStatus("DECLINED");
-        } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.PENDING) {
-            response.setStatus("PENDING");
-        }
-
-        // Add the response to the list
-        responses.add(response);
+        return responses;
     }
-    return responses;
-}
+
 
     public List<KoiOfflineConsignmentResponse> getAllOfflineKoi() {
         List<KoiOfflineConsignmentResponse> responses = new ArrayList<>();

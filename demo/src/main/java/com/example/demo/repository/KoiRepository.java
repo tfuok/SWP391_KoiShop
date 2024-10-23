@@ -40,6 +40,9 @@ public interface KoiRepository extends JpaRepository<Koi, Long> {
     @Query("SELECT cd.consignment FROM ConsignmentDetails cd WHERE cd.koi.id = :koiId")
     Consignment findConsignmentByKoiId(@Param("koiId") Long koiId);
 
+    @Query("SELECT cd.consignment FROM ConsignmentDetails cd WHERE cd.koi.id = :koiId")
+    List<Consignment> findConsignmentsByKoiId(@Param("koiId") Long koiId);
+
     Koi findById(long id);
 
     @Query("SELECT b.name, COUNT(k.id) AS totalSold FROM Koi k " +
