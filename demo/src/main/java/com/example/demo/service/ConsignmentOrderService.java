@@ -208,7 +208,7 @@ public class ConsignmentOrderService {
                     .orElseThrow((() -> new NotFoundException("Order not found")));
             Consignment consignment = consignmentRepository.findById(consignmentId)
                     .orElseThrow((() -> new NotFoundException("Consignment not found")));
-
+            double totalCost = orders.getFinalAmount() + consignment.getCost();
         /*
         1. tao payment
          */
@@ -218,6 +218,8 @@ public class ConsignmentOrderService {
             payment.setConsignment(consignment);
             payment.setCreateAt(new Date());
             payment.setMethod(PaymentEnums.BANKING);
+            payment.setCreateAt(new Date());
+            payment.setTotal(totalCost);
 
             List<Transactions> transactions = new ArrayList<>();
 
@@ -228,6 +230,8 @@ public class ConsignmentOrderService {
             Account customer = authenticationService.getCurrentAccount();
             transaction1.setTo(customer);
             transaction1.setPayment(payment);
+            transaction1.setCreateAt(new Date());
+            transaction1.setAmount(totalCost);
             transaction1.setStatus(TransactionEnum.SUCCESS);
             transaction1.setDescription("VNPAY TO CUSTOMER");
             transactions.add(transaction1);
@@ -240,8 +244,10 @@ public class ConsignmentOrderService {
             transaction2.setTo(manager);
             transaction2.setPayment(payment);
             transaction2.setStatus(TransactionEnum.SUCCESS);
+            transaction2.setAmount(orders.getFinalAmount());
+            transaction2.setCreateAt(new Date());
             transaction2.setDescription("CUSTOMER TO MANAGER");
-            double newBalance = manager.getBalance() + orders.getTotal();
+            double newBalance = manager.getBalance() + orders.getTotal() ;
             manager.setBalance(newBalance);
             transactions.add(transaction2);
 
@@ -253,15 +259,18 @@ public class ConsignmentOrderService {
                     transaction3.setFrom(manager);
                     transaction3.setTo(orderDetails.getKoi().getAccount());
                     transaction3.setPayment(payment);
+                    transaction3.setCreateAt(new Date());
                     transaction3.setStatus(TransactionEnum.SUCCESS);
                     transaction3.setDescription("MANAGER TO CONSIGNMENT VENDOR");
-                    double consignmentAmount = orderDetails.getPrice() * 0.9;
-                    manager.setBalance(manager.getBalance() - consignmentAmount);
-                    orderDetails.getKoi().getAccount().setBalance(orderDetails.getKoi().getAccount().getBalance() + consignmentAmount);
+                    double orderAmount = orderDetails.getPrice() * 0.9;
+                    transaction3.setAmount(orderAmount);
+                    manager.setBalance(manager.getBalance() - orderAmount);
+                    Account vendor = orderDetails.getKoi().getAccount();
+                    vendor.setBalance(vendor.getBalance() + orderAmount);
                     transactions.add(transaction3);
+                    accountRepository.save(vendor);
                 }
             }
-
             Koi koi = null;
             for (OrderDetails orderDetails : orders.getOrderDetails()) {
                 OrderDetails details = new OrderDetails();
@@ -273,9 +282,7 @@ public class ConsignmentOrderService {
                     // certificateService.sendCertificateEmail(customer, koi.getCertificate());
                 }
             }
-
             //tao transaction
-
             Transactions transaction5 = new Transactions();
             //customer -> server
             manager = accountRepository.findAccountByRole(Role.MANAGER);
@@ -283,13 +290,14 @@ public class ConsignmentOrderService {
             transaction5.setTo(manager);
             transaction5.setPayment(payment);
             transaction5.setStatus(TransactionEnum.SUCCESS);
+            transaction5.setCreateAt(new Date());
+            transaction5.setAmount(consignment.getCost());
             if(consignment.getType() == Type.OFFLINE){
                 transaction5.setDescription("CHUYEN PHI KY GUI OFFLINE VE MANAGER");
             }else{
                 transaction5.setDescription("CHUYEN PHI KY GUI ONLINE VE MANAGER");
             }
             transactions.add(transaction5);
-
             payment.setTransactions(transactions);
             accountRepository.save(manager);
             paymentRepository.save(payment);
@@ -297,7 +305,6 @@ public class ConsignmentOrderService {
             consignment.setStatus(Status.PAID);
             orderRepository.save(orders);
             consignmentRepository.save(consignment);
-            // Send email with the order bill
             emailService.sendConsignmentBillEmail(consignment,consignment.getAccount().getEmail());
             emailService.sendOrderBillEmail(orders, orders.getCustomer().getEmail()); // Ensure to get customer's email
         } catch (Exception e) {

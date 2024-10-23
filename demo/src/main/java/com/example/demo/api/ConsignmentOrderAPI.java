@@ -20,8 +20,8 @@ public class ConsignmentOrderAPI {
         return ResponseEntity.ok(url);
     }
     @PostMapping("/transaction")
-    public ResponseEntity createTrans(@RequestParam long orderid,@RequestParam long consignmentid ) throws Exception {
-        consignmentOrderService.createTransaction(orderid,consignmentid);
+    public ResponseEntity createTrans(@RequestParam long orderId,@RequestParam long consignmentId ) throws Exception {
+        consignmentOrderService.createTransaction(orderId,consignmentId);
         return ResponseEntity.ok("Success");
     }
 }

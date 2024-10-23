@@ -353,7 +353,8 @@ public class ConsignmentService {
             payment.setConsignment(consignment);
             payment.setCreateAt(new Date());
             payment.setMethod(PaymentEnums.BANKING);
-
+            payment.setTotal(consignment.getCost());
+            payment.setCreateAt(new Date());
             List<Transactions> transactions = new ArrayList<>();
 
             //tao transaction
@@ -365,6 +366,8 @@ public class ConsignmentService {
             transaction1.setPayment(payment);
             transaction1.setStatus(TransactionEnum.SUCCESS);
             transaction1.setDescription("VNPAY TO CUSTOMER");
+            transaction1.setAmount(consignment.getCost());
+            transaction1.setCreateAt(new Date());
             transactions.add(transaction1);
 
             Transactions transaction2 = new Transactions();
@@ -374,6 +377,8 @@ public class ConsignmentService {
             transaction2.setTo(manager);
             transaction2.setPayment(payment);
             transaction2.setStatus(TransactionEnum.SUCCESS);
+            transaction2.setAmount(consignment.getCost());
+            transaction2.setCreateAt(new Date());
             if(consignment.getType() == Type.OFFLINE){
                 transaction2.setDescription("OFFLINE CONSIGNMENT COST TO MANAGER");
             }else{
