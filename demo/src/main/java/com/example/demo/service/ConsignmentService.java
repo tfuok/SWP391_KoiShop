@@ -516,14 +516,17 @@ public class ConsignmentService {
         // Get the current account ID
         Long accountId = authenticationService.getCurrentAccount().getId();
 
-        // Fetch all koi consigned offline by the current account
+        // Fetch all Koi consigned offline by the current account
         List<Koi> koiList = koiLotRepository.findAllKoiByAccountIdAndConsignmentType(accountId, Type.OFFLINE);
 
         for (Koi koi : koiList) {
             KoiOfflineConsignmentResponse response = new KoiOfflineConsignmentResponse();
 
-            // Fetch the consignment details once
-            Consignment consignment = koiLotRepository.findConsignmentByKoiId(koi.getId());
+            // Fetch all consignments associated with the current Koi
+            List<Consignment> consignments = koiLotRepository.findConsignmentsByKoiId(koi.getId());
+
+            // Get the last consignment if available
+            Consignment consignment = !consignments.isEmpty() ? consignments.get(consignments.size() - 1) : null;
 
             if (consignment != null) {
                 // Populate the response using the consignment
@@ -552,6 +555,7 @@ public class ConsignmentService {
 
         return responses;
     }
+
 
     public ConsignmentResponse assignStaff(long consignmentId, long staffId) {
         Consignment consignment = consignmentRepository.findById(consignmentId)
