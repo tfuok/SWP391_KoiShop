@@ -402,7 +402,7 @@ public class ConsignmentService {
             koiLot.setSize(koiLotRequest.getSize());
             koiLot.setOrigin(koiLotRequest.getOrigin());
             koiLot.setDescription(koiLotRequest.getDescription());
-            koiLot.setQuantity(koiLotRequest.getQuantity());
+            koiLot.setQuantity(1);
             koiLot.setImages(koiLotRequest.getImageUrl());
             koiLot.setDeleted(true);
 

@@ -66,7 +66,7 @@ public class CareTypeAPI {
             return ResponseEntity.status(500).body(null);
         }
     }
-    @GetMapping("/Manager")
+    @GetMapping("/manager")
     public ResponseEntity<List<CareType>> getCareTypes() {
         try {
             List<CareType> careTypes = careTypeService.getAllCareType();

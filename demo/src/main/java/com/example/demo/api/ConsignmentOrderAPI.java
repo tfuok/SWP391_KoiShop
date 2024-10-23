@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/consignmentOrder/")
+@RequestMapping("/api/consignmentOrder")
 @CrossOrigin("*")
 @SecurityRequirement(name = "api")
 public class ConsignmentOrderAPI {
@@ -20,8 +20,8 @@ public class ConsignmentOrderAPI {
         return ResponseEntity.ok(url);
     }
     @PostMapping("/transaction")
-    public ResponseEntity createTrans(@RequestParam long orderId,@RequestParam long consignmentId ) throws Exception {
-        consignmentOrderService.createTransaction(orderId,consignmentId);
+    public ResponseEntity createTrans(@RequestParam long orderid,@RequestParam long consignmentid ) throws Exception {
+        consignmentOrderService.createTransaction(orderid,consignmentid);
         return ResponseEntity.ok("Success");
     }
 }
