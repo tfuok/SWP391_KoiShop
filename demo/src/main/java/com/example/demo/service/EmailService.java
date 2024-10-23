@@ -4,10 +4,8 @@ import com.example.demo.entity.Consignment;
 import com.example.demo.entity.Orders;
 import com.example.demo.model.Request.EmailDetails;
 import jakarta.mail.*;
-import jakarta.mail.internet.InternetAddress;
-import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -16,6 +14,7 @@ import org.thymeleaf.TemplateEngine;
 
 import org.thymeleaf.context.Context;
 
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -57,52 +56,29 @@ public class EmailService {
         }
     }
 
-    public void sendEmailWithAttachment(EmailDetails emailDetails, String firebasePath) {
-        // Set up JavaMail properties and session
-        Properties props = new Properties();
-        props.put("mail.smtp.host", "your-smtp-server");
-        props.put("mail.smtp.port", "your-smtp-port");
-        // Add any other necessary SMTP properties
-
-        Session session = Session.getInstance(props, null);
-
+    public void sendEmailWithAttachment(EmailDetails emailDetails, byte[] pdfBytes) {
         try {
             // Create a MimeMessage
-            MimeMessage message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("your-email@example.com"));
-            message.setRecipient(Message.RecipientType.TO, new InternetAddress(emailDetails.getReceiver().getEmail()));
-            message.setSubject(emailDetails.getSubject());
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true); // true indicates multipart message
 
-            // Create a MimeBodyPart for the message text
-            MimeBodyPart messageBodyPart = new MimeBodyPart();
-            messageBodyPart.setText("Please find your Koi Certificate attached.");
+            // Set email properties
+            helper.setFrom("your-email@example.com");
+            helper.setTo(emailDetails.getReceiver().getEmail());
+            helper.setSubject(emailDetails.getSubject());
+            helper.setText("Please find your Koi Certificate attached.");
 
-            // Download the PDF file from Firebase Storage
-            File pdfFile = downloadFileFromFirebase(firebasePath);
-
-            // Create a MimeBodyPart for the attachment
-            MimeBodyPart attachmentPart = new MimeBodyPart();
-            attachmentPart.attachFile(pdfFile);
-
-            // Create a Multipart to hold both parts
-            Multipart multipart = new MimeMultipart();
-            multipart.addBodyPart(messageBodyPart);
-            multipart.addBodyPart(attachmentPart);
-
-            // Set the content of the email
-            message.setContent(multipart);
+            // Create the attachment
+            helper.addAttachment("Koi_Certificate.pdf", new ByteArrayDataSource(pdfBytes, "application/pdf"));
 
             // Send the email
-            Transport.send(message);
-
-            // Optionally, delete the downloaded file after sending the email
-            pdfFile.delete();
-
-        } catch (MessagingException | IOException e) {
+            mailSender.send(message);
+        } catch (Exception e) {
             e.printStackTrace();
             // Handle exception (log or retry)
         }
     }
+
 
     private File downloadFileFromFirebase(String firebasePath) throws IOException {
         // You will need to implement the logic to download the file from Firebase

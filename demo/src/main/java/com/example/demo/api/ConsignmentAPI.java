@@ -66,8 +66,7 @@ public class ConsignmentAPI {
     }
     @PutMapping("/status")
     public ResponseEntity<Consignment> updateConsignmentStatus(
-           @PathVariable Long consignmentId,
-           @RequestParam Status newStatus) {
+           long consignmentId, Status newStatus) {
         Consignment updatedConsignment  = consignmentService.updateConsignmentStatus(consignmentId, newStatus);
         return ResponseEntity.ok(updatedConsignment);
     }

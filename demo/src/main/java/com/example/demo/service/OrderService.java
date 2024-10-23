@@ -212,24 +212,27 @@ public class OrderService {
             manager.setBalance(newBalance);
             transactions.add(transaction2);
 
-//            //server -> user (if koi is consignment online)
-//            //Account manager = accountRepository.findAccountByRole(Role.MANAGER);
-//            for (OrderDetails orderDetails : orders.getOrderDetails()) {
-//                if (orderDetails.getKoi().getAccount().getRole() == Role.CUSTOMER) {
-//                    Transactions transaction3 = new Transactions(); // create a new instance inside the loop
-//                    transaction3.setFrom(manager);
-//                    transaction3.setTo(orderDetails.getKoi().getAccount());
-//                    transaction3.setPayment(payment);
-//                    transaction3.setStatus(TransactionEnum.SUCCESS);
-//                    transaction3.setDescription("MANAGER TO CONSIGNMENT VENDOR");
-//                    transaction3.setCreateAt(new Date());
-//                    double consignmentAmount = orderDetails.getPrice() * 0.9;
-//                    transaction3.setAmount(consignmentAmount);
-//                    manager.setBalance(manager.getBalance() - consignmentAmount);
-//                    orderDetails.getKoi().getAccount().setBalance(orderDetails.getKoi().getAccount().getBalance() + consignmentAmount);
-//                    transactions.add(transaction3);
-//                }
-//            }
+            //server -> user (if koi is consignment online)
+            //Account manager = accountRepository.findAccountByRole(Role.MANAGER);
+            for (OrderDetails orderDetails : orders.getOrderDetails()) {
+                if (orderDetails.getKoi().getAccount().getRole() == Role.CUSTOMER) {
+                    Transactions transaction3 = new Transactions();
+                    transaction3.setFrom(manager);
+                    transaction3.setTo(orderDetails.getKoi().getAccount());
+                    transaction3.setPayment(payment);
+                    transaction3.setStatus(TransactionEnum.SUCCESS);
+                    transaction3.setDescription("MANAGER TO CONSIGNMENT VENDOR");
+                    transaction3.setCreateAt(new Date());
+                    double orderAmount = orderDetails.getPrice() * 0.9;
+                    transaction3.setAmount(orderAmount);
+                    manager.setBalance(manager.getBalance() - orderAmount);
+                    transactions.add(transaction3);
+                    Account vendor = orderDetails.getKoi().getAccount();
+                    vendor.setBalance(vendor.getBalance() + orderAmount);
+                    accountRepository.save(vendor);
+                    accountRepository.save(manager);
+                }
+            }
             payment.setTransactions(transactions);
             Koi koi = null;
             for (OrderDetails orderDetails : orders.getOrderDetails()) {
@@ -239,7 +242,7 @@ public class OrderService {
                 koi.setAccount(customer);
                 koiRepository.save(koi);
                 if (koi.getQuantity() == 1) {
-                   // certificateService.sendCertificateEmail(customer, koi.getCertificate());
+                   certificateService.sendCertificateEmail(orders.getCustomer(),koi.getCertificate().getCertificateId());
                 }
             }
             accountRepository.save(manager);
