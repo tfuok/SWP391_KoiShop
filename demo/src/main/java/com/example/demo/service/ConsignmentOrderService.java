@@ -233,7 +233,6 @@ public class ConsignmentOrderService {
             transaction1.setTo(customer);
             transaction1.setPayment(payment);
             transaction1.setCreateAt(new Date());
-            transaction1.setAmount(totalCost);
             transaction1.setStatus(TransactionEnum.SUCCESS);
             transaction1.setDescription("VNPAY TO CUSTOMER");
             transactions.add(transaction1);
