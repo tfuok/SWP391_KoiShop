@@ -1,22 +1,28 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.Certificate;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.itextpdf.html2pdf.HtmlConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.text.SimpleDateFormat;
-
-import static java.lang.Long.parseLong;
+import java.util.UUID;
 
 @Service
 public class CertificatePdfGeneratorService {
 
     private final ResourceLoader resourceLoader;
+
 
     @Autowired
     public CertificatePdfGeneratorService(ResourceLoader resourceLoader) {
@@ -24,9 +30,9 @@ public class CertificatePdfGeneratorService {
     }
 
     public String generateHtml(Certificate certificate) {
-        int bornInDate = certificate.getKoi().getBornYear(); // Assuming this is an integer year
+        int bornInDate = certificate.getKoi().getBornYear();
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-        String formattedIssueDate = dateFormatter.format(certificate.getIssueDate()); // Format the issue date
+        String formattedIssueDate = dateFormatter.format(certificate.getIssueDate());
         String Koiid = Long.toString(certificate.getKoi().getId());
 
         // Load image as a resource
@@ -34,21 +40,22 @@ public class CertificatePdfGeneratorService {
         String backgroundImagePath;
 
         try {
-            backgroundImagePath = resource.getFile().getPath(); // Convert resource to path
+            backgroundImagePath = resource.getFile().getPath();
         } catch (Exception e) {
             e.printStackTrace();
-            backgroundImagePath = ""; // Fallback if the image is not found
+            backgroundImagePath = "";
         }
-        //
-        Resource fontResource = resourceLoader.getResource("classpath:static/NotoSansJP-Regular.ttf");
+
+        Resource fontResource = resourceLoader.getResource("classpath:static/NotoSansJP-VariableFont_wght.ttf");
         String fontFilePath;
 
         try {
-            fontFilePath = fontResource.getFile().getPath(); // Convert resource to path
+            fontFilePath = fontResource.getFile().getPath();
         } catch (Exception e) {
             e.printStackTrace();
-            fontFilePath = ""; // Fallback if the font is not found
+            fontFilePath = "";
         }
+
         return "<!DOCTYPE html>" +
                 "<html lang=\"en\">" +
                 "<head>" +
@@ -58,10 +65,10 @@ public class CertificatePdfGeneratorService {
                 "    <style>" +
                 "        @font-face {" +
                 "            font-family: 'Noto Sans JP';" +
-                "            src: url('fonts/NotoSansJP-Regular.ttf');" + // Ensure the path is correct
+                "            src: url('" + fontFilePath + "');" +
                 "        }" +
                 "        body {" +
-                "            font-family: 'Noto Sans JP', Arial, sans-serif;" + // Use the custom font
+                "            font-family: 'Noto Sans JP', Arial, sans-serif;" +
                 "            margin: 0;" +
                 "            padding: 0;" +
                 "            background: url('" + backgroundImagePath + "') no-repeat center center;" +
@@ -101,7 +108,7 @@ public class CertificatePdfGeneratorService {
                 "        <h1>Certification of Breeding</h1>" +
                 "        <p>We hereby certify that the Koi shown in the photo was bred by the following breeder and sold by Kodama Koi Farm</p>" +
                 "        <div style=\"display: flex; align-items: center;\">" +
-                "            <img class=\"koi-image\" src='" + certificate.getKoi().getImages() + "' alt=\"Koi Fish Image\">" +
+                "            <img class=\"koi-image\" src='" + certificate.getKoi().getImagesList().get(0) + "' alt=\"Koi Fish Image\">" +
                 "            <div>" +
                 "                <table class=\"details-table\">" +
                 "                    <tr>" +
@@ -130,7 +137,7 @@ public class CertificatePdfGeneratorService {
                 "                    </tr>" +
                 "                    <tr>" +
                 "                        <td><strong>Signature:</strong></td>" +
-                "                        <td style=\"font-family: 'Noto Sans JP';\">樹神太郎</td>" + // Use custom font for signature
+                "                        <td style=\"font-family: 'Noto Sans JP';\">樹神太郎</td>" +
                 "                    </tr>" +
                 "                </table>" +
                 "            </div>" +
@@ -138,20 +145,83 @@ public class CertificatePdfGeneratorService {
                 "    </div>" +
                 "</body>" +
                 "</html>";
-
     }
 
-    public File createCertificatePdf(Certificate certificate) throws Exception {
-        // Generate HTML content
-        String htmlContent = generateHtml(certificate);
+    public byte[] createCertificatePdf(Certificate certificate) throws Exception {
+    // Generate HTML content
+    String htmlContent = generateHtml(certificate);
 
-        // Define the file path for the PDF
-        String outputPath = "D:/Download/Hoc/TestPDF/" + "Koi "+ certificate.getKoi().getId() + " Certificate.pdf";
-        File pdfFile = new File(outputPath);
+    // Use ByteArrayOutputStream to hold the PDF content
+    try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+        // Convert HTML to PDF and write to the output stream
+        HtmlConverter.convertToPdf(htmlContent, byteArrayOutputStream);
 
-        // Convert HTML to PDF and save it
-        HtmlConverter.convertToPdf(htmlContent, new FileOutputStream(pdfFile));
-
-        return pdfFile;
+        // Convert the ByteArrayOutputStream to a byte array and return it
+        return byteArrayOutputStream.toByteArray();
     }
+}
+
+    public class FirebaseInitializer {
+
+        public static void initializeFirebase() throws IOException {
+            // Tải tệp tài khoản dịch vụ Firebase từ thư mục resources
+            ClassLoader classLoader = FirebaseInitializer.class.getClassLoader();
+            InputStream serviceAccount = classLoader.getResourceAsStream("firebase-admin.json");
+
+            if (serviceAccount == null) {
+                throw new IllegalArgumentException("Không tìm thấy tệp firebase-admin.json");
+            }
+
+            // Khởi tạo Firebase với thông tin tài khoản dịch vụ
+            FirebaseOptions options = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .setStorageBucket("koimanagement-cd9bd.appspot.com")  // Thay bằng tên bucket của bạn
+                    .build();
+
+            if (FirebaseApp.getApps().isEmpty()) {
+                FirebaseApp.initializeApp(options);
+            }
+        }
+    }
+    private String uploadFileToFirebaseStorage(MultipartFile file, String firebasePath) throws IOException {
+        FirebaseInitializer.initializeFirebase();
+        // Generate a unique file name to avoid conflicts
+        String fileName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
+
+        // Capture the file's MIME type
+        String contentType = file.getContentType();
+
+        // Build metadata with the correct MIME type
+        BlobInfo blobInfo = BlobInfo.newBuilder("koimanagement-cd9bd.appspot.com", firebasePath)
+                .setContentType(contentType)
+                .build();
+
+        // Initialize the Storage object using StorageOptions
+        Storage storage = StorageOptions.getDefaultInstance().getService();
+
+        // Upload the file with metadata
+        storage.create(blobInfo, file.getBytes());
+
+        // Build and return the public download URL for the uploaded file
+        return String.format("https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media",
+                "koimanagement-cd9bd.appspot.com",
+                firebasePath.replace("/", "%2F")); // Encode '/' to '%2F' in the URL
+    }
+
+
+
+    private void savePdfLocally(String filePath, byte[] pdfBytes) throws Exception {
+        File file = new File(filePath);
+
+        // Ensure the directory exists
+        file.getParentFile().mkdirs();
+
+        // Write the bytes to a file
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            fos.write(pdfBytes);
+        }
+    }
+
+
+
 }
