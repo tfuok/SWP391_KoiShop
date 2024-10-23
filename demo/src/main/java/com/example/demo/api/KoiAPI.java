@@ -94,8 +94,14 @@ public class KoiAPI {
     }
 
     @PostMapping("/sale")
-    public ResponseEntity applyDiscount(@RequestBody SaleRequest saleRequest) {
+    public ResponseEntity sale(@RequestBody SaleRequest saleRequest) {
         SaleRequest salePrice = koiLotService.sale(saleRequest);
         return ResponseEntity.ok(salePrice);
+    }
+
+    @PostMapping("/unSale")
+    public ResponseEntity unSale(long id) {
+        koiLotService.unSale(id);
+        return ResponseEntity.ok("Success");
     }
 }

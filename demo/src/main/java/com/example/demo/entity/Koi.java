@@ -41,8 +41,6 @@ public class Koi {
     private boolean isDeleted = false;
     private int quantity;
 
-    private LocalDateTime saleStartTime;
-    private LocalDateTime saleEndTime;
 
     // Many-to-Many with Breed
     @ManyToMany(fetch = FetchType.EAGER)

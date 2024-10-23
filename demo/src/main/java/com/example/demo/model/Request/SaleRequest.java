@@ -16,6 +16,4 @@ public class SaleRequest {
     @Min(value = 0, message = "Phần trăm giảm giá phải lớn hơn hoặc bằng 0!")
     @Max(value = 100, message = "Phần trăm giảm giá không được vượt quá 100!")
     private float salePercentage;
-    private LocalDateTime saleStartTime;
-    private LocalDateTime saleEndTime;
 }
