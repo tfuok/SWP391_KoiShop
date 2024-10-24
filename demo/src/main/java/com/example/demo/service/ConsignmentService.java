@@ -480,7 +480,7 @@ public class ConsignmentService {
             List<Consignment> consignments = koiLotRepository.findConsignmentsByKoiId(koi.getId());
 
             // Assuming you want to work with the first consignment (if any)
-            Consignment consignment = !consignments.isEmpty() ? consignments.get(consignments.size() - 1) : null;
+            Consignment consignment = consignments.isEmpty() ? null : consignments.get(0);
 
             if (consignment != null) {
                 // Populate the response using the consignment

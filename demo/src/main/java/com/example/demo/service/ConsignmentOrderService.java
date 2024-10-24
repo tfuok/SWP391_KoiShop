@@ -226,8 +226,8 @@ public class ConsignmentOrderService {
             List<Transactions> transactions = new ArrayList<>();
 
             //tao transaction
+            //VNPAY -> customer
             Transactions transaction1 = new Transactions();
-            //vnpay -> customer
             transaction1.setFrom(null);
             Account customer = authenticationService.getCurrentAccount();
             transaction1.setTo(customer);
@@ -248,7 +248,6 @@ public class ConsignmentOrderService {
             double MoneySendtoManager = orders.getFinalAmount() - MoneySendToVendor;
 
             //customer -> server
-//            Account manager = orders.getOrderDetails().get(0).getKoi().getAccount();
             Transactions transaction2 = new Transactions();
             transaction2.setFrom(customer);
             transaction2.setTo(manager);
@@ -301,9 +300,9 @@ public class ConsignmentOrderService {
             transaction5.setCreateAt(new Date());
             transaction5.setAmount(consignment.getCost());
             if(consignment.getType() == Type.OFFLINE){
-                transaction5.setDescription("CHUYEN PHI KY GUI OFFLINE VE MANAGER");
+                transaction5.setDescription("OFFLINE CONSIGNMENT COST TO MANAGER");
             }else{
-                transaction5.setDescription("CHUYEN PHI KY GUI ONLINE VE MANAGER");
+                transaction5.setDescription("ONLINE CONSIGNMENT COST TO MANAGER");
             }
             transactions.add(transaction5);
             payment.setTransactions(transactions);
@@ -314,7 +313,7 @@ public class ConsignmentOrderService {
             orderRepository.save(orders);
             consignmentRepository.save(consignment);
             emailService.sendConsignmentBillEmail(consignment,consignment.getAccount().getEmail());
-            emailService.sendOrderBillEmail(orders, orders.getCustomer().getEmail()); // Ensure to get customer's email
+            emailService.sendOrderBillEmail(orders, orders.getCustomer().getEmail());
         } catch (Exception e) {
             e.printStackTrace();
         }
