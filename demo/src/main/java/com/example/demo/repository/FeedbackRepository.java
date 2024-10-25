@@ -15,5 +15,8 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
             "LEFT JOIN f.customer c " +
             "JOIN f.orders o")
     List<FeedbackResponse> findAllFeedbackWithDetails();
+    boolean existsByOrders_Id(long orderId);
+    boolean existsByConsignment_Id(long consignmentId);
+
 }
 

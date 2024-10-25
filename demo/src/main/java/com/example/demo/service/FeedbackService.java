@@ -40,18 +40,31 @@ public class FeedbackService {
         return feedbackRepository.save(feedback);
     }
     public Feedback feedbackOnOrderConsignment(FeedbackRequest feedbackRequest, long orderId, long consignmentId) {
+        // Check if feedback already exists for the order
+        if (feedbackRepository.existsByOrders_Id(orderId)) {
+            throw new IllegalStateException("Feedback already exists for this order");
+        }
+
+        // Check if feedback already exists for the consignment
+        if (feedbackRepository.existsByConsignment_Id(consignmentId)) {
+            throw new IllegalStateException("Feedback already exists for this consignment");
+        }
+
         Feedback feedback = new Feedback();
         Orders orders = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
         Consignment consignment = consignmentRepository.findById(consignmentId)
-                        .orElseThrow(() -> new NotFoundException("Consignment not found"));
+                .orElseThrow(() -> new NotFoundException("Consignment not found"));
+
         feedback.setConsignment(consignment);
         feedback.setContent(feedbackRequest.getContent());
         feedback.setRating(feedbackRequest.getRating());
         feedback.setOrders(orders);
         feedback.setCustomer(orders.getCustomer());
+
         return feedbackRepository.save(feedback);
     }
+
 
 
     public List<FeedbackResponse> getFeedback() {
