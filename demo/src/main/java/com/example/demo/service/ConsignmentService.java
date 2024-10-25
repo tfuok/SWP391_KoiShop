@@ -64,11 +64,12 @@ public class ConsignmentService {
     public Consignment createConsignment(ConsignmentRequest consignmentRequest) throws Exception {
         // Map from ConsignmentRequest to Consignment entity
         //Consignment consignment = modelMapper.map(consignmentRequest, Consignment.class);
+
         Consignment consignment = new Consignment();
         consignment.setType(consignmentRequest.getType());
         consignment.setAddress(consignmentRequest.getAddress());
         consignment.setDescription(consignmentRequest.getDescription());
-        consignment.setStatus(Status.PENDING);
+        consignment.setStatus(ConsignmentStatus.PENDING);
 
         // Set the account to the currently authenticated user
         Account account = authenticationService.getCurrentAccount();
@@ -356,6 +357,8 @@ public class ConsignmentService {
             payment.setTotal(consignment.getCost());
             payment.setCreateAt(new Date());
             List<Transactions> transactions = new ArrayList<>();
+            Account account =authenticationService.getCurrentAccount();
+            payment.setCustomer(account);
 
             //tao transaction
             Transactions transaction1 = new Transactions();
@@ -390,7 +393,7 @@ public class ConsignmentService {
 
             accountRepository.save(manager);
             paymentRepository.save(payment);
-            consignment.setStatus(Status.PAID);
+            consignment.setStatus(ConsignmentStatus.PAID);
             consignmentRepository.save(consignment);
             emailService.sendConsignmentBillEmail(consignment,consignment.getAccount().getEmail());
         }
@@ -444,13 +447,13 @@ public class ConsignmentService {
         }
     }
 
-    public Consignment updateConsignmentStatus(long id, Status status) throws Exception {
+    public Consignment updateConsignmentStatus(long id, ConsignmentStatus status) throws Exception {
         Consignment consignment = consignmentRepository.findConsignmentById(id);
         if (consignment == null) {
             throw new NotFoundException("Consignment not exist");
         }
         consignment.setStatus(status);
-        if (consignment.getStatus() == Status.CONFIRMED) {
+        if (consignment.getStatus() == ConsignmentStatus.CONFIRMED) {
             for (ConsignmentDetails consignmentDetails : consignment.getConsignmentDetails()) {
                 consignmentDetails.getKoi().setConsignment(true);
                 if (consignment.getType() == Type.ONLINE) {
@@ -493,13 +496,15 @@ public class ConsignmentService {
             response.setImgUrl(koi.getImages());
 
             // Set consignment status based on the current Koi and consignment details
-            if (koi.isConsignment() && consignment != null && consignment.getStatus() == Status.CONFIRMED) {
-                response.setStatus("CONSIGNED");
-            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.PAID) {
+            if (koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.CONFIRMED && koi.isSold()) {
+                response.setStatus("SOLD");
+            }  else if(koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.CONFIRMED) {
                 response.setStatus("ON SELL");
-            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.DECLINED) {
+            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.PAID) {
+                response.setStatus("WAIT FOR ACCEPT");
+            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.DECLINED) {
                 response.setStatus("DECLINED");
-            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.PENDING) {
+            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.PENDING) {
                 response.setStatus("PENDING");
             }
 
@@ -539,13 +544,13 @@ public class ConsignmentService {
             response.setImgUrl(koi.getImages());
 
             // Set consignment status based on the current Koi and consignment details
-            if (koi.isConsignment() && consignment != null && consignment.getStatus() == Status.CONFIRMED) {
+            if (koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.CONFIRMED) {
                 response.setIsConsignment("CONSIGNED");
-            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.PAID) {
+            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.PAID) {
                 response.setIsConsignment("PAID");
-            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.DECLINED) {
+            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.DECLINED) {
                 response.setIsConsignment("DECLINED");
-            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == Status.PENDING) {
+            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.PENDING) {
                 response.setIsConsignment("PENDING");
             }
 
@@ -599,5 +604,6 @@ public class ConsignmentService {
         response.setDetails(details);
         return response;
     }
+
 
 }

@@ -1,6 +1,7 @@
 package com.example.demo.api;
 
 import com.example.demo.entity.Consignment;
+import com.example.demo.entity.ConsignmentStatus;
 import com.example.demo.entity.Status;
 import com.example.demo.model.Request.ConsignmentRequest;
 import com.example.demo.model.Response.ConsignmentResponse;
@@ -66,7 +67,7 @@ public class ConsignmentAPI {
     }
     @PutMapping("/status")
     public ResponseEntity<Consignment> updateConsignmentStatus(
-           long consignmentId, Status newStatus) throws Exception {
+           long consignmentId, ConsignmentStatus newStatus) throws Exception {
         Consignment updatedConsignment  = consignmentService.updateConsignmentStatus(consignmentId, newStatus);
         return ResponseEntity.ok(updatedConsignment);
     }

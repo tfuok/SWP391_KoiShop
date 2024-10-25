@@ -86,7 +86,7 @@ public class ConsignmentOrderService {
         consignment.setType(Type.OFFLINE);
         consignment.setAddress("Koi Shop");
         consignment.setDescription(orderConsignmentRequest.getDescription());
-        consignment.setStatus(Status.PENDING);
+        consignment.setStatus(ConsignmentStatus.PENDING);
 
         Account account = authenticationService.getCurrentAccount();
         consignment.setAccount(account);
@@ -214,7 +214,7 @@ public class ConsignmentOrderService {
         /*
         1. tao payment
          */
-
+            Account account =authenticationService.getCurrentAccount();
             Payment payment = new Payment();
             payment.setOrders(orders);
             payment.setConsignment(consignment);
@@ -222,6 +222,7 @@ public class ConsignmentOrderService {
             payment.setMethod(PaymentEnums.BANKING);
             payment.setCreateAt(new Date());
             payment.setTotal(totalCost);
+            payment.setCustomer(account);
 
             List<Transactions> transactions = new ArrayList<>();
 
@@ -309,7 +310,7 @@ public class ConsignmentOrderService {
             accountRepository.save(manager);
             paymentRepository.save(payment);
             orders.setStatus(Status.PAID);
-            consignment.setStatus(Status.PAID);
+            consignment.setStatus(ConsignmentStatus.PAID);
             orderRepository.save(orders);
             consignmentRepository.save(consignment);
             emailService.sendConsignmentBillEmail(consignment,consignment.getAccount().getEmail());

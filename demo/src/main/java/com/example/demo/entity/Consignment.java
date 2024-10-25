@@ -42,7 +42,7 @@ public class Consignment implements UserDetails {
 
 
     @Enumerated(EnumType.STRING)
-    private Status status;
+    private ConsignmentStatus status;
 
     Boolean isDeleted = false;
     @OneToMany(mappedBy = "consignment",cascade = CascadeType.ALL, orphanRemoval = true)
@@ -78,4 +78,10 @@ public class Consignment implements UserDetails {
     @OneToOne(mappedBy = "consignment")
     @JsonIgnore
     private Payment payment;
+
+    @OneToOne(mappedBy = "consignment")
+    @JsonIgnore
+    private Feedback feedback;
+
+
 }

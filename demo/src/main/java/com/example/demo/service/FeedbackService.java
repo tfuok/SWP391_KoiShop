@@ -6,10 +6,7 @@ import com.example.demo.model.Request.FeedbackRequest;
 import com.example.demo.model.Request.ReportRequest;
 import com.example.demo.model.Response.FeedbackResponse;
 import com.example.demo.model.Response.ReportResponse;
-import com.example.demo.repository.AccountRepository;
-import com.example.demo.repository.FeedbackRepository;
-import com.example.demo.repository.OrderRepository;
-import com.example.demo.repository.ReportRepository;
+import com.example.demo.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +26,8 @@ public class FeedbackService {
     OrderRepository orderRepository;
     @Autowired
     ReportRepository reportRepository;
+    @Autowired
+    private ConsignmentRepository consignmentRepository;
 
     public Feedback feedbackOnOrders(FeedbackRequest feedbackRequest, long orderId) {
         Feedback feedback = new Feedback();
@@ -40,6 +39,20 @@ public class FeedbackService {
         feedback.setCustomer(orders.getCustomer());
         return feedbackRepository.save(feedback);
     }
+    public Feedback feedbackOnOrderConsignment(FeedbackRequest feedbackRequest, long orderId, long consignmentId) {
+        Feedback feedback = new Feedback();
+        Orders orders = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+        Consignment consignment = consignmentRepository.findById(consignmentId)
+                        .orElseThrow(() -> new NotFoundException("Consignment not found"));
+        feedback.setConsignment(consignment);
+        feedback.setContent(feedbackRequest.getContent());
+        feedback.setRating(feedbackRequest.getRating());
+        feedback.setOrders(orders);
+        feedback.setCustomer(orders.getCustomer());
+        return feedbackRepository.save(feedback);
+    }
+
 
     public List<FeedbackResponse> getFeedback() {
         return feedbackRepository.findAllFeedbackWithDetails();

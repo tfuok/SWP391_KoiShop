@@ -40,4 +40,9 @@ public class FeedbackAPI {
         Feedback feedback = feedbackService.feedbackOnOrders(feedbackRequest, id);
         return ResponseEntity.ok(feedback);
     }
+    @PostMapping
+    public ResponseEntity feedbackOnOrders(@RequestBody FeedbackRequest feedbackRequest, long orderid, long consignmentid ) {
+        Feedback feedback = feedbackService.feedbackOnOrderConsignment(feedbackRequest, orderid, consignmentid);
+        return ResponseEntity.ok(feedback);
+    }
 }

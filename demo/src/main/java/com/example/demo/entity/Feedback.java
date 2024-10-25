@@ -24,4 +24,10 @@ public class Feedback {
     @OneToOne
     @JoinColumn(name = "order_id")
     Orders orders;
+
+    @OneToOne
+    @JoinColumn(name = "consignment_id")
+    Consignment consignment;
+
+
 }
