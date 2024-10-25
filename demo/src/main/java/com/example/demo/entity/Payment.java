@@ -36,4 +36,9 @@ public class Payment {
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
     @JsonIgnore
     List<Transactions> transactions;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id")
+    @JsonIgnore
+    Account customer;
 }

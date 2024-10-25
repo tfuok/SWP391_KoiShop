@@ -4,10 +4,7 @@ import com.example.demo.entity.*;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.OrderDetailRequest;
 import com.example.demo.model.Request.OrderRequest;
-import com.example.demo.model.Response.FeedbackResponse;
-import com.example.demo.model.Response.OrderDetailResponse;
-import com.example.demo.model.Response.OrderResponse;
-import com.example.demo.model.Response.ReportResponse;
+import com.example.demo.model.Response.*;
 import com.example.demo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -176,12 +173,13 @@ public class OrderService {
             if (existingPayment != null) {
                 throw new IllegalStateException("Payment for this order already exists.");
             }
-
+            Account customer = authenticationService.getCurrentAccount();
             Payment payment = new Payment();
             payment.setOrders(orders);
             payment.setCreateAt(new Date());
             payment.setMethod(PaymentEnums.BANKING);
             payment.setTotal(orders.getTotal());
+            payment.setCustomer(customer);
 
             List<Transactions> transactions = new ArrayList<>();
 
@@ -189,7 +187,6 @@ public class OrderService {
             Transactions transaction1 = new Transactions();
             //vnpay -> customer
             transaction1.setFrom(null);
-            Account customer = authenticationService.getCurrentAccount();
             System.out.println(customer);
             transaction1.setTo(customer);
             transaction1.setPayment(payment);
@@ -358,6 +355,26 @@ public class OrderService {
                 .build();
     }
 
+
+    public List<PaymentResponse> getAllPaymentsForCurrentUser() {
+        // Get the currently authenticated account
+        Account currentAccount = authenticationService.getCurrentAccount();
+
+        // Fetch payments associated with the current account
+        List<Payment> payments = paymentRepository.findByCustomer(currentAccount);
+
+        // Convert Payment entities to PaymentResponse objects
+        return payments.stream()
+                .map(payment -> new PaymentResponse(
+                        payment.getId(),
+                        payment.getCreateAt(),
+                        payment.getTotal(),
+                        payment.getMethod(),
+                        payment.getOrders() != null ? payment.getOrders().getId() : null,
+                        payment.getConsignment() != null ? payment.getConsignment().getId() : null
+                ))
+                .collect(Collectors.toList());
+    }
 }
 
 

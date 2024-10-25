@@ -5,6 +5,7 @@ import com.example.demo.entity.Orders;
 import com.example.demo.entity.Status;
 import com.example.demo.model.Request.OrderRequest;
 import com.example.demo.model.Response.OrderResponse;
+import com.example.demo.model.Response.PaymentResponse;
 import com.example.demo.repository.OrderRepository;
 import com.example.demo.service.AuthenticationService;
 import com.example.demo.service.OrderService;
@@ -69,5 +70,11 @@ public class OrderAPI {
     public ResponseEntity uploadOrderPic(long orderId, String image){
         Orders orders = orderService.staffConfirmOrdersByImage(orderId,image);
         return ResponseEntity.ok(orders);
+    }
+
+    @GetMapping("/current-user")
+    public ResponseEntity getPaymentsForCurrentUser() {
+        List<PaymentResponse> payments = orderService.getAllPaymentsForCurrentUser();
+        return ResponseEntity.ok(payments);
     }
 }

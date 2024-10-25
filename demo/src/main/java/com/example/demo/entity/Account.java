@@ -117,4 +117,8 @@ public class Account implements UserDetails {
     @OneToMany(mappedBy = "customer")
     @JsonIgnore
     List<Report> customer_report;
+
+    @OneToMany(mappedBy = "customer")
+    @JsonIgnore
+    List<Payment> payments;
 }
