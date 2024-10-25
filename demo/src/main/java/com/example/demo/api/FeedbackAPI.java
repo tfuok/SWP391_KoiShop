@@ -45,7 +45,7 @@ public class FeedbackAPI {
     public ResponseEntity feedbackOnOrders(
             @RequestBody FeedbackRequest feedbackRequest
             ,@RequestParam(required = true) long orderid
-            ,@RequestParam(required = false) long consignmentid ) {
+            ,@RequestParam(required = false) Long consignmentid ) {
         Feedback feedback = feedbackService.feedbackOnOrderConsignment(feedbackRequest, orderid, consignmentid);
         return ResponseEntity.ok(feedback);
     }

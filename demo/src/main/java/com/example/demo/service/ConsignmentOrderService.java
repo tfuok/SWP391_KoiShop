@@ -214,7 +214,7 @@ public class ConsignmentOrderService {
         /*
         1. tao payment
          */
-            Account account =authenticationService.getCurrentAccount();
+            Account account = authenticationService.getCurrentAccount();
             Payment payment = new Payment();
             payment.setOrders(orders);
             payment.setConsignment(consignment);
