@@ -44,6 +44,8 @@ public class OrderService {
     VoucherRepository voucherRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    ConsignmentRepository consignmentRepository;
 
     public Orders create(OrderRequest orderRequest) {
         Orders orders = new Orders();
@@ -246,7 +248,7 @@ public class OrderService {
                 koi.setAccount(customer);
                 koiRepository.save(koi);
                 if (koi.getQuantity() == 1) {
-                   certificateService.sendCertificateEmail(orders.getCustomer(),koi.getCertificate().getCertificateId());
+                    certificateService.sendCertificateEmail(orders.getCustomer(), koi.getCertificate().getCertificateId());
                 }
             }
             accountRepository.save(manager);
@@ -260,16 +262,33 @@ public class OrderService {
         }
     }
 
-    public OrderResponse assignStaff(long orderId, long staffId) {
-        Orders orders = orderRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException("Order not found"));
+    public void assignStaff(long staffId, Long orderId, Long consignmentId) {
+        // Fetch the staff, staff is mandatory
         Account staff = accountRepository.findById(staffId)
                 .orElseThrow(() -> new NotFoundException("Staff not found"));
 
-        orders.setStaff(staff);
-        orderRepository.save(orders);
-        return mapToOrderResponse(orders);
+        // Check if either orderId or consignmentId is provided
+        if (orderId == null && consignmentId == null) {
+            throw new IllegalArgumentException("At least one of orderId or consignmentId must be provided");
+        }
+
+        // If orderId is provided, assign staff to the order
+        if (orderId != null) {
+            Orders orders = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new NotFoundException("Order not found"));
+            orders.setStaff(staff);
+            orderRepository.save(orders);
+        }
+
+        // If consignmentId is provided, assign staff to the consignment
+        if (consignmentId != null) {
+            Consignment consignment = consignmentRepository.findById(consignmentId)
+                    .orElseThrow(() -> new NotFoundException("Consignment not found"));
+            consignment.setStaff(staff);
+            consignmentRepository.save(consignment);
+        }
     }
+
 
     public List<OrderResponse> getAllOrders() {
         return orderRepository.findAll().stream()
@@ -281,9 +300,9 @@ public class OrderService {
         // Get the currently authenticated user
         Account account = authenticationService.getCurrentAccount();
         List<Orders> ordersList = null;
-        if(account.getRole().equals(Role.STAFF)){
+        if (account.getRole().equals(Role.STAFF)) {
             ordersList = orderRepository.findByStaff(account);
-        }else {
+        } else {
             ordersList = orderRepository.findOrdersByCustomer(account);
         }
         // Convert the list of Orders entities to OrderResponse objects
@@ -300,7 +319,7 @@ public class OrderService {
         return orderRepository.save(order);
     }
 
-    public Orders staffConfirmOrdersByImage(Long orderId, String image){
+    public Orders staffConfirmOrdersByImage(Long orderId, String image) {
         Account currentStaff = authenticationService.getCurrentAccount();
         Orders order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
@@ -329,16 +348,6 @@ public class OrderService {
                     order.getId()
             );
         }
-        Report report = order.getReport();
-        ReportResponse reportResponse = null;
-        if (report != null) {
-            reportResponse = new ReportResponse(
-                    report.getId(),
-                    report.getReportMessage(),
-                    report.getCustomer() != null ? report.getCustomer().getUsername() : null,
-                    order.getId()
-            );
-        }
         return OrderResponse.builder()
                 .id(order.getId())
                 .date(order.getDate())
@@ -350,9 +359,35 @@ public class OrderService {
                 .customerId(order.getCustomer() != null ? order.getCustomer().getId() : null)
                 .orderDetails(details)
                 .feedback(feedbackResponse)
-                .report(reportResponse)
                 .image(order.getImage())
                 .build();
+    }
+
+    private ConsignmentResponse mapToConsignmentResponse(Consignment consignment) {
+        ConsignmentResponse response = new ConsignmentResponse();
+
+        response.setConsignmentID(consignment.getId());
+        response.setType(consignment.getType() != null ? consignment.getType().name() : null);
+        response.setAddress(consignment.getAddress());
+        response.setDescription(consignment.getDescription());
+        response.setCost(String.valueOf(consignment.getCost()));
+        response.setStartDate(consignment.getStartDate());
+        response.setEndDate(consignment.getEndDate());
+        response.setCreateDate(consignment.getCreateDate());
+        response.setStatus(consignment.getStatus() != null ? consignment.getStatus().name() : null);
+        response.setCareTypeName(consignment.getCareType() != null ? consignment.getCareType().getCareTypeName() : null);
+        response.setStaffid(consignment.getStaff() != null ? consignment.getStaff().getId() : 0);
+
+        response.setDetails(consignment.getConsignmentDetails().stream()
+                .map(detail -> new ConsignmentDetailResponse(
+                        detail.getKoi().getId(),
+                        detail.getConsignment().getCost(),
+                        detail.getKoi().getName(),
+                        detail.getKoi().getImages()
+                ))
+                .collect(Collectors.toList()));
+
+        return response;
     }
 
 
@@ -361,20 +396,35 @@ public class OrderService {
         Account currentAccount = authenticationService.getCurrentAccount();
 
         // Fetch payments associated with the current account
-        List<Payment> payments = paymentRepository.findByCustomer(currentAccount);
+        List<Payment> payments = paymentRepository.findByCustomerWithOrders(currentAccount);
 
-        // Convert Payment entities to PaymentResponse objects
+        // Convert Payment entities to PaymentResponse objects with full order and consignment details
         return payments.stream()
                 .map(payment -> new PaymentResponse(
                         payment.getId(),
                         payment.getCreateAt(),
                         payment.getTotal(),
                         payment.getMethod(),
-                        payment.getOrders() != null ? payment.getOrders().getId() : null,
-                        payment.getConsignment() != null ? payment.getConsignment().getId() : null
+                        payment.getOrders() != null ? mapToOrderResponse(payment.getOrders()) : null,
+                        payment.getConsignment() != null ? mapToConsignmentResponse(payment.getConsignment()) : null
                 ))
                 .collect(Collectors.toList());
     }
+
+    public List<PaymentResponse> getAllPayment() {
+        List<Payment> payments = paymentRepository.findAll();
+        return payments.stream()
+                .map(payment -> new PaymentResponse(
+                        payment.getId(),
+                        payment.getCreateAt(),
+                        payment.getTotal(),
+                        payment.getMethod(),
+                        payment.getOrders() != null ? mapToOrderResponse(payment.getOrders()) : null,
+                        payment.getConsignment() != null ? mapToConsignmentResponse(payment.getConsignment()) : null
+                ))
+                .collect(Collectors.toList());
+    }
+
 }
 
 

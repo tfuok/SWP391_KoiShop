@@ -28,7 +28,6 @@ public interface KoiRepository extends JpaRepository<Koi, Long> {
     @Query("SELECT k FROM Koi k JOIN k.consignmentDetails cd JOIN cd.consignment c WHERE c.account.id = :accountId AND c.type = :type")
     List<Koi> findAllKoiByAccountIdAndConsignmentType(@Param("accountId") Long accountId, @Param("type") Type type);
 
-
     // Find all Koi where they are not deleted and not sold
     Page<Koi> findAllByIsDeletedFalseAndSoldFalse(Pageable pageable);
 
@@ -37,6 +36,7 @@ public interface KoiRepository extends JpaRepository<Koi, Long> {
 
     // Find Koi by breed while ensuring they are not deleted and not sold
     List<Koi> findByBreedsAndIsDeletedFalseAndSoldFalse(Breed breed);
+
     @Query("SELECT cd.consignment FROM ConsignmentDetails cd WHERE cd.koi.id = :koiId")
     Consignment findConsignmentByKoiId(@Param("koiId") Long koiId);
 
@@ -52,4 +52,8 @@ public interface KoiRepository extends JpaRepository<Koi, Long> {
             "GROUP BY b.name " +
             "ORDER BY totalSold DESC")
     List<Object[]> findTopBreeds();
+
+    long countByIsDeletedFalseAndSoldFalse();
+
+    long countByIsDeletedFalseAndSoldTrue();
 }

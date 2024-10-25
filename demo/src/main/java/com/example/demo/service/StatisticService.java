@@ -36,8 +36,11 @@ public class StatisticService {
     public Map<String, Object> getDashboardStats() {
         //dem so san pham trong he thong
         Map<String, Object> stats = new HashMap<>();
-        long totalProducts = koiRepository.count();
-        stats.put("totalProducts", totalProducts);
+        long availableKois = koiRepository.countByIsDeletedFalseAndSoldFalse();  // Available Koi
+        long soldKois = koiRepository.countByIsDeletedFalseAndSoldTrue();  // Sold Koi
+
+        stats.put("AvailableKois", availableKois);
+        stats.put("SoldKois", soldKois);
         //so luong customer
         long customerCount = accountRepository.countByRole(Role.CUSTOMER);
         stats.put("CUSTOMER", customerCount);
@@ -55,7 +58,6 @@ public class StatisticService {
         }
         stats.put("topBreeds", topBreedsList);
         return stats;
-
     }
 
     public Map<String, Object> getMonthlyRevenue() throws AuthException {

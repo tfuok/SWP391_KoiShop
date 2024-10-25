@@ -14,6 +14,6 @@ public class PaymentResponse {
     private Date createAt;
     private double total;
     private PaymentEnums method;
-    private Long orderId;
-    private Long consignmentId;
+    private OrderResponse order;
+    private ConsignmentResponse consignment;
 }

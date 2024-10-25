@@ -30,6 +30,7 @@ public class OrderAPI {
 
     @Autowired
     AuthenticationService authenticationService;
+
     @PostMapping
     public ResponseEntity create(@RequestBody OrderRequest orderRequest) throws Exception {
         String url = orderService.createUrl(orderRequest);
@@ -47,6 +48,7 @@ public class OrderAPI {
         List<OrderResponse> orders = orderService.getAllOrders();
         return ResponseEntity.ok(orders);
     }
+
     @PostMapping("/transaction")
     public ResponseEntity createTrans(@RequestParam long id) throws Exception {
          orderService.createTransaction(id);
@@ -54,14 +56,20 @@ public class OrderAPI {
     }
 
     @PutMapping("/assign-staff")
-    public ResponseEntity assignStaff(long orderId, long staffId){
-        OrderResponse orders = orderService.assignStaff(orderId,staffId);
-        return ResponseEntity.ok(orders);
+    public ResponseEntity<String> assignStaff(
+            @RequestParam(required = false) Long orderId,
+            @RequestParam(required = true) long staffId,
+            @RequestParam(required = false) Long consignmentId) {
+
+        // Call the service method with staffId (mandatory), orderId and consignmentId (optional)
+        orderService.assignStaff(staffId, orderId, consignmentId);
+
+        return ResponseEntity.ok("Staff successfully assigned.");
     }
+
 
     @PutMapping("/status")
     public ResponseEntity updateOrderStatus(Long orderId,Status newStatus) {
-
         Orders updatedOrder = orderService.updateOrderStatusByStaff(orderId, newStatus);
         return ResponseEntity.ok(updatedOrder);
     }
@@ -75,6 +83,12 @@ public class OrderAPI {
     @GetMapping("/current-user")
     public ResponseEntity getPaymentsForCurrentUser() {
         List<PaymentResponse> payments = orderService.getAllPaymentsForCurrentUser();
+        return ResponseEntity.ok(payments);
+    }
+
+    @GetMapping("/all-payments")
+    public ResponseEntity getAllPayment() {
+        List<PaymentResponse> payments = orderService.getAllPayment();
         return ResponseEntity.ok(payments);
     }
 }
