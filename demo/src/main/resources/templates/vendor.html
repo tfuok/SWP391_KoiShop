@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Transfer Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background-color: #009688;
+            padding: 20px;
+            text-align: center;
+            color: #fff;
+        }
+        .header h1 {
+            margin: 0;
+        }
+        .content {
+            padding: 20px;
+        }
+        .content h2 {
+            color: #333;
+        }
+        .content p {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .transaction-details {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .transaction-details h3 {
+            margin-top: 0;
+        }
+        .footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Koi Management System</h1>
+    </div>
+    <div class="content">
+        <h2>Transfer Notification</h2>
+        <p>Dear Vendor,</p>
+        <p>We are pleased to inform you that a payment has been transferred from the Koi Management System to your account. Below are the transaction details for your reference:</p>
+
+        <div class="transaction-details">
+            <h3>Transaction Details</h3>
+            <p><strong>Date:</strong> {{transaction_date}}</p>
+            <p><strong>Amount:</strong> ${{amount}}</p>
+            <p><strong>Status:</strong> {{status}}</p>
+        </div>
+
+        <p>If you have any questions or concerns, please feel free to reach out to us at support@koimanagement.com.</p>
+        <p>Thank you for partnering with us.</p>
+        <p>Best regards,<br>Koi Management Team</p>
+    </div>
+    <div class="footer">
+        <p>&copy; 2024 Koi Management System. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>
