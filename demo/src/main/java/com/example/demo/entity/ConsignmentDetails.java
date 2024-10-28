@@ -24,7 +24,7 @@ public class ConsignmentDetails {
     @JoinColumn(name = "consignment_id")
      Consignment consignment;
 
-    // Owning side of the relationship
+
     @ManyToOne
     @JoinColumn(name = "koi_id")
      Koi koi;

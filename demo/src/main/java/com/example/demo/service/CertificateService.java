@@ -42,12 +42,8 @@ public class CertificateService {
     }
     public void sendCertificateEmail(Account customer, long certificateId) {
         try {
-            // Fetch the certificate by ID
             Certificate certificate = certificateRepository.findCertificateByCertificateId(certificateId);
-
-
             byte[] pdfFile = certificatePdfGeneratorService.createCertificatePdf(certificate);
-            // Prepare email details
             EmailDetails emailDetails = new EmailDetails();
             emailDetails.setReceiver(customer);
             emailDetails.setSubject("Your Koi Certificate");
@@ -57,16 +53,11 @@ public class CertificateService {
             emailService.sendEmailWithAttachment(emailDetails,pdfFile);
         } catch (Exception e) {
             e.printStackTrace();
-            // Handle exception (log or retry)
         }
     }
-
-
-    // Lấy tất cả Certificates
     public List<Certificate> getAllCertificates() {
         return certificateRepository.findAll();
     }
-    // Lấy Certificate theo ID
     public String getCertificateById(Long id) {
         Certificate certificateFound = certificateRepository.findCertificateByCertificateId(id);
         if (certificateFound == null) {

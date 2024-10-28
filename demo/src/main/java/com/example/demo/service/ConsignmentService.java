@@ -48,43 +48,22 @@ public class ConsignmentService {
 
     @Autowired
     private CertificateService certificateService;
-
-
-    @Autowired
-    private KoiService koiService;
     @Autowired
     private EmailService emailService;
 
-    /**
-     * Creates a new Consignment based on the provided request.
-     *
-     * @param consignmentRequest The request containing consignment details.
-     * @return The newly created Consignment entity.
-     */
     public Consignment createConsignment(ConsignmentRequest consignmentRequest) throws Exception {
-        // Map from ConsignmentRequest to Consignment entity
-        //Consignment consignment = modelMapper.map(consignmentRequest, Consignment.class);
-
         Consignment consignment = new Consignment();
         consignment.setType(consignmentRequest.getType());
         consignment.setAddress(consignmentRequest.getAddress());
         consignment.setDescription(consignmentRequest.getDescription());
         consignment.setStatus(ConsignmentStatus.PENDING);
-
-        // Set the account to the currently authenticated user
         Account account = authenticationService.getCurrentAccount();
         consignment.setAccount(account);
-
-        // Set creation date
         consignment.setCreateDate(new Date());
-
-        // Normalize and set startDate and endDate
         Date normalizedStartDate = DateUtils.normalizeDate(consignmentRequest.getStartDate());
         Date normalizedEndDate = DateUtils.normalizeDate(consignmentRequest.getEndDate());
         consignment.setStartDate(normalizedStartDate);
         consignment.setEndDate(normalizedEndDate);
-
-        // Set CareType
         if (consignment.getType() == Type.OFFLINE) {
             CareType careType = careTypeRepository.findByCareTypeId(consignmentRequest.getCareTypeId());
             if (careType == null) {
@@ -99,7 +78,6 @@ public class ConsignmentService {
                 consignment.setCareType(careType);
             }
         }
-        // Calculate and set cost if type is "OFFLINE"
         if (consignment.getType() == Type.OFFLINE) {
             CareType careType = careTypeRepository.findByCareTypeId(consignmentRequest.getCareTypeId());
             float estimateCost = calculateTotalCost(
@@ -114,37 +92,22 @@ public class ConsignmentService {
             float estimateCost = careType.getCostPerDay();
             consignment.setCost(estimateCost);
         }
-
-        // Initialize ConsignmentDetails list
-
         if(consignmentRequest.getConsignmentDetailRequests().isEmpty()){
             throw new NotFoundException("Consignment details not found");
         }
         List<ConsignmentDetails> consignmentDetailsList = new ArrayList<>();
         for (ConsignmentDetailRequest consignmentDetailRequest : consignmentRequest.getConsignmentDetailRequests()) {
-
-
             Koi koi = createConsignmentKoi(consignmentDetailRequest.getKoiRequest());
-
             ConsignmentDetails consignmentDetail = new ConsignmentDetails();
             consignmentDetail.setConsignment(consignment);
             consignmentDetail.setKoi(koi);
-
             consignmentDetailsList.add(consignmentDetail);
         }
 
         consignment.setConsignmentDetails(consignmentDetailsList);
-
-        // Save consignment (cascade will save consignmentDetails)
         return consignmentRepository.save(consignment);
     }
 
-
-    /**
-     * Retrieves all active consignments.
-     *
-     * @return A list of active Consignments.
-     */
     public List<ConsignmentResponse> getAllConsignments() {
 
         List<Consignment> consignmentsList = consignmentRepository.findByIsDeletedFalse();
@@ -155,13 +118,6 @@ public class ConsignmentService {
         }
         return consignmentResponseList;
     }
-
-    /**
-     * Deletes (soft deletes) a consignment by its ID.
-     *
-     * @param id The ID of the consignment to delete.
-     * @return The updated Consignment entity.
-     */
     public Consignment deleteConsignment(long id) {
         Consignment consignment = consignmentRepository.findConsignmentById(id);
         if (consignment == null) {
@@ -242,15 +198,6 @@ public class ConsignmentService {
         return consignmentResponseList;
     }
 
-    /**
-     * Calculates the total cost of a consignment.
-     *
-     * @param costPerDay The cost per day for the care type.
-     * @param quantity   The number of Koi involved.
-     * @param startDate  The start date of the consignment.
-     * @param endDate    The end date of the consignment.
-     * @return The total estimated cost.
-     */
     public static float calculateTotalCost(float costPerDay, int quantity, Date startDate, Date endDate) {
         // Calculate the difference in milliseconds
         long diffInMillies = endDate.getTime() - startDate.getTime();
@@ -266,10 +213,7 @@ public class ConsignmentService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         LocalDateTime createDate = LocalDateTime.now();
         String formattedCreateDate = createDate.format(formatter);
-        /*
-         COde cua minh
-         1.tao order
-         */
+
         Consignment consignment = createConsignment(consignmentRequest);
         double money = consignment.getCost() * 100;
         String amount = String.valueOf((int) money);
@@ -399,7 +343,7 @@ public class ConsignmentService {
         }
     public Koi createConsignmentKoi(KoiRequest koiLotRequest) {
         try {
-            // Create a new KoiLot manually without using ModelMapper for the List<Breed>
+
             Koi koiLot = new Koi();
             koiLot.setName(koiLotRequest.getName());
             koiLot.setPrice(koiLotRequest.getPrice());
@@ -412,17 +356,15 @@ public class ConsignmentService {
             koiLot.setQuantity(1);
             koiLot.setImages(koiLotRequest.getImageUrl());
             koiLot.setDeleted(true);
-
             List<Images> imagesList = koiLotRequest.getImagesList().stream().map(imageListRequest -> {
                 Images image = new Images();
                 image.setImages(imageListRequest.getImage());
-                image.setKoi(koiLot);  // Associate the image with the koi
+                image.setKoi(koiLot);
                 return image;
             }).collect(Collectors.toList());
 
             koiLot.setImagesList(imagesList);
 
-            // Map breed IDs to Breed entities
             Set<Breed> breeds = new HashSet<>();
             for (Long breedId : koiLotRequest.getBreedId()) {
                 Breed breed = breedRepository.findBreedByIdAndIsDeletedFalse(breedId);
@@ -431,14 +373,14 @@ public class ConsignmentService {
             }
             koiLot.setBreeds(breeds);
 
-            // Set the account of the creator (authenticated user)
+
             Account accountRequest = authenticationService.getCurrentAccount();
             koiLot.setAccount(accountRequest);
             if (accountRequest.getRole() == Role.CUSTOMER) {
                 koiLot.setDeleted(true);
             }
 
-            // Save the KoiLot entity
+
             return koiLotRepository.save(koiLot);
 
         } catch (Exception e) {
@@ -470,7 +412,7 @@ public class ConsignmentService {
     public List<KoiOnlineConsignmentResponse> getAllOnlineKoi() {
         List<KoiOnlineConsignmentResponse> responses = new ArrayList<>();
 
-        // Get the current account ID
+
         Long accountId = authenticationService.getCurrentAccount().getId();
 
         // Fetch all Koi consigned online by the current account
@@ -479,23 +421,22 @@ public class ConsignmentService {
         for (Koi koi : koiList) {
             KoiOnlineConsignmentResponse response = new KoiOnlineConsignmentResponse();
 
-            // Fetch all consignments associated with the current Koi
+
             List<Consignment> consignments = koiLotRepository.findConsignmentsByKoiId(koi.getId());
 
-            // Assuming you want to work with the first consignment (if any)
+
             Consignment consignment = consignments.isEmpty() ? null : consignments.get(0);
 
             if (consignment != null) {
-                // Populate the response using the consignment
+
                 response.setId(consignment.getId());
                 response.setPrice(koi.getPrice());
                 response.setName(koi.getName());
             }
 
-            // Populate other Koi details
             response.setImgUrl(koi.getImages());
 
-            // Set consignment status based on the current Koi and consignment details
+
             if (koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.CONFIRMED && koi.isSold()) {
                 response.setStatus("SOLD");
             }  else if(koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.CONFIRMED) {
@@ -508,42 +449,26 @@ public class ConsignmentService {
                 response.setStatus("PENDING");
             }
 
-            // Add the response to the list
+
             responses.add(response);
         }
         return responses;
     }
 
-
     public List<KoiOfflineConsignmentResponse> getAllOfflineKoi() {
         List<KoiOfflineConsignmentResponse> responses = new ArrayList<>();
-
-        // Get the current account ID
         Long accountId = authenticationService.getCurrentAccount().getId();
-
-        // Fetch all Koi consigned offline by the current account
         List<Koi> koiList = koiLotRepository.findAllKoiByAccountIdAndConsignmentType(accountId, Type.OFFLINE);
-
         for (Koi koi : koiList) {
             KoiOfflineConsignmentResponse response = new KoiOfflineConsignmentResponse();
-
-            // Fetch all consignments associated with the current Koi
             List<Consignment> consignments = koiLotRepository.findConsignmentsByKoiId(koi.getId());
-
-            // Get the last consignment if available
             Consignment consignment = !consignments.isEmpty() ? consignments.get(consignments.size() - 1) : null;
-
             if (consignment != null) {
-                // Populate the response using the consignment
                 response.setId(consignment.getId());
                 response.setEndDate(consignment.getEndDate());
                 response.setPrice(consignment.getCost());
             }
-
-            // Populate other Koi details
             response.setImgUrl(koi.getImages());
-
-            // Set consignment status based on the current Koi and consignment details
             if (koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.CONFIRMED) {
                 response.setIsConsignment("CONSIGNED");
             } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.PAID) {
@@ -553,11 +478,8 @@ public class ConsignmentService {
             } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.PENDING) {
                 response.setIsConsignment("PENDING");
             }
-
-            // Add the response to the list
             responses.add(response);
         }
-
         return responses;
     }
 
@@ -567,7 +489,6 @@ public class ConsignmentService {
                 .orElseThrow(() -> new NotFoundException("Order not found"));
         Account staff = accountRepository.findById(staffId)
                 .orElseThrow(() -> new NotFoundException("Staff not found"));
-
         consignment.setStaff(staff);
         consignmentRepository.save(consignment);
         return mapToConsignmentResponse(consignment);
@@ -577,33 +498,30 @@ public class ConsignmentService {
         detailResponse.setKoiId(koi.getId());
         detailResponse.setPrice(koi.getPrice());
         detailResponse.setKoiName(koi.getName());
-        // Assuming imagesList is not empty and contains the main image URL
         if (koi.getImagesList() != null && !koi.getImagesList().isEmpty()) {
             detailResponse.setImageUrl(koi.getImages()); // Adjust to get the correct URL
         }
         return detailResponse;
     }
+
+
     public ConsignmentResponse mapToConsignmentResponse(Consignment consignment) {
         ConsignmentResponse response = new ConsignmentResponse();
         response.setConsignmentID(consignment.getId());
         response.setType(consignment.getType().toString());
         response.setAddress(consignment.getAddress());
         response.setDescription(consignment.getDescription());
-        response.setCost(String.valueOf(consignment.getCost())); // Adjust as per your currency formatting
+        response.setCost(String.valueOf(consignment.getCost()));
         response.setStartDate(consignment.getStartDate());
         response.setEndDate(consignment.getEndDate());
         response.setCreateDate(consignment.getCreateDate());
         response.setStatus(consignment.getStatus().toString());
         response.setCareTypeName(consignment.getCareType() != null ? consignment.getCareType().getCareTypeName() : "N/A");
         response.setStaffid(consignment.getStaff() != null ? consignment.getStaff().getId() : 0); // Get staff ID
-        // Map the consignment details (Koi) to the response list
         List<ConsignmentDetailResponse> details = consignment.getConsignmentDetails().stream()
                 .map(consignmentDetail -> mapToConsignmentDetailResponse(consignmentDetail.getKoi()))
                 .collect(Collectors.toList());
-
         response.setDetails(details);
         return response;
     }
-
-
 }

@@ -148,15 +148,9 @@ public class CertificatePdfGeneratorService {
     }
 
     public byte[] createCertificatePdf(Certificate certificate) throws Exception {
-    // Generate HTML content
     String htmlContent = generateHtml(certificate);
-
-    // Use ByteArrayOutputStream to hold the PDF content
     try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
-        // Convert HTML to PDF and write to the output stream
         HtmlConverter.convertToPdf(htmlContent, byteArrayOutputStream);
-
-        // Convert the ByteArrayOutputStream to a byte array and return it
         return byteArrayOutputStream.toByteArray();
     }
 }
@@ -164,20 +158,16 @@ public class CertificatePdfGeneratorService {
     public class FirebaseInitializer {
 
         public static void initializeFirebase() throws IOException {
-            // Tải tệp tài khoản dịch vụ Firebase từ thư mục resources
             ClassLoader classLoader = FirebaseInitializer.class.getClassLoader();
             InputStream serviceAccount = classLoader.getResourceAsStream("firebase-admin.json");
 
             if (serviceAccount == null) {
                 throw new IllegalArgumentException("Không tìm thấy tệp firebase-admin.json");
             }
-
-            // Khởi tạo Firebase với thông tin tài khoản dịch vụ
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                    .setStorageBucket("koimanagement-cd9bd.appspot.com")  // Thay bằng tên bucket của bạn
+                    .setStorageBucket("koimanagement-cd9bd.appspot.com")
                     .build();
-
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
             }
@@ -185,38 +175,21 @@ public class CertificatePdfGeneratorService {
     }
     private String uploadFileToFirebaseStorage(MultipartFile file, String firebasePath) throws IOException {
         FirebaseInitializer.initializeFirebase();
-        // Generate a unique file name to avoid conflicts
         String fileName = UUID.randomUUID().toString() + "-" + file.getOriginalFilename();
-
-        // Capture the file's MIME type
         String contentType = file.getContentType();
-
-        // Build metadata with the correct MIME type
         BlobInfo blobInfo = BlobInfo.newBuilder("koimanagement-cd9bd.appspot.com", firebasePath)
                 .setContentType(contentType)
                 .build();
-
-        // Initialize the Storage object using StorageOptions
         Storage storage = StorageOptions.getDefaultInstance().getService();
-
-        // Upload the file with metadata
         storage.create(blobInfo, file.getBytes());
-
-        // Build and return the public download URL for the uploaded file
         return String.format("https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media",
                 "koimanagement-cd9bd.appspot.com",
                 firebasePath.replace("/", "%2F")); // Encode '/' to '%2F' in the URL
     }
 
-
-
     private void savePdfLocally(String filePath, byte[] pdfBytes) throws Exception {
         File file = new File(filePath);
-
-        // Ensure the directory exists
         file.getParentFile().mkdirs();
-
-        // Write the bytes to a file
         try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(pdfBytes);
         }

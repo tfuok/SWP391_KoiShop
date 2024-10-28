@@ -159,7 +159,6 @@ public class ConsignmentOrderService {
         vnpParams.put("vnp_OrderInfo", "Thanh toan cho ma GD: " + orders.getId());
         vnpParams.put("vnp_OrderType", "other");
         vnpParams.put("vnp_Amount", amount);
-
         vnpParams.put("vnp_ReturnUrl", returnUrl);
         vnpParams.put("vnp_CreateDate", formattedCreateDate);
         vnpParams.put("vnp_IpAddr", "128.199.178.23");
@@ -211,9 +210,7 @@ public class ConsignmentOrderService {
             Consignment consignment = consignmentRepository.findById(consignmentId)
                     .orElseThrow((() -> new NotFoundException("Consignment not found")));
             double totalCost = orders.getFinalAmount() + consignment.getCost();
-        /*
-        1. tao payment
-         */
+
             Account account = authenticationService.getCurrentAccount();
             Payment payment = new Payment();
             payment.setOrders(orders);
@@ -323,13 +320,8 @@ public class ConsignmentOrderService {
 
 
     public static float calculateTotalCost(float costPerDay, int quantity, Date startDate, Date endDate) {
-        // Calculate the difference in milliseconds
         long diffInMillies = endDate.getTime() - startDate.getTime();
-
-        // Calculate the number of days
         long daysBetween = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-
-        // Return total cost
         return daysBetween * costPerDay * quantity;
     }
 }
