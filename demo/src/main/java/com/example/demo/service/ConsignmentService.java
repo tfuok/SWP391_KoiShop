@@ -452,6 +452,7 @@ public class ConsignmentService {
 
             responses.add(response);
         }
+        responses.sort((r1, r2) -> Long.compare(r2.getId(), r1.getId()));
         return responses;
     }
 
@@ -480,6 +481,7 @@ public class ConsignmentService {
             }
             responses.add(response);
         }
+        responses.sort((r1, r2) -> Long.compare(r2.getId(), r1.getId()));
         return responses;
     }
 
@@ -499,7 +501,7 @@ public class ConsignmentService {
         detailResponse.setPrice(koi.getPrice());
         detailResponse.setKoiName(koi.getName());
         if (koi.getImagesList() != null && !koi.getImagesList().isEmpty()) {
-            detailResponse.setImageUrl(koi.getImages()); // Adjust to get the correct URL
+            detailResponse.setImageUrl(koi.getImages());
         }
         return detailResponse;
     }
