@@ -88,9 +88,13 @@ public class Account implements UserDetails {
     @JsonIgnore
     Set<Orders> orders;
 
-    @OneToMany(mappedBy = "staff")
+    @OneToMany(mappedBy = "staff",fetch = FetchType.EAGER)
     @JsonIgnore
     Set<Orders> staff_orders;
+
+    @OneToMany(mappedBy = "staff",fetch = FetchType.EAGER)
+    @JsonIgnore
+    Set<Orders> staff_consignments;
 
     @OneToMany(mappedBy = "account")
     @JsonIgnore

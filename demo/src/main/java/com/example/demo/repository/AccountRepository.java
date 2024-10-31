@@ -34,4 +34,10 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     @Query("select count(a) from Account a where a.role = :role")
     long countByRole(@Param("role") Role role);
+    @Query("SELECT a FROM Account a " +
+            "LEFT JOIN FETCH a.staff_orders o " +
+            "LEFT JOIN FETCH a.consignments c " +
+            "WHERE a.role = 'STAFF' AND a.isDeleted = false")
+    List<Account> findStaffWithOrdersAndConsignments();
+
 }

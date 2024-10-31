@@ -1,12 +1,12 @@
 package com.example.demo.service;
 
-import com.example.demo.entity.Account;
-import com.example.demo.entity.Role;
+import com.example.demo.entity.*;
 import com.example.demo.exception.DuplicatedEntity;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.*;
 import com.example.demo.model.Response.AccountResponse;
 import com.example.demo.model.Response.LoginGoogleResponse;
+import com.example.demo.model.Response.StaffResponse;
 import com.example.demo.repository.AccountRepository;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
@@ -25,6 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -183,11 +185,38 @@ public class AuthenticationService implements UserDetailsService {
         account.setPassword(passwordEncoder.encode(resetPasswordRequest.getPassword()));
         accountRepository.save(account);
     }
+    public List<StaffResponse> getStaff() {
+        List<Account> staffs = accountRepository.findStaffWithOrdersAndConsignments();
+        List<StaffResponse> staffResponses = new ArrayList<>();
+
+        for (Account account : staffs) {
+            StaffResponse staffResponse = new StaffResponse();
+            staffResponse.setStaff(account);
+            System.out.println("Account ID: " + account.getId() + ", Orders size: " + account.getOrders().size());
+            System.out.println("Account ID: " + account.getId() + ", Consignments size: " + account.getConsignments().size());
+            long orderCount = account.getStaff_orders().stream()
+                    .filter(orders -> orders.getStatus() != Status.CANCELLED &&
+                            orders.getStatus() != Status.COMPLETED &&
+                            orders.getStatus() != Status.DECLINED)
+                    .count();
+            staffResponse.setOrderCount(orderCount);
+
+            long consignmentCount = account.getStaff_consignments().stream()
+                    .filter(consignment -> consignment.getStatus() != Status.CONFIRMED && consignment.getStatus() != Status.DECLINED)
+                    .count();
+            staffResponse.setConsignmentCount(consignmentCount);
+            staffResponses.add(staffResponse);
+        }
+
+
+        staffResponses.sort(Comparator.comparingLong(response -> response.getOrderCount() + response.getConsignmentCount()));
+
+        return staffResponses;
+    }
 
     public List<Account> getAccountByRole(Role role) {
         return accountRepository.findByRoleAndIsDeletedFalse(role);
     }
-
     private static final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String LOWER = "abcdefghijklmnopqrstuvwxyz";
     private static final String DIGITS = "0123456789";

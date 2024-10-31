@@ -120,7 +120,10 @@ public class AuthenticationAPI {
         List<Account> allAccounts = authenticationService.getAllAccount();
         return ResponseEntity.ok(allAccounts);
     }
-
+    @GetMapping("/staff")
+    private ResponseEntity getStaff() {
+        return ResponseEntity.ok(authenticationService.getStaff());
+    }
     @PostMapping("/login-google")
     private ResponseEntity checkLoginGoogle(@RequestBody LoginGoogleRequest loginGGRequest){
         return ResponseEntity.ok(authenticationService.loginGoogle(loginGGRequest));
