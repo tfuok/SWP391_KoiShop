@@ -27,6 +27,8 @@ public class ConsignmentService {
     @Autowired
     private ConsignmentRepository consignmentRepository;
 
+    @Autowired
+    private OrderRepository orderRepository;
 
     @Autowired
     private AuthenticationService authenticationService;
@@ -406,9 +408,32 @@ public class ConsignmentService {
                     koiLotRepository.save(koi);
                 }
             }
-        }else if(consignment.getStatus() == ConsignmentStatus.DECLINED){}
+        }else if(consignment.getStatus() == ConsignmentStatus.DECLINED){
+            Payment payment = paymentRepository.findByConsignmentId(id);
+            if(payment.getOrders() != null) {
+                Orders order = payment.getOrders();
+                order.setStatus(Status.DECLINED);
+                orderRepository.save(order);
+            }
+            Transactions refundTransactions = new Transactions();
+            refundTransactions.setAmount(payment.getTotal());
+            refundTransactions.setStatus(TransactionEnum.SUCCESS);
+            refundTransactions.setDescription("REFUND PAYMENT FOR CUSTOMER");
+            Account manager = accountRepository.findAccountByRole(Role.MANAGER);
+            Account customer = payment.getCustomer();
+            refundTransactions.setFrom(manager);
+            refundTransactions.setTo(customer);
+            refundTransactions.setCreateAt(new Date());
+            manager.setBalance(manager.getBalance() - payment.getTotal());
+            customer.setBalance(customer.getBalance() + payment.getTotal());
+            payment.getTransactions().add(refundTransactions);
+            accountRepository.save(manager);
+            accountRepository.save(customer);
+            paymentRepository.save(payment);
+            }
         return consignmentRepository.save(consignment);
     }
+
     public List<KoiOnlineConsignmentResponse> getAllOnlineKoi() {
         List<KoiOnlineConsignmentResponse> responses = new ArrayList<>();
 
