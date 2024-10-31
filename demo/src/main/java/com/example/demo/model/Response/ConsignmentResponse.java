@@ -26,5 +26,5 @@ public class ConsignmentResponse{
     private String careTypeName; // only careTypeName here
     private List<ConsignmentDetailResponse> details;
     private long staffid;
-
+    private String phoneNumber;
 }

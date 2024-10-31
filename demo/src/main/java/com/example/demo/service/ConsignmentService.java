@@ -406,7 +406,7 @@ public class ConsignmentService {
                     koiLotRepository.save(koi);
                 }
             }
-        }
+        }else if(consignment.getStatus() == ConsignmentStatus.DECLINED){}
         return consignmentRepository.save(consignment);
     }
     public List<KoiOnlineConsignmentResponse> getAllOnlineKoi() {
@@ -486,6 +486,7 @@ public class ConsignmentService {
     }
 
 
+
     public ConsignmentResponse assignStaff(long consignmentId, long staffId) {
         Consignment consignment = consignmentRepository.findById(consignmentId)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
@@ -516,6 +517,7 @@ public class ConsignmentService {
         response.setCost(String.valueOf(consignment.getCost()));
         response.setStartDate(consignment.getStartDate());
         response.setEndDate(consignment.getEndDate());
+        response.setPhoneNumber(consignment.getAccount().getPhone());
         response.setCreateDate(consignment.getCreateDate());
         response.setStatus(consignment.getStatus().toString());
         response.setCareTypeName(consignment.getCareType() != null ? consignment.getCareType().getCareTypeName() : "N/A");
