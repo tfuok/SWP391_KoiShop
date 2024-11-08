@@ -10,6 +10,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -39,8 +40,8 @@ public class VoucherService {
     }
 
     public List<Voucher> getAllVoucher() {
-        List<Voucher> vouchers = voucherRepository.findVoucherByIsDeletedFalse();
-        return vouchers;
+        Date currentDate = new Date();
+        return voucherRepository.findActiveVouchers(currentDate);
     }
 
     public Voucher updateVoucher(VoucherRequest voucherRequest, long id){
