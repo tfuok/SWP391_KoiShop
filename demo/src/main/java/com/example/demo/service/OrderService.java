@@ -46,6 +46,8 @@ public class OrderService {
     private EmailService emailService;
     @Autowired
     ConsignmentRepository consignmentRepository;
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     public Orders create(OrderRequest orderRequest) {
         Orders orders = new Orders();
@@ -280,8 +282,19 @@ public class OrderService {
         double refundAmount = order.getFinalAmount();
         double newBalance = customer.getBalance() + refundAmount;
         customer.setBalance(newBalance);
-
-        for(OrderDetails orderDetails : order.getOrderDetails()){
+        Transactions refundTransactions = new Transactions();
+        refundTransactions.setAmount(refundAmount);
+        refundTransactions.setStatus(TransactionEnum.SUCCESS);
+        refundTransactions.setDescription("REFUND FOR CUSTOMER");
+        Account manager = accountRepository.findAccountByRole(Role.MANAGER);
+        refundTransactions.setFrom(manager);
+        refundTransactions.setTo(customer);
+        refundTransactions.setCreateAt(new Date());
+        manager.setBalance(manager.getBalance() - refundAmount);
+        accountRepository.save(manager);
+        accountRepository.save(customer);
+        transactionRepository.save(refundTransactions);
+        for (OrderDetails orderDetails : order.getOrderDetails()) {
             Koi koi = koiRepository.findById(orderDetails.getKoi().getId());
             koi.setSold(false);
             koi.setDeleted(false);
@@ -344,17 +357,27 @@ public class OrderService {
                 .orElseThrow(() -> new NotFoundException("Order not found"));
         Account customer = order.getCustomer();
         Account manager = accountRepository.findAccountByRole(Role.MANAGER);
-        if (order.getStatus() == Status.DECLINED) {
-            double amount = order.getFinalAmount();
-            double newBalance = customer.getBalance() + amount;
+        if (newStatus == Status.DECLINED) {
+            double refundAmount = order.getFinalAmount();
+            double newBalance = customer.getBalance() + refundAmount;
             customer.setBalance(newBalance);
+            Transactions refundTransactions = new Transactions();
+            refundTransactions.setAmount(refundAmount);
+            refundTransactions.setStatus(TransactionEnum.SUCCESS);
+            refundTransactions.setDescription("REFUND FOR CUSTOMER");
+            refundTransactions.setFrom(manager);
+            refundTransactions.setTo(customer);
+            refundTransactions.setCreateAt(new Date());
+            manager.setBalance(manager.getBalance() - refundAmount);
+            accountRepository.save(manager);
+            transactionRepository.save(refundTransactions);
             for (OrderDetails orderDetails : order.getOrderDetails()) {
                 Koi orderKoi = koiRepository.findById(orderDetails.getKoi().getId());
                 orderKoi.setAccount(manager);
                 orderKoi.setSold(false);
                 koiRepository.save(orderKoi);
             }
-        }else if(order.getStatus() == Status.COMPLETED){
+        } else if (newStatus == Status.COMPLETED) {
             Payment orderPayment = paymentRepository.findByOrders(order);
             for (OrderDetails orderDetails : order.getOrderDetails()) {
                 if (orderDetails.getKoi().getAccount().getRole() == Role.CUSTOMER) {
