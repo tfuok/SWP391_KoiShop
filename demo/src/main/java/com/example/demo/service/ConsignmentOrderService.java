@@ -234,16 +234,15 @@ public class ConsignmentOrderService {
             transaction1.setStatus(TransactionEnum.SUCCESS);
             transaction1.setDescription("VNPAY TO CUSTOMER");
             transactions.add(transaction1);
-
-            double MoneySendToVendor = 0;
             Account manager = accountRepository.findAccountByRole(Role.MANAGER);
-            for (OrderDetails orderDetails : orders.getOrderDetails()) {
-                if (orderDetails.getKoi().getAccount().getRole() == Role.CUSTOMER) {
-                    double orderAmount = orderDetails.getPrice() * 0.9;
-                    MoneySendToVendor += orderAmount;
-                }
-            }
-            double MoneySendtoManager = orders.getFinalAmount() - MoneySendToVendor;
+//            double MoneySendToVendor = 0;
+//            for (OrderDetails orderDetails : orders.getOrderDetails()) {
+//                if (orderDetails.getKoi().getAccount().getRole() == Role.CUSTOMER) {
+//                    double orderAmount = orderDetails.getPrice() * 0.9;
+//                    MoneySendToVendor += orderAmount;
+//                }
+//            }
+//            double MoneySendtoManager = orders.getFinalAmount() - MoneySendToVendor;
 
             //customer -> server
             Transactions transaction2 = new Transactions();
@@ -251,41 +250,41 @@ public class ConsignmentOrderService {
             transaction2.setTo(manager);
             transaction2.setPayment(payment);
             transaction2.setStatus(TransactionEnum.SUCCESS);
-            transaction2.setAmount(MoneySendtoManager);
+            transaction2.setAmount(orders.getFinalAmount());
             transaction2.setCreateAt(new Date());
             transaction2.setDescription("CUSTOMER TO MANAGER");
-            double newBalance = manager.getBalance() + MoneySendtoManager ;
+            double newBalance = manager.getBalance() + orders.getFinalAmount() ;
             manager.setBalance(newBalance);
             transactions.add(transaction2);
 
             //server -> user (if koi is consignment online)
-            for (OrderDetails orderDetails : orders.getOrderDetails()) {
-                if (orderDetails.getKoi().getAccount().getRole() == Role.CUSTOMER) {
-                    Transactions transaction3 = new Transactions();
-                    transaction3.setFrom(manager);
-                    transaction3.setTo(orderDetails.getKoi().getAccount());
-                    transaction3.setPayment(payment);
-                    transaction3.setStatus(TransactionEnum.SUCCESS);
-                    transaction3.setDescription("MANAGER TO CONSIGNMENT VENDOR");
-                    transaction3.setCreateAt(new Date());
-                    double orderAmount = orderDetails.getPrice() * 0.9;
-                    transaction3.setAmount(orderAmount);
-                    Account vendor = orderDetails.getKoi().getAccount();
-                    vendor.setBalance(vendor.getBalance() + orderAmount);
-                    accountRepository.save(vendor);
-                    transactions.add(transaction3);
-                }
-            }
+//            for (OrderDetails orderDetails : orders.getOrderDetails()) {
+//                if (orderDetails.getKoi().getAccount().getRole() == Role.CUSTOMER) {
+//                    Transactions transaction3 = new Transactions();
+//                    transaction3.setFrom(manager);
+//                    transaction3.setTo(orderDetails.getKoi().getAccount());
+//                    transaction3.setPayment(payment);
+//                    transaction3.setStatus(TransactionEnum.SUCCESS);
+//                    transaction3.setDescription("MANAGER TO CONSIGNMENT VENDOR");
+//                    transaction3.setCreateAt(new Date());
+//                    double orderAmount = orderDetails.getPrice() * 0.9;
+//                    transaction3.setAmount(orderAmount);
+//                    Account vendor = orderDetails.getKoi().getAccount();
+//                    vendor.setBalance(vendor.getBalance() + orderAmount);
+//                    accountRepository.save(vendor);
+//                    transactions.add(transaction3);
+//                }
+//            }
             Koi koi = null;
             for (OrderDetails orderDetails : orders.getOrderDetails()) {
                 OrderDetails details = new OrderDetails();
                 koi = koiRepository.findKoiByIdAndIsDeletedFalse(orderDetails.getKoi().getId());
                 koi.setSold(true);
-                koi.setAccount(customer);
+//                koi.setAccount(customer);
                 koiRepository.save(koi);
-                if (koi.getQuantity() == 1) {
-                     certificateService.sendCertificateEmail(customer, koi.getCertificate().getCertificateId());
-                }
+//                if (koi.getQuantity() == 1) {
+//                     certificateService.sendCertificateEmail(customer, koi.getCertificate().getCertificateId());
+//                }
             }
             //tao transaction
             Transactions transaction5 = new Transactions();

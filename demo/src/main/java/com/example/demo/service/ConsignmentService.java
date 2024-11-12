@@ -343,6 +343,29 @@ public class ConsignmentService {
             consignmentRepository.save(consignment);
             emailService.sendConsignmentBillEmail(consignment,consignment.getAccount().getEmail());
         }
+    public Consignment cancelConsignmentByCustomer(Long orderId) {
+        Account customer = authenticationService.getCurrentAccount();
+        Consignment consignment = consignmentRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+
+        if (consignment.getAccount().getId() != customer.getId()) {
+            throw new IllegalStateException("You can only cancel your own orders.");
+        }
+
+
+        consignment.setStatus(ConsignmentStatus.CANCELLED);
+
+
+        for(ConsignmentDetails consignmentDetails : consignment.getConsignmentDetails()){
+            Koi koi = koiLotRepository.findById(consignmentDetails.getKoi().getId());
+            koi.setSold(false);
+            koi.setDeleted(true);
+
+            koiLotRepository.save(koi);
+        }
+
+       return consignmentRepository.save(consignment);
+    }
     public Koi createConsignmentKoi(KoiRequest koiLotRequest) {
         try {
 
@@ -472,10 +495,9 @@ public class ConsignmentService {
                 response.setStatus("DECLINED");
             } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.PENDING) {
                 response.setStatus("PENDING");
+            }else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.CANCELLED) {
+                response.setStatus("CANCELLED");
             }
-
-
-            responses.add(response);
         }
         responses.sort((r1, r2) -> Long.compare(r2.getId(), r1.getId()));
         return responses;
@@ -503,6 +525,8 @@ public class ConsignmentService {
                 response.setIsConsignment("DECLINED");
             } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.PENDING) {
                 response.setIsConsignment("PENDING");
+            }else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.CANCELLED) {
+                    response.setIsConsignment("CANCELLED");
             }
             responses.add(response);
         }
@@ -510,7 +534,47 @@ public class ConsignmentService {
         return responses;
     }
 
+    public ConsignmentResponse extendEndDate(Long consignmentId, Date endDate) {
+        Consignment oldConsignment = consignmentRepository.findConsignmentById(consignmentId);
+        Consignment newConsignment = new Consignment();
+        oldConsignment.setIsDeleted(true);
 
+
+        Date normalizedStartDate = DateUtils.normalizeDate(oldConsignment.getStartDate());
+        Date normalizedEndDate = DateUtils.normalizeDate(endDate);
+        CareType careType = careTypeRepository.findByCareTypeId(oldConsignment.getCareType().getCareTypeId());
+        float estimateCost = calculateTotalCost(
+                careType.getCostPerDay(),
+                oldConsignment.getConsignmentDetails().size(),
+                normalizedStartDate,
+                normalizedEndDate
+
+        );
+        newConsignment.setCreateDate(oldConsignment.getCreateDate());
+        newConsignment.setCost(estimateCost);
+        newConsignment.setType(oldConsignment.getType());
+        newConsignment.setStatus(oldConsignment.getStatus());
+
+        List<ConsignmentDetails> newConsignmentDetails = new ArrayList<>();
+        for (ConsignmentDetails oldDetail : oldConsignment.getConsignmentDetails()) {
+            ConsignmentDetails newDetail = new ConsignmentDetails();
+            newDetail.setKoi(oldDetail.getKoi());  // Set the same Koi
+            newDetail.setConsignment(newConsignment);  // Link to the new consignment
+            newConsignmentDetails.add(newDetail);
+        }
+        newConsignment.setCreateDate(oldConsignment.getCreateDate());
+        newConsignment.setConsignmentDetails(newConsignmentDetails);
+        newConsignment.setEndDate(normalizedEndDate);
+        newConsignment.setCreateDate(normalizedStartDate);
+        newConsignment.setAddress(oldConsignment.getAddress());
+        newConsignment.setDescription(oldConsignment.getDescription());
+        newConsignment.setCareType(oldConsignment.getCareType());
+        newConsignment.setAccount(oldConsignment.getAccount());
+        newConsignment.setStaff(oldConsignment.getStaff());
+        consignmentRepository.save(newConsignment);
+        ConsignmentResponse consignmentResponse = mapToConsignmentResponse(newConsignment);
+        return consignmentResponse;
+    }
 
     public ConsignmentResponse assignStaff(long consignmentId, long staffId) {
         Consignment consignment = consignmentRepository.findById(consignmentId)

@@ -5,4 +5,5 @@ public enum ConsignmentStatus {
     CONFIRMED,
     PAID,
     DECLINED,
+    CANCELLED
 }

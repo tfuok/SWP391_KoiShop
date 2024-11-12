@@ -25,8 +25,9 @@ public interface KoiRepository extends JpaRepository<Koi, Long> {
     List<Koi> findByAccountId(Long accountId);
 
     // Find all Koi by account ID through Consignment where Consignment type is ONLINE
-    @Query("SELECT k FROM Koi k JOIN k.consignmentDetails cd JOIN cd.consignment c WHERE c.account.id = :accountId AND c.type = :type")
+    @Query("SELECT k FROM Koi k JOIN k.consignmentDetails cd JOIN cd.consignment c WHERE c.account.id = :accountId AND c.type = :type AND c.isDeleted = false")
     List<Koi> findAllKoiByAccountIdAndConsignmentType(@Param("accountId") Long accountId, @Param("type") Type type);
+
 
     // Find all Koi where they are not deleted and not sold
     Page<Koi> findAllByIsDeletedFalseAndSoldFalse(Pageable pageable);

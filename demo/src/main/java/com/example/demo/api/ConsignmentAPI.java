@@ -2,6 +2,7 @@ package com.example.demo.api;
 
 import com.example.demo.entity.Consignment;
 import com.example.demo.entity.ConsignmentStatus;
+import com.example.demo.entity.Orders;
 import com.example.demo.entity.Status;
 import com.example.demo.model.Request.ConsignmentRequest;
 import com.example.demo.model.Response.ConsignmentResponse;
@@ -9,23 +10,28 @@ import com.example.demo.model.Response.KoiOfflineConsignmentResponse;
 import com.example.demo.model.Response.KoiOnlineConsignmentResponse;
 import com.example.demo.service.ConsignmentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/consignment")
 @CrossOrigin("*")
 @SecurityRequirement(name = "api")
+@Validated
 public class ConsignmentAPI {
 
     @Autowired
     private ConsignmentService consignmentService;
 
     @PostMapping()
-    public ResponseEntity createConsignment(@RequestBody ConsignmentRequest consignment) throws Exception {
+    public ResponseEntity createConsignment(@Valid @RequestBody ConsignmentRequest consignment) throws Exception {
         String url = consignmentService.createUrl(consignment);
         return ResponseEntity.ok(url);
     }
@@ -70,6 +76,18 @@ public class ConsignmentAPI {
            long consignmentId, ConsignmentStatus newStatus) throws Exception {
         Consignment updatedConsignment  = consignmentService.updateConsignmentStatus(consignmentId, newStatus);
         return ResponseEntity.ok(updatedConsignment);
+    }
+    @PutMapping("extend")
+    public ResponseEntity<ConsignmentResponse> extendConsignment(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date extendDate,
+            @RequestParam Long id){
+        ConsignmentResponse response = consignmentService.extendEndDate(id, extendDate);
+        return ResponseEntity.ok(response);
+    }
+    @PutMapping("/cancel")
+    public ResponseEntity<Consignment> cancelOrder(@RequestParam Long consginementid) throws Exception {
+        Consignment cancelledOrder = consignmentService.cancelConsignmentByCustomer(consginementid);
+        return ResponseEntity.ok(cancelledOrder);
     }
 }
 
