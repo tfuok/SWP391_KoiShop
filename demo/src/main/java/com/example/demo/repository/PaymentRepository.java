@@ -23,4 +23,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @Query("SELECT p FROM Payment p WHERE p.consignment.id = :consignmentId")
     Payment findByConsignmentId(@Param("consignmentId") Long consignmentId);
+    @Query("SELECT p FROM Payment p WHERE p.orders.id = :orderId")
+    Payment findByOrderId(@Param("orderId") Long orderId);
 }

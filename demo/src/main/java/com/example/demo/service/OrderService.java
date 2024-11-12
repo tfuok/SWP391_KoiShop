@@ -378,7 +378,7 @@ public class OrderService {
                 koiRepository.save(orderKoi);
             }
         } else if (newStatus == Status.COMPLETED) {
-            Payment orderPayment = paymentRepository.findByOrders(order);
+            Payment orderPayment = paymentRepository.findByOrderId(orderId);
             for (OrderDetails orderDetails : order.getOrderDetails()) {
                 if (orderDetails.getKoi().getAccount().getRole() == Role.CUSTOMER) {
                     Transactions transaction3 = new Transactions();
@@ -395,18 +395,13 @@ public class OrderService {
                     accountRepository.save(vendor);
                     orderPayment.getTransactions().add(transaction3);
                     paymentRepository.save(orderPayment);
-
-                }
-                for (OrderDetails orderDetailss : order.getOrderDetails()) {
-                    OrderDetails details = new OrderDetails();
-                    Koi koi = koiRepository.findKoiByIdAndIsDeletedFalse(orderDetailss.getKoi().getId());
-                    koi.setSold(true);
-                    koi.setAccount(order.getCustomer());
-                    koiRepository.save(koi);
-                    if (koi.getQuantity() == 1) {
-                        certificateService.sendCertificateEmail(order.getCustomer(), koi.getCertificate().getCertificateId());
                     }
-
+                Koi koi = orderDetails.getKoi();
+                koi.setSold(true);
+                koi.setAccount(order.getCustomer());
+                koiRepository.save(koi);
+                if (koi.getQuantity() == 1) {
+                    certificateService.sendCertificateEmail(order.getCustomer(), koi.getCertificate().getCertificateId());
                 }
             }
         }
