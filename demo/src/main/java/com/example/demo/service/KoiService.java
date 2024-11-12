@@ -234,13 +234,12 @@ public class KoiService {
         return koi;
     }
 
-    public Map<String, Object> compareKoi(long id1, long id2) {
+    public Map<String, Object> compareUniqueKoi(long id1, long id2) {
         Koi koi1 = koiLotRepository.findKoiByIdAndIsDeletedFalse(id1);
         Koi koi2 = koiLotRepository.findKoiByIdAndIsDeletedFalse(id2);
         if (koi1 == null || koi2 == null) {
             throw new NotFoundException("One or both Koi not found");
         }
-        // So sánh các thuộc tính của 2 cá thể Koi
         Map<String, Object> comparisonResult = new HashMap<>();
         comparisonResult.put("nameMatch", koi1.getName().equals(koi2.getName()));
         comparisonResult.put("priceDifference", Math.abs(koi1.getPrice() - koi2.getPrice()));
@@ -249,6 +248,21 @@ public class KoiService {
         comparisonResult.put("sizeDifference", Math.abs(koi1.getSize() - koi2.getSize()));
         comparisonResult.put("breedMatch", koi1.getBreeds().equals(koi2.getBreeds()));
         comparisonResult.put("originMatch", koi1.getOrigin().equals(koi2.getOrigin()));
+        return comparisonResult;
+    }
+
+    public Map<String, Object> compareKoiLots(long lotId1, long lotId2) {
+        Koi lot1 = koiLotRepository.findKoiByIdAndIsDeletedFalse(lotId1);
+        Koi lot2 = koiLotRepository.findKoiByIdAndIsDeletedFalse(lotId2);
+        if (lot1 == null || lot2 == null) {
+            throw new NotFoundException("One or both Koi lots not found");
+        }
+        Map<String, Object> comparisonResult = new HashMap<>();
+        comparisonResult.put("lotSizeDifference", Math.abs(lot1.getQuantity() - lot2.getQuantity()));
+        comparisonResult.put("averagePriceDifference", Math.abs(lot1.getPrice() - lot2.getPrice()));
+        comparisonResult.put("breedMatch", lot1.getBreeds().equals(lot2.getBreeds()));
+        comparisonResult.put("originMatch", lot1.getOrigin().equals(lot2.getOrigin()));
+
         return comparisonResult;
     }
 
@@ -308,6 +322,12 @@ public class KoiService {
 
     public List<Koi> getKoiByCurrentAccount() {
         return koiLotRepository.findByAccountId(authenticationService.getCurrentAccount().getId());
+    }
+
+    public void unDelete(long id){
+        Koi koi = koiLotRepository.findById(id);
+        koi.setDeleted(false);
+        koiLotRepository.save(koi);
     }
 }
 

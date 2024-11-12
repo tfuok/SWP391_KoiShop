@@ -37,6 +37,8 @@ public class Orders {
 
     String image;
 
+    String address;
+
     @ManyToOne
     @JoinColumn(name = "customer_id")
     @JsonIgnore

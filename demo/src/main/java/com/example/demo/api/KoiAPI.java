@@ -1,6 +1,7 @@
 package com.example.demo.api;
 
 import com.example.demo.entity.Koi;
+import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Request.KoiRequest;
 import com.example.demo.model.Request.SaleRequest;
 import com.example.demo.model.Response.KoiPageResponse;
@@ -9,10 +10,12 @@ import com.example.demo.service.KoiService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/koi")
@@ -39,23 +42,6 @@ public class KoiAPI {
         Koi newKoi = koiLotService.deleteKoi(id);
         return ResponseEntity.ok(newKoi);
     }
-
-//    @GetMapping
-//    public ResponseEntity getAllKoi(@RequestParam int page, @RequestParam(defaultValue = "5") int size) {
-//        KoiLotResponse kois = koiLotService.getAllKoi(page, size);
-//        return ResponseEntity.ok(kois);
-//    }
-//
-//    @GetMapping("{name}")
-//    public ResponseEntity searchKoiByName(@PathVariable String name) {
-//        KoiLot kois = koiLotService.searchByName(name);
-//        return ResponseEntity.ok(kois);
-//    }
-//
-//    @GetMapping("/by-breed/{breedId}")
-//    public List<KoiLot> getKoiByBreed(@PathVariable long breedId) {
-//        return koiLotService.getKoiByBreed(breedId);
-//    }
 
     @GetMapping
     public ResponseEntity<?> getKoi(
@@ -103,5 +89,35 @@ public class KoiAPI {
     public ResponseEntity unSale(long id) {
         koiLotService.unSale(id);
         return ResponseEntity.ok("Success");
+    }
+
+    @GetMapping("/compare")
+    public ResponseEntity<Map<String, Object>> compareKoi(
+            @RequestParam("id1") long id1,
+            @RequestParam("id2") long id2,
+            @RequestParam("comparisonType") String comparisonType) {
+        try {
+            Map<String, Object> comparisonResult;
+            switch (comparisonType.toLowerCase()) {
+                case "unique":
+                    comparisonResult = koiLotService.compareUniqueKoi(id1, id2);
+                    break;
+                case "lot":
+                    comparisonResult = koiLotService.compareKoiLots(id1, id2);
+                    break;
+                default:
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(Map.of("error", "Invalid comparison type"));
+            }
+            return ResponseEntity.ok(comparisonResult);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/undelete")
+    public ResponseEntity unDeleteKoi(long id) {
+        koiLotService.unDelete(id);
+        return ResponseEntity.ok("success");
     }
 }

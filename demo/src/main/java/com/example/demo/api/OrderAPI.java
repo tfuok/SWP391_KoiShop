@@ -91,4 +91,11 @@ public class OrderAPI {
         List<PaymentResponse> payments = orderService.getAllPayment();
         return ResponseEntity.ok(payments);
     }
+
+    @PutMapping("/cancel")
+    public ResponseEntity<Orders> cancelOrder(@RequestParam Long orderId) {
+        Orders cancelledOrder = orderService.cancelOrderByCustomer(orderId);
+        return ResponseEntity.ok(cancelledOrder);
+    }
+
 }

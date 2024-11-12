@@ -57,6 +57,7 @@ public class OrderService {
         orders.setCustomer(customer);
         orders.setStatus(Status.PENDING);
         orders.setDescription(orderRequest.getDescription());
+        orders.setAddress(orderRequest.getAddress());
 
         for (OrderDetailRequest orderDetailRequest : orderRequest.getDetail()) {
             OrderDetails details = new OrderDetails();
@@ -262,17 +263,44 @@ public class OrderService {
         }
     }
 
+    public Orders cancelOrderByCustomer(Long orderId) {
+        Account customer = authenticationService.getCurrentAccount();
+        Orders order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found"));
+
+        if (order.getCustomer().getId() != customer.getId()) {
+            throw new IllegalStateException("You can only cancel your own orders.");
+        }
+
+        if (order.getStatus() == Status.SHIPPED) {
+            throw new IllegalStateException("Order has already been shipped and cannot be cancelled.");
+        }
+
+        order.setStatus(Status.CANCELLED);
+        double refundAmount = order.getFinalAmount();
+        double newBalance = customer.getBalance() + refundAmount;
+        customer.setBalance(newBalance);
+
+        for(OrderDetails orderDetails : order.getOrderDetails()){
+            Koi koi = koiRepository.findById(orderDetails.getKoi().getId());
+            koi.setSold(false);
+            koi.setDeleted(false);
+            koi.setAccount(accountRepository.findAccountByRole(Role.MANAGER));
+            koiRepository.save(koi);
+        }
+
+        accountRepository.save(customer);
+        return orderRepository.save(order);
+    }
+
     public void assignStaff(long staffId, Long orderId, Long consignmentId) {
-        // Fetch the staff, staff is mandatory
         Account staff = accountRepository.findById(staffId)
                 .orElseThrow(() -> new NotFoundException("Staff not found"));
 
-        // Check if either orderId or consignmentId is provided
         if (orderId == null && consignmentId == null) {
             throw new IllegalArgumentException("At least one of orderId or consignmentId must be provided");
         }
 
-        // If orderId is provided, assign staff to the order
         if (orderId != null) {
             Orders orders = orderRepository.findById(orderId)
                     .orElseThrow(() -> new NotFoundException("Order not found"));
@@ -280,7 +308,6 @@ public class OrderService {
             orderRepository.save(orders);
         }
 
-        // If consignmentId is provided, assign staff to the consignment
         if (consignmentId != null) {
             Consignment consignment = consignmentRepository.findById(consignmentId)
                     .orElseThrow(() -> new NotFoundException("Consignment not found"));
@@ -315,6 +342,20 @@ public class OrderService {
         Account currentStaff = authenticationService.getCurrentAccount();
         Orders order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
+        Account customer = order.getCustomer();
+        Account manager = accountRepository.findAccountByRole(Role.MANAGER);
+        if (order.getStatus() == Status.DECLINED) {
+            double amount = order.getFinalAmount();
+            double newBalance = customer.getBalance() + amount;
+            customer.setBalance(newBalance);
+            for (OrderDetails orderDetails : order.getOrderDetails()) {
+                Koi orderKoi = koiRepository.findById(orderDetails.getKoi().getId());
+                orderKoi.setAccount(manager);
+                orderKoi.setSold(false);
+                koiRepository.save(orderKoi);
+            }
+        }
+        accountRepository.save(customer);
         order.setStatus(newStatus);
         return orderRepository.save(order);
     }
@@ -360,6 +401,7 @@ public class OrderService {
                 .orderDetails(details)
                 .feedback(feedbackResponse)
                 .image(order.getImage())
+                .address(order.getAddress())
                 .build();
     }
 

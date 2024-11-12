@@ -10,4 +10,5 @@ public class OrderRequest {
     private List<OrderDetailRequest> detail;
     private String description;
     private String voucherCode;
+    private String address;
 }
