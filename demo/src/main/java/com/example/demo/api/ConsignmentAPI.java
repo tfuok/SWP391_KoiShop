@@ -78,11 +78,16 @@ public class ConsignmentAPI {
         return ResponseEntity.ok(updatedConsignment);
     }
     @PutMapping("extend")
-    public ResponseEntity<ConsignmentResponse> extendConsignment(
+    public ResponseEntity extendConsignment(
             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date extendDate,
-            @RequestParam Long id){
-        ConsignmentResponse response = consignmentService.extendEndDate(id, extendDate);
-        return ResponseEntity.ok(response);
+            @RequestParam Long id) throws Exception {
+        String url = consignmentService.createExtendUrl(id, extendDate);
+        return ResponseEntity.ok(url);
+    }
+    @PostMapping("/extendTransactions")
+    public ResponseEntity extendTransactions(@RequestParam long consignmentID) throws Exception {
+        consignmentService.createExtendTransaction(consignmentID);
+        return ResponseEntity.ok("success");
     }
     @PutMapping("/cancel")
     public ResponseEntity<Consignment> cancelOrder(@RequestParam Long consginementid) throws Exception {

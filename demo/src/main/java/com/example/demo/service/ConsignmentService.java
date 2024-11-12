@@ -534,13 +534,13 @@ public class ConsignmentService {
         return responses;
     }
 
-    public ConsignmentResponse extendEndDate(Long consignmentId, Date endDate) {
+    public Consignment extendEndDate(Long consignmentId, Date endDate) {
         Consignment oldConsignment = consignmentRepository.findConsignmentById(consignmentId);
         Consignment newConsignment = new Consignment();
         oldConsignment.setIsDeleted(true);
 
 
-        Date normalizedStartDate = DateUtils.normalizeDate(oldConsignment.getStartDate());
+        Date normalizedStartDate = DateUtils.normalizeDate(oldConsignment.getEndDate());
         Date normalizedEndDate = DateUtils.normalizeDate(endDate);
         CareType careType = careTypeRepository.findByCareTypeId(oldConsignment.getCareType().getCareTypeId());
         float estimateCost = calculateTotalCost(
@@ -565,17 +565,129 @@ public class ConsignmentService {
         newConsignment.setCreateDate(oldConsignment.getCreateDate());
         newConsignment.setConsignmentDetails(newConsignmentDetails);
         newConsignment.setEndDate(normalizedEndDate);
-        newConsignment.setCreateDate(normalizedStartDate);
+        newConsignment.setStartDate(normalizedStartDate);
         newConsignment.setAddress(oldConsignment.getAddress());
         newConsignment.setDescription(oldConsignment.getDescription());
         newConsignment.setCareType(oldConsignment.getCareType());
         newConsignment.setAccount(oldConsignment.getAccount());
         newConsignment.setStaff(oldConsignment.getStaff());
         consignmentRepository.save(newConsignment);
-        ConsignmentResponse consignmentResponse = mapToConsignmentResponse(newConsignment);
-        return consignmentResponse;
-    }
 
+        return newConsignment;
+    }
+    public String createExtendUrl(Long consignmentId, Date endDate) throws Exception {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        LocalDateTime createDate = LocalDateTime.now();
+        String formattedCreateDate = createDate.format(formatter);
+
+        Consignment consignment = extendEndDate(consignmentId,endDate);
+        double money = consignment.getCost() * 100;
+        String amount = String.valueOf((int) money);
+
+        String tmnCode = "VONI2DAD";
+        String secretKey = "PIOSTSKRYSENPWY7NW7UG7HGWCHTT4IS";
+        String vnpUrl = " https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+        String returnUrl = "http://koishop.site/successful-consign?consignmentID=" + consignment.getId(); // trang thong bao thanh toan thanh cong
+        String currCode = "VND";
+
+        Map<String, String> vnpParams = new TreeMap<>();
+        vnpParams.put("vnp_Version", "2.1.0");
+        vnpParams.put("vnp_Command", "pay");
+        vnpParams.put("vnp_TmnCode", tmnCode);
+        vnpParams.put("vnp_Locale", "vn");
+        vnpParams.put("vnp_CurrCode", currCode);
+        vnpParams.put("vnp_TxnRef", String.valueOf(consignment.getId()+1000));
+        vnpParams.put("vnp_OrderInfo", "Thanh toan cho ma GD: " + consignment.getId()+1000);
+        vnpParams.put("vnp_OrderType", "other");
+        vnpParams.put("vnp_Amount", amount);
+
+        vnpParams.put("vnp_ReturnUrl", returnUrl);
+        vnpParams.put("vnp_CreateDate", formattedCreateDate);
+        vnpParams.put("vnp_IpAddr", "128.199.178.23");
+
+        StringBuilder signDataBuilder = new StringBuilder();
+        for (Map.Entry<String, String> entry : vnpParams.entrySet()) {
+            signDataBuilder.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.toString()));
+            signDataBuilder.append("=");
+            signDataBuilder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.toString()));
+            signDataBuilder.append("&");
+        }
+        signDataBuilder.deleteCharAt(signDataBuilder.length() - 1); // Remove last '&'
+
+        String signData = signDataBuilder.toString();
+        String signed = generateHMAC(secretKey, signData);
+
+        vnpParams.put("vnp_SecureHash", signed);
+
+        StringBuilder urlBuilder = new StringBuilder(vnpUrl);
+        urlBuilder.append("?");
+        for (Map.Entry<String, String> entry : vnpParams.entrySet()) {
+            urlBuilder.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.toString()));
+            urlBuilder.append("=");
+            urlBuilder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.toString()));
+            urlBuilder.append("&");
+        }
+        urlBuilder.deleteCharAt(urlBuilder.length() - 1); // Remove last '&'
+
+        return urlBuilder.toString();
+    }
+    public void createExtendTransaction(long id){
+        Consignment consignment = consignmentRepository.findConsignmentById(id);
+        if(consignment == null){
+            throw new NotFoundException("Consignment not found");
+        }
+
+        /*
+        1. tao payment
+         */
+        Payment existingPayment = paymentRepository.findByConsignment(consignment);
+        if (existingPayment != null) {
+            throw new IllegalStateException("Payment for this consignment already exists.");
+        }
+
+        Payment payment = new Payment();
+        payment.setConsignment(consignment);
+        payment.setCreateAt(new Date());
+        payment.setMethod(PaymentEnums.BANKING);
+        payment.setTotal(consignment.getCost());
+        payment.setCreateAt(new Date());
+        List<Transactions> transactions = new ArrayList<>();
+        Account account =authenticationService.getCurrentAccount();
+        payment.setCustomer(account);
+
+        //tao transaction
+        Transactions transaction1 = new Transactions();
+        //vnpay -> customer
+        transaction1.setFrom(null);
+        Account customer = authenticationService.getCurrentAccount();
+        transaction1.setTo(customer);
+        transaction1.setPayment(payment);
+        transaction1.setStatus(TransactionEnum.SUCCESS);
+        transaction1.setDescription("VNPAY TO CUSTOMER");
+        transaction1.setCreateAt(new Date());
+        transactions.add(transaction1);
+
+        Transactions transaction2 = new Transactions();
+        //customer -> server
+        Account manager = accountRepository.findAccountByRole(Role.MANAGER);
+        transaction2.setFrom(customer);
+        transaction2.setTo(manager);
+        transaction2.setPayment(payment);
+        transaction2.setStatus(TransactionEnum.SUCCESS);
+        transaction2.setAmount(consignment.getCost());
+        transaction2.setCreateAt(new Date());
+        transaction2.setDescription("EXTEND COST TO MANAGER");
+        double newBalance = manager.getBalance() + consignment.getCost();
+        manager.setBalance(newBalance);
+        transactions.add(transaction2);
+        payment.setTransactions(transactions);
+
+        accountRepository.save(manager);
+        paymentRepository.save(payment);
+        consignment.setStatus(ConsignmentStatus.PAID);
+        consignmentRepository.save(consignment);
+
+    }
     public ConsignmentResponse assignStaff(long consignmentId, long staffId) {
         Consignment consignment = consignmentRepository.findById(consignmentId)
                 .orElseThrow(() -> new NotFoundException("Order not found"));
