@@ -508,7 +508,7 @@ public class ConsignmentService {
                 response.setStatus("ON SELL");
             } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.PAID) {
                 response.setStatus("WAIT FOR ACCEPT");
-            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.DECLINED) {
+            } else if (koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.DECLINED) {
                 response.setStatus("DECLINED");
             } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.PENDING) {
                 response.setStatus("PENDING");
@@ -539,7 +539,7 @@ public class ConsignmentService {
                 response.setIsConsignment("CONSIGNED");
             } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.PAID) {
                 response.setIsConsignment("PAID");
-            } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.DECLINED) {
+            } else if (koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.DECLINED) {
                 response.setIsConsignment("DECLINED");
             } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.PENDING) {
                 response.setIsConsignment("PENDING");
