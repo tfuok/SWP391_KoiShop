@@ -344,10 +344,10 @@ public class ConsignmentService {
             consignmentRepository.save(consignment);
             emailService.sendConsignmentBillEmail(consignment,consignment.getAccount().getEmail());
         }
-    public Consignment cancelConsignmentByCustomer(Long orderId) {
+    public Consignment cancelConsignmentByCustomer(Long consignmentId) {
         Account customer = authenticationService.getCurrentAccount();
-        Consignment consignment = consignmentRepository.findById(orderId)
-                .orElseThrow(() -> new NotFoundException("Order not found"));
+        Consignment consignment = consignmentRepository.findById(consignmentId)
+                .orElseThrow(() -> new NotFoundException("Consignment not found"));
 
         if (consignment.getAccount().getId() != customer.getId()) {
             throw new IllegalStateException("You can only cancel your own orders.");
@@ -506,7 +506,7 @@ public class ConsignmentService {
                 response.setStatus("DECLINED");
             } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.PENDING) {
                 response.setStatus("PENDING");
-            }else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.CANCELLED) {
+            }else if ( consignment != null && consignment.getStatus() == ConsignmentStatus.CANCELLED) {
                 response.setStatus("CANCELLED");
             }
             responses.add(response);
@@ -537,7 +537,7 @@ public class ConsignmentService {
                 response.setIsConsignment("DECLINED");
             } else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.PENDING) {
                 response.setIsConsignment("PENDING");
-            }else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.CANCELLED) {
+            }else if ( consignment != null && consignment.getStatus() == ConsignmentStatus.CANCELLED) {
                     response.setIsConsignment("CANCELLED");
             }
             responses.add(response);
@@ -557,6 +557,7 @@ public class ConsignmentService {
 
     public Consignment extendEndDate(Long consignmentId, Date endDate) {
         Consignment oldConsignment = consignmentRepository.findConsignmentById(consignmentId);
+
         Consignment newConsignment = new Consignment();
         oldConsignment.setIsDeleted(true);
 
