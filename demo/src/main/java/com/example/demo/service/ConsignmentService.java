@@ -600,10 +600,14 @@ public class ConsignmentService {
             newDetail.setConsignment(newConsignment);  // Link to the new consignment
             newConsignmentDetails.add(newDetail);
         }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(normalizedOldEndDate);
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        Date nextDate = calendar.getTime();
         newConsignment.setCreateDate(oldConsignment.getCreateDate());
         newConsignment.setConsignmentDetails(newConsignmentDetails);
         newConsignment.setEndDate(normalizedEndDate);
-        newConsignment.setStartDate(normalizedStartDate);
+        newConsignment.setStartDate(nextDate);
         newConsignment.setAddress(oldConsignment.getAddress());
         newConsignment.setDescription(oldConsignment.getDescription());
         newConsignment.setCareType(oldConsignment.getCareType());
