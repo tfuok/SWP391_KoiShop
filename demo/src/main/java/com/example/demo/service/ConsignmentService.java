@@ -6,6 +6,7 @@ import com.example.demo.model.Request.*;
 import com.example.demo.model.Response.*;
 import com.example.demo.repository.*;
 import com.example.demo.util.DateUtils;
+import jakarta.persistence.criteria.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -423,11 +424,21 @@ public class ConsignmentService {
         if (consignment.getStatus() == ConsignmentStatus.CONFIRMED) {
             for (ConsignmentDetails consignmentDetails : consignment.getConsignmentDetails()) {
                 consignmentDetails.getKoi().setConsignment(true);
-                if (consignment.getType() == Type.ONLINE) {
+                if(consignment.getType() == Type.OFFLINE){
+                    if(paymentRepository.findByConsignment(consignment).getOrders() != null) {
+                        Koi koi = consignmentDetails.getKoi();
+                        certificateService.sendCertificateEmail(consignment.getAccount(), koi.getCertificate().getCertificateId());
+                        paymentRepository.findByConsignment(consignment).getOrders().setStatus(Status.CONFIRMED);
+                    }
+                }
+                else if (consignment.getType() == Type.ONLINE) {
                     consignmentDetails.getKoi().setDeleted(false);
                     Certificate certificate = certificateService.createCertificates(consignmentDetails.getKoi());
                     Koi koi = consignmentDetails.getKoi();
                     koi.setCertificate(certificate);
+
+
+
                     koiLotRepository.save(koi);
                 }
             }
@@ -534,6 +545,15 @@ public class ConsignmentService {
         responses.sort((r1, r2) -> Long.compare(r2.getId(), r1.getId()));
         return responses;
     }
+    public void addAddress(Long consignmentId, String address) throws Exception {
+        Orders orders = paymentRepository.findByConsignmentId(consignmentId).getOrders();
+        if(orders == null) {
+            throw new Exception("There no order for this consignment to add address");
+            }
+            orders.setAddress(address);
+            orderRepository.save(orders);
+
+        }
 
     public Consignment extendEndDate(Long consignmentId, Date endDate) {
         Consignment oldConsignment = consignmentRepository.findConsignmentById(consignmentId);

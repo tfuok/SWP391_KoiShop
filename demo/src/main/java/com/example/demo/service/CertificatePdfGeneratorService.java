@@ -35,7 +35,6 @@ public class CertificatePdfGeneratorService {
         String formattedIssueDate = dateFormatter.format(certificate.getIssueDate());
         String Koiid = Long.toString(certificate.getKoi().getId());
 
-        // Load image as a resource
         Resource resource = resourceLoader.getResource("classpath:image/background.png");
         String backgroundImagePath;
 
@@ -62,17 +61,12 @@ public class CertificatePdfGeneratorService {
                 "    <meta charset=\"UTF-8\">" +
                 "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
                 "    <title>Certificate of Breeding</title>" +
+                "    <link href=\"https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap\" rel=\"stylesheet\">" +
                 "    <style>" +
-                "        @font-face {" +
-                "            font-family: 'Noto Sans JP';" +
-                "            src: url('" + fontFilePath + "');" +
-                "        }" +
                 "        body {" +
                 "            font-family: 'Noto Sans JP', Arial, sans-serif;" +
                 "            margin: 0;" +
                 "            padding: 0;" +
-                "            background: url('" + backgroundImagePath + "') no-repeat center center;" +
-                "            background-size: cover;" +
                 "            text-align: center;" +
                 "        }" +
                 "        .container {" +
@@ -80,22 +74,24 @@ public class CertificatePdfGeneratorService {
                 "            max-width: 800px;" +
                 "            margin: 0 auto;" +
                 "            padding: 20px;" +
-                "            background: rgba(255, 255, 255, 0.9);" +
                 "        }" +
                 "        h1 {" +
                 "            font-size: 24px;" +
                 "            margin-bottom: 20px;" +
                 "        }" +
+                "        .content {" +
+                "            display: flex;" +
+                "            align-items: center;" +
+                "            justify-content: flex-start;" +
+                "        }" +
                 "        .koi-image {" +
                 "            width: 150px;" +
                 "            height: auto;" +
                 "            margin-right: 20px;" +
-                "            float: left;" +
                 "        }" +
                 "        .details-table {" +
-                "            margin: 0 auto;" +
+                "            margin-left: 20px;" +
                 "            text-align: left;" +
-                "            clear: both;" +
                 "        }" +
                 "        .details-table td {" +
                 "            padding: 5px 10px;" +
@@ -107,44 +103,46 @@ public class CertificatePdfGeneratorService {
                 "    <div class=\"container\">" +
                 "        <h1>Certification of Breeding</h1>" +
                 "        <p>We hereby certify that the Koi shown in the photo was bred by the following breeder and sold by Kodama Koi Farm</p>" +
-                "        <div style=\"display: flex; align-items: center;\">" +
-                "            <img class=\"koi-image\" src='" + certificate.getKoi().getImagesList().get(0) + "' alt=\"Koi Fish Image\">" +
-                "            <div>" +
-                "                <table class=\"details-table\">" +
-                "                    <tr>" +
-                "                        <td><strong>Variety:</strong></td>" +
-                "                        <td>" + certificate.getKoi().getName() + "</td>" +
-                "                    </tr>" +
-                "                    <tr>" +
-                "                        <td><strong>Breeder:</strong></td>" +
-                "                        <td>" + certificate.getKoi().getVendor() + "</td>" +
-                "                    </tr>" +
-                "                    <tr>" +
-                "                        <td><strong>Born In:</strong></td>" +
-                "                        <td>" + bornInDate + "</td>" +
-                "                    </tr>" +
-                "                    <tr>" +
-                "                        <td><strong>Size:</strong></td>" +
-                "                        <td>" + certificate.getKoi().getSize() + " cm</td>" +
-                "                    </tr>" +
-                "                    <tr>" +
-                "                        <td><strong>Id:</strong></td>" +
-                "                        <td>" + Koiid + "</td>" +
-                "                    </tr>" +
-                "                    <tr>" +
-                "                        <td><strong>Date of Issue:</strong></td>" +
-                "                        <td>" + formattedIssueDate + "</td>" +
-                "                    </tr>" +
-                "                    <tr>" +
-                "                        <td><strong>Signature:</strong></td>" +
-                "                        <td style=\"font-family: 'Noto Sans JP';\">樹神太郎</td>" +
-                "                    </tr>" +
-                "                </table>" +
-                "            </div>" +
+                "        <div class=\"content\">" +
+                "            <img class=\"koi-image\" src=\"" + certificate.getKoi().getImages() + "\" alt=\"Koi Fish Image\">" +
+                "            <table class=\"details-table\">" +
+                "                <tr>" +
+                "                    <td><strong>Variety:</strong></td>" +
+                "                    <td>" + certificate.getKoi().getName() + "</td>" +
+                "                </tr>" +
+                "                <tr>" +
+                "                    <td><strong>Breeder:</strong></td>" +
+                "                    <td>" + certificate.getKoi().getVendor() + "</td>" +
+                "                </tr>" +
+                "                <tr>" +
+                "                    <td><strong>Born In:</strong></td>" +
+                "                    <td>" + bornInDate + "</td>" +
+                "                </tr>" +
+                "                <tr>" +
+                "                    <td><strong>Size:</strong></td>" +
+                "                    <td>" + certificate.getKoi().getSize() + " cm</td>" +
+                "                </tr>" +
+                "                <tr>" +
+                "                    <td><strong>Id:</strong></td>" +
+                "                    <td>" + Koiid + "</td>" +
+                "                </tr>" +
+                "                <tr>" +
+                "                    <td><strong>Date of Issue:</strong></td>" +
+                "                    <td>" + formattedIssueDate + "</td>" +
+                "                </tr>" +
+                "                <tr>" +
+                "                    <td><strong>Signature:</strong></td>" +
+                "                    <td style=\"font-family: 'Noto Sans JP';\">樹神太郎</td>" +
+                "                </tr>" +
+                "            </table>" +
                 "        </div>" +
                 "    </div>" +
                 "</body>" +
                 "</html>";
+
+
+
+
     }
 
     public byte[] createCertificatePdf(Certificate certificate) throws Exception {

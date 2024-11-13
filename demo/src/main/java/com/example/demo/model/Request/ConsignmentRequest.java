@@ -2,7 +2,7 @@ package com.example.demo.model.Request;
 
 import com.example.demo.entity.Status;
 import com.example.demo.entity.Type;
-//import com.example.demo.exception.ValidStartDate;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
@@ -27,7 +27,7 @@ public class ConsignmentRequest {
 
     @Future(message = "Start Date must be in the future!")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-//    @ValidStartDate
+
     private Date startDate;
 
     @Future(message = "End Date must be in the future!")

@@ -94,6 +94,11 @@ public class ConsignmentAPI {
         Consignment cancelledOrder = consignmentService.cancelConsignmentByCustomer(consginementid);
         return ResponseEntity.ok(cancelledOrder);
     }
+    @PutMapping("/addAddress")
+    public ResponseEntity addAddress(@RequestParam Long consignmentID, String address) throws Exception {
+        consignmentService.addAddress(consignmentID, address);
+        return ResponseEntity.ok("success");
+    }
 }
 
 

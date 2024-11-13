@@ -65,6 +65,7 @@ public class ConsignmentOrderService {
             total += koi.getPrice();
         }
         orders.setOrderDetails(orderDetails);
+
         orders.setTotal(total);
         if (orderConsignmentRequest.getVoucherCode() != null) {
             Voucher voucher = voucherRepository.findVoucherByCodeAndIsDeletedFalse(orderConsignmentRequest.getVoucherCode());
@@ -72,9 +73,11 @@ public class ConsignmentOrderService {
                 throw new NotFoundException("Invalid or expired voucher.");
             }
 
+
             double discount = voucher.getDiscountValue();
             double finalAmount = total - (total * discount / 100);
             orders.setFinalAmount(finalAmount);
+
 
             voucher.setQuantity(voucher.getQuantity() - 1);
             voucherRepository.save(voucher);
