@@ -16,7 +16,9 @@
         }
         h1 {
             text-align: center;
-            color: #333;
+            color: white; /* White text color for better contrast */
+            background-color: #228B22; /* Lighter green background color */
+            padding: 10px; /* Padding around the text */
         }
         table {
             width: 100%;
@@ -41,12 +43,10 @@
 </head>
 <body>
 
-
 <h1>Order Bill</h1>
 <p>Date: <strong th:text="${orderDate}"></strong></p>
 <p>Customer: <strong th:text="${name}"></strong></p>
 <p>Description: <strong th:text="${orderDescription}"></strong></p>
-
 
 <table>
     <thead>
