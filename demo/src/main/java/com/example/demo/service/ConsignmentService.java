@@ -344,10 +344,13 @@ public class ConsignmentService {
 
             accountRepository.save(manager);
             paymentRepository.save(payment);
-            consignment.setStatus(ConsignmentStatus.PAID);
+            if(consignment.getStatus() == ConsignmentStatus.PENDING) {
+                consignment.setStatus(ConsignmentStatus.PAID);
+            }
             consignmentRepository.save(consignment);
             emailService.sendConsignmentBillEmail(consignment,consignment.getAccount().getEmail());
         }
+
     public Consignment cancelConsignmentByCustomer(Long consignmentId) {
         Account customer = authenticationService.getCurrentAccount();
         Consignment consignment = consignmentRepository.findById(consignmentId)
@@ -750,6 +753,7 @@ public class ConsignmentService {
 
         accountRepository.save(manager);
         paymentRepository.save(payment);
+
         consignment.setStatus(ConsignmentStatus.PAID);
         consignmentRepository.save(consignment);
 
