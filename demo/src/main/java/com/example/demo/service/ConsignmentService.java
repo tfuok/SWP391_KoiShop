@@ -568,20 +568,23 @@ public class ConsignmentService {
 
         }
 
-    public Consignment extendEndDate(Long consignmentId, Date endDate) {
+    public Consignment extendEndDate(Long consignmentId, Date endDate) throws Exception {
         Consignment oldConsignment = consignmentRepository.findConsignmentById(consignmentId);
+        if(!oldConsignment.getEndDate().after(new Date())){
+            throw new Exception("The consignment is expired");
+        }
 
         Consignment newConsignment = new Consignment();
         oldConsignment.setIsDeleted(true);
 
-
-        Date normalizedStartDate = DateUtils.normalizeDate(oldConsignment.getEndDate());
+        Date normalizedOldEndDate = DateUtils.normalizeDate(oldConsignment.getEndDate());
+        Date normalizedStartDate = DateUtils.normalizeDate(new Date());
         Date normalizedEndDate = DateUtils.normalizeDate(endDate);
         CareType careType = careTypeRepository.findByCareTypeId(oldConsignment.getCareType().getCareTypeId());
         float estimateCost = calculateTotalCost(
                 careType.getCostPerDay(),
                 oldConsignment.getConsignmentDetails().size(),
-                normalizedStartDate,
+                normalizedOldEndDate,
                 normalizedEndDate
 
         );
