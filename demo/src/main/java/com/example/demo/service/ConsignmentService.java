@@ -568,7 +568,7 @@ public class ConsignmentService {
 
         }
 
-    public Consignment extendEndDate(Long consignmentId, Date endDate) throws Exception {
+    public Consignment extendEndDate(Long consignmentId, ExtendDateRequest extendDateRequest) throws Exception {
         Consignment oldConsignment = consignmentRepository.findConsignmentById(consignmentId);
         if(!oldConsignment.getEndDate().after(new Date())){
             throw new Exception("The consignment is expired");
@@ -579,7 +579,7 @@ public class ConsignmentService {
 
         Date normalizedOldEndDate = DateUtils.normalizeDate(oldConsignment.getEndDate());
         Date normalizedStartDate = DateUtils.normalizeDate(new Date());
-        Date normalizedEndDate = DateUtils.normalizeDate(endDate);
+        Date normalizedEndDate = DateUtils.normalizeDate(extendDateRequest.getExtendDate());
         CareType careType = careTypeRepository.findByCareTypeId(oldConsignment.getCareType().getCareTypeId());
         float estimateCost = calculateTotalCost(
                 careType.getCostPerDay(),
@@ -617,7 +617,7 @@ public class ConsignmentService {
 
         return newConsignment;
     }
-    public String createExtendUrl(Long consignmentId, Date endDate) throws Exception {
+    public String createExtendUrl(Long consignmentId, ExtendDateRequest endDate) throws Exception {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         LocalDateTime createDate = LocalDateTime.now();
         String formattedCreateDate = createDate.format(formatter);

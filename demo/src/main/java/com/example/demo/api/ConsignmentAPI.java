@@ -5,6 +5,7 @@ import com.example.demo.entity.ConsignmentStatus;
 import com.example.demo.entity.Orders;
 import com.example.demo.entity.Status;
 import com.example.demo.model.Request.ConsignmentRequest;
+import com.example.demo.model.Request.ExtendDateRequest;
 import com.example.demo.model.Response.ConsignmentResponse;
 import com.example.demo.model.Response.KoiOfflineConsignmentResponse;
 import com.example.demo.model.Response.KoiOnlineConsignmentResponse;
@@ -79,9 +80,8 @@ public class ConsignmentAPI {
     }
     @PutMapping("extend")
     public ResponseEntity extendConsignment(
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") Date extendDate,
-            @RequestParam Long id) throws Exception {
-        String url = consignmentService.createExtendUrl(id, extendDate);
+            @RequestParam Long id, @RequestBody ExtendDateRequest extendDateRequest) throws Exception {
+        String url = consignmentService.createExtendUrl(id, extendDateRequest);
         return ResponseEntity.ok(url);
     }
     @PostMapping("/extendTransactions")
