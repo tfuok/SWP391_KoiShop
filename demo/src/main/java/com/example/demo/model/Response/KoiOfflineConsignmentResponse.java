@@ -11,4 +11,5 @@ public class KoiOfflineConsignmentResponse {
     Date endDate;
     String isConsignment;
     float price;
+    boolean ofOrder;
 }

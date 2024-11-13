@@ -424,11 +424,16 @@ public class ConsignmentService {
         if (consignment.getStatus() == ConsignmentStatus.CONFIRMED) {
             for (ConsignmentDetails consignmentDetails : consignment.getConsignmentDetails()) {
                 consignmentDetails.getKoi().setConsignment(true);
-                if(consignment.getType() == Type.OFFLINE){
-                    if(paymentRepository.findByConsignment(consignment).getOrders() != null) {
-                        Koi koi = consignmentDetails.getKoi();
-                        certificateService.sendCertificateEmail(consignment.getAccount(), koi.getCertificate().getCertificateId());
-                        paymentRepository.findByConsignment(consignment).getOrders().setStatus(Status.CONFIRMED);
+                if(consignment.getType() == Type.OFFLINE) {
+                    Payment payment = paymentRepository.findByConsignment(consignment);
+                    if (payment != null) {
+                        Orders orders = payment.getOrders();
+                        if (orders != null) {
+                            Koi koi = consignmentDetails.getKoi();
+                            certificateService.sendCertificateEmail(consignment.getAccount(), koi.getCertificate().getCertificateId());
+                            paymentRepository.findByConsignment(consignment).getOrders().setStatus(Status.CONFIRMED);
+
+                        }
                     }
                 }
                 else if (consignment.getType() == Type.ONLINE) {
@@ -444,7 +449,8 @@ public class ConsignmentService {
             }
         }else if(consignment.getStatus() == ConsignmentStatus.DECLINED){
             Payment payment = paymentRepository.findByConsignmentId(id);
-            if(payment.getOrders() != null) {
+            Orders orders = payment.getOrders();
+            if(orders != null) {
                 Orders order = payment.getOrders();
                 order.setStatus(Status.DECLINED);
                 orderRepository.save(order);
@@ -539,6 +545,13 @@ public class ConsignmentService {
                 response.setIsConsignment("PENDING");
             }else if ( consignment != null && consignment.getStatus() == ConsignmentStatus.CANCELLED) {
                     response.setIsConsignment("CANCELLED");
+            }
+            Payment payment = paymentRepository.findByConsignment(consignment);
+            if (payment != null) {
+                Orders orders = payment.getOrders();
+                if (orders != null) {
+                    response.setOfOrder(true);
+                }
             }
             responses.add(response);
         }
