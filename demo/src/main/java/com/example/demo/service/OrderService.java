@@ -149,7 +149,7 @@ public class OrderService {
             urlBuilder.append("&");
         }
         urlBuilder.deleteCharAt(urlBuilder.length() - 1); // Remove last '&'
-
+        
         return urlBuilder.toString();
     }
 
@@ -274,7 +274,7 @@ public class OrderService {
             throw new IllegalStateException("You can only cancel your own orders.");
         }
 
-        if (order.getStatus() == Status.SHIPPED) {
+        if (order.getStatus() == Status.SHIPPING) {
             throw new IllegalStateException("Order has already been shipped and cannot be cancelled.");
         }
 

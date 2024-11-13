@@ -498,6 +498,7 @@ public class ConsignmentService {
             }else if (!koi.isConsignment() && consignment != null && consignment.getStatus() == ConsignmentStatus.CANCELLED) {
                 response.setStatus("CANCELLED");
             }
+            responses.add(response);
         }
         responses.sort((r1, r2) -> Long.compare(r2.getId(), r1.getId()));
         return responses;
