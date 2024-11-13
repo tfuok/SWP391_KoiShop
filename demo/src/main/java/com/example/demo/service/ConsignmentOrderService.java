@@ -65,7 +65,7 @@ public class ConsignmentOrderService {
             total += koi.getPrice();
         }
         orders.setOrderDetails(orderDetails);
-
+        orders.setAddress(orderConsignmentRequest.getAddress());
         orders.setTotal(total);
         if (orderConsignmentRequest.getVoucherCode() != null) {
             Voucher voucher = voucherRepository.findVoucherByCodeAndIsDeletedFalse(orderConsignmentRequest.getVoucherCode());
