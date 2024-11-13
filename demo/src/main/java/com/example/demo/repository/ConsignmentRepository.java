@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ConsignmentRepository extends JpaRepository<Consignment, Long> {
-    @Query("SELECT c FROM Consignment c WHERE c.id = :id AND c.isDeleted = false")
+    @Query("SELECT c FROM Consignment c WHERE c.id = :id ")
     Consignment findConsignmentById(@Param("id") long id);
 
     List<Consignment> findByIsDeletedFalse();

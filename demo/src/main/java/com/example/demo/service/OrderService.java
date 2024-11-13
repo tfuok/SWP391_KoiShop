@@ -298,7 +298,7 @@ public class OrderService {
             Koi koi = koiRepository.findById(orderDetails.getKoi().getId());
             koi.setSold(false);
             koi.setDeleted(false);
-            koi.setAccount(accountRepository.findAccountByRole(Role.MANAGER));
+            //koi.setAccount(accountRepository.findAccountByRole(Role.MANAGER));
             koiRepository.save(koi);
         }
 

@@ -32,6 +32,9 @@ public class ConsignmentService {
     private OrderRepository orderRepository;
 
     @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
     private AuthenticationService authenticationService;
 
     @Autowired
@@ -288,7 +291,8 @@ public class ConsignmentService {
             if(consignment == null){
                 throw new NotFoundException("Consignment not found");
             }
-
+            consignment.setIsDeleted(false);
+            consignmentRepository.save(consignment);
         /*
         1. tao payment
          */
@@ -353,7 +357,26 @@ public class ConsignmentService {
             throw new IllegalStateException("You can only cancel your own orders.");
         }
 
-
+        Payment payments = paymentRepository.findByConsignment(consignment);
+        Orders orders = payments.getOrders();
+        if(orders != null){
+            orders.setStatus(Status.CANCELLED);
+            double refundAmount = orders.getFinalAmount();
+            double newBalance = customer.getBalance() + refundAmount;
+            customer.setBalance(newBalance);
+            Transactions refundTransactions = new Transactions();
+            refundTransactions.setAmount(refundAmount);
+            refundTransactions.setStatus(TransactionEnum.SUCCESS);
+            refundTransactions.setDescription("REFUND FOR CUSTOMER");
+            Account manager = accountRepository.findAccountByRole(Role.MANAGER);
+            refundTransactions.setFrom(manager);
+            refundTransactions.setTo(customer);
+            refundTransactions.setCreateAt(new Date());
+            manager.setBalance(manager.getBalance() - refundAmount);
+            accountRepository.save(manager);
+            accountRepository.save(customer);
+            transactionRepository.save(refundTransactions);
+        }
         consignment.setStatus(ConsignmentStatus.CANCELLED);
 
 
@@ -575,7 +598,7 @@ public class ConsignmentService {
         }
 
         Consignment newConsignment = new Consignment();
-        oldConsignment.setIsDeleted(true);
+        //oldConsignment.setIsDeleted(true);
 
         Date normalizedOldEndDate = DateUtils.normalizeDate(oldConsignment.getEndDate());
         Date normalizedStartDate = DateUtils.normalizeDate(new Date());
@@ -592,6 +615,7 @@ public class ConsignmentService {
         newConsignment.setCost(estimateCost);
         newConsignment.setType(oldConsignment.getType());
         newConsignment.setStatus(oldConsignment.getStatus());
+        newConsignment.setIsDeleted(true);
 
         List<ConsignmentDetails> newConsignmentDetails = new ArrayList<>();
         for (ConsignmentDetails oldDetail : oldConsignment.getConsignmentDetails()) {
