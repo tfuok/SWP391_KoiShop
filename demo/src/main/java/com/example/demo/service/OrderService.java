@@ -81,14 +81,14 @@ public class OrderService {
 
             // Apply discount
             double discount = voucher.getDiscountValue();
-            double finalAmount = total - (total * discount / 100);  // Assuming percentage-based discount
+            double finalAmount = total - (total * discount / 100);
             orders.setFinalAmount(finalAmount);
 
             // Decrease voucher quantity
             voucher.setQuantity(voucher.getQuantity() - 1);
             voucherRepository.save(voucher);
         } else {
-            orders.setFinalAmount(total);  // No voucher, final amount remains the same
+            orders.setFinalAmount(total);
         }
         return orderRepository.save(orders);
     }
@@ -183,7 +183,7 @@ public class OrderService {
             payment.setOrders(orders);
             payment.setCreateAt(new Date());
             payment.setMethod(PaymentEnums.BANKING);
-            payment.setTotal(orders.getTotal());
+            payment.setTotal(orders.getFinalAmount());
             payment.setCustomer(customer);
 
             List<Transactions> transactions = new ArrayList<>();
@@ -484,13 +484,8 @@ public class OrderService {
 
 
     public List<PaymentResponse> getAllPaymentsForCurrentUser() {
-        // Get the currently authenticated account
         Account currentAccount = authenticationService.getCurrentAccount();
-
-        // Fetch payments associated with the current account
         List<Payment> payments = paymentRepository.findByCustomerWithOrders(currentAccount);
-
-        // Convert Payment entities to PaymentResponse objects with full order and consignment details
         return payments.stream()
                 .map(payment -> new PaymentResponse(
                         payment.getId(),

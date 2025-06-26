@@ -31,9 +31,5 @@ public class Voucher {
 
     private int quantity;
 
-//    @ManyToOne
-//    @JoinColumn(name = "account_id")
-//    private Account account;
-
     private boolean isDeleted;
 }

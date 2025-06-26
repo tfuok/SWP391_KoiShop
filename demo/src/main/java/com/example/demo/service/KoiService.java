@@ -2,12 +2,14 @@ package com.example.demo.service;
 
 import com.example.demo.entity.*;
 import com.example.demo.exception.NotFoundException;
+import com.example.demo.model.Request.ImageListRequest;
 import com.example.demo.model.Request.KoiRequest;
 import com.example.demo.model.Request.SaleRequest;
 import com.example.demo.model.Response.KoiPageResponse;
 import com.example.demo.model.Response.KoiResponse;
 import com.example.demo.repository.BreedRepository;
 import com.example.demo.repository.CertificateRepository;
+import com.example.demo.repository.ImagesRepository;
 import com.example.demo.repository.KoiRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,8 @@ public class KoiService {
     private CertificateRepository certificateRepository;
     @Autowired
     private CertificateService certificateService;
-
+    @Autowired
+    ImagesRepository imagesRepository;
     public Koi createKoi(KoiRequest koiLotRequest) {
         try {
             // Create a new KoiLot manually without using ModelMapper for the List<Breed>
@@ -215,9 +218,11 @@ public class KoiService {
             breeds.add(breed);
         }
         foundKoi.setBreeds(breeds);
+        for (Images images: imagesRepository.findImagesByKoi(foundKoi)){
+            imagesRepository.delete(images);
+        }
         return koiLotRepository.save(foundKoi);
     }
-
 
     public Koi deleteKoi(long id) {
         Koi koi1 = koiLotRepository.findKoiByIdAndIsDeletedFalse(id);
@@ -324,7 +329,7 @@ public class KoiService {
         return koiLotRepository.findByAccountId(authenticationService.getCurrentAccount().getId());
     }
 
-    public void unDelete(long id){
+    public void unDelete(long id) {
         Koi koi = koiLotRepository.findById(id);
         koi.setDeleted(false);
         koiLotRepository.save(koi);

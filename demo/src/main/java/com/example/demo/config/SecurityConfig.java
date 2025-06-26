@@ -24,7 +24,6 @@ public class SecurityConfig {
     AuthenticationService authenticationService;
     @Autowired
     Filter filter;
-
     @Bean //hàm này trở thành thư viện có thể sử dụng ở bất cứ đâu (@Autowired)
     //hàm này có chức năng mã hóa password
     public PasswordEncoder passwordEncoder() {

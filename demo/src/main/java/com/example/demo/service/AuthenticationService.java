@@ -56,14 +56,14 @@ public class AuthenticationService implements UserDetailsService {
         }
 
         try {
-            String originPassword;
+            String originPassword = registerRequest.getPassword();;
 
-            // Generate a random password for STAFF role
-            if (registerRequest.getRole() == Role.STAFF) {
-                originPassword = generateRandomPassword(6);  // Generate a 6-character password for STAFF
-            } else {
-                originPassword = registerRequest.getPassword();  // Use the provided password for other roles
-            }
+//            // Generate a random password for STAFF role
+//            if (registerRequest.getRole() == Role.STAFF) {
+//                originPassword = generateRandomPassword(6);  // Generate a 6-character password for STAFF
+//            } else {
+//                originPassword = registerRequest.getPassword();  // Use the provided password for other roles
+//            }
 
             // Encode the password and set it in the account
             account.setPassword(passwordEncoder.encode(originPassword));
@@ -71,15 +71,15 @@ public class AuthenticationService implements UserDetailsService {
             // Save the new account to the database
             Account newAccount = accountRepository.save(account);
 
-            // Prepare email details with the generated password
-            EmailDetails emailDetails = new EmailDetails();
-            emailDetails.setReceiver(newAccount);
-            emailDetails.setSubject("Welcome to KoiShop");
-            emailDetails.setLink("http://koishop.site/");
-            emailDetails.setPassword(originPassword);  // Include the original (non-encoded) password in the email
-
-            // Send the email to the user with login details
-            emailService.sendEmail(emailDetails, "welcome-template");
+//            // Prepare email details with the generated password
+//            EmailDetails emailDetails = new EmailDetails();
+//            emailDetails.setReceiver(newAccount);
+//            emailDetails.setSubject("Welcome to KoiShop");
+//            emailDetails.setLink("http://koishop.site/");
+//            emailDetails.setPassword(originPassword);  // Include the original (non-encoded) password in the email
+//
+//            // Send the email to the user with login details
+//            emailService.sendEmail(emailDetails, "welcome-template");
 
             // Return the registered account details as a response
             return modelMapper.map(newAccount, AccountResponse.class);
