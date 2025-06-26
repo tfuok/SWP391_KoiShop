@@ -8,7 +8,7 @@ RUN mvn clean package -DskipTests
 FROM openjdk:17-jdk-slim
 WORKDIR /app
 
-COPY --from=build /app/target/demoKOI-0.0.1-SNAPSHOT.war demoKOI.war
+COPY --from=build /app/target/be.war be.war
 EXPOSE 8080
 
-ENTRYPOINT ["java","-jar","demoKOI.war"]
+ENTRYPOINT ["java","-jar","be.war"]
